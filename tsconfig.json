@@ -1,0 +1,36 @@
+
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
+        "esModuleInterop": true,
+        "outDir": "./dist",
+        "paths": {
+            "@lib/*": [
+                "src/lib/*"
+            ],
+            "@root/*": [
+                "*"
+            ],
+            "@utils/*": [
+                "src/lib/util/*"
+            ]
+        },
+        "resolveJsonModule": true,
+        "rootDir": "./",
+		"target": "ES2019",
+		"types": [
+			"node",
+			"discord.js"
+		],
+        "module": "commonjs"
+    },
+    "exclude": [
+        "**/node_modules",
+        "**/dist"
+    ],
+    "include": [
+        "./src/**/*"
+    ]
+}

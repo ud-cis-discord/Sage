@@ -1,0 +1,9 @@
+{
+    "editor.detectIndentation": false,
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4,
+    "eslint.validate": ["typescript"],
+	"typescript.tsdk": "node_modules\\typescript\\lib",
+	"typescript.preferences.quoteStyle": "single",
+	"cmake.configureOnOpen": false
+}
