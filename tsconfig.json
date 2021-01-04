@@ -6,7 +6,9 @@
         "esModuleInterop": true,
         "outDir": "./dist",
         "paths": {
-            "@root/*": ["*"]
+			"@root/*": ["*"],
+			"@lib/*": ["src/lib/*"],
+			"@pieces/*": ["src/pieces/*"]
         },
         "resolveJsonModule": true,
         "rootDir": "./",
@@ -19,9 +21,7 @@
     },
     "exclude": [
         "**/node_modules",
-        "**/dist"
-    ],
-    "include": [
-        "./src/**/*"
+		"**/dist",
+		"config.example.js"
     ]
 }
