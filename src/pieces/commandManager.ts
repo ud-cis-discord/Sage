@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import { SageClient } from '@lib/types/SageClient';
 import { Command } from '@lib/types/Command';
 import { PREFIX } from '@root/config';
-import { inspect } from 'util';
 
 function readdirRecursive(dir: string): string[] {
 	let results = [];
@@ -27,8 +26,12 @@ function regester(bot: SageClient): void {
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const command = require(`../../../${file}`);
-		bot.commands.set(file.split('/')[file.split('/').length - 1].split('.')[0], command);
+		const command: Command = require(`../../../${file}`);
+		const dirs = file.split('/');
+		const name = dirs[dirs.length - 1].split('.')[0];
+		command.name = name;
+		command.category = dirs[dirs.length - 2];
+		bot.commands.set(name, command);
 	}
 	bot.on('message', (msg) => {
 		if (!msg.content.startsWith(PREFIX) || msg.author.bot) return;
