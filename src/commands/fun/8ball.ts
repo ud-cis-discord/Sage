@@ -28,7 +28,6 @@ const MAGIC8BALL_RESPONSES = [
 ];
 
 export function run(msg: Message, question: string[]): Promise<Message> {
-	console.log(`${question.length}`);
 	if (question.length !== 0 && question[question.length - 1].endsWith('?')) {
 		return msg.channel.send(MAGIC8BALL_RESPONSES[
 			Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]);
