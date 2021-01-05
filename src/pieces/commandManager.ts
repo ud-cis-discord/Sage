@@ -37,14 +37,27 @@ function regester(bot: SageClient): void {
 	bot.on('message', async (msg) => {
 		if (!msg.content.startsWith(PREFIX) || msg.author.bot) return;
 
-		const args = msg.content.slice(PREFIX.length).trim().split(/ +/);
-		const commandName = args.shift().toLowerCase();
+		const commandName = msg.content.slice(PREFIX.length).trim().split(' ')[0];
+		const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
 
 		const command = getCommand(bot, commandName);
 		if (!command) return;
+		
+		if (command.permissions && !command.permissions(msg)) return msg.reply('Missing permissions');
+
+		let args: Array<any>;
+		if (command.argParser) {
+			try {
+				args = await command.argParser(unparsedArgs);
+			} catch (error) {
+				msg.channel.send(error);
+				return;
+			}
+		} else {
+			args = [ unparsedArgs ];
+		}
 
 		try {
-			if (command.permissions && !command.permissions(msg)) return msg.reply('Missing permissions');
 			command.run(msg, args);
 		} catch (e) {
 			await msg.reply('An error occured.');
