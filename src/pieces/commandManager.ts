@@ -26,14 +26,14 @@ function regester(bot: SageClient): void {
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const command: Command = require(`../../../${file}`);
+		const command: Command = require(`@root/../${file}`);
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
 		command.name = name;
 		command.category = dirs[dirs.length - 2];
 		bot.commands.set(name, command);
 	}
-	bot.on('message', (msg) => {
+	bot.on('message', async (msg) => {
 		if (!msg.content.startsWith(PREFIX) || msg.author.bot) return;
 
 		const args = msg.content.slice(PREFIX.length).trim().split(/ +/);
@@ -42,13 +42,12 @@ function regester(bot: SageClient): void {
 		if (!bot.commands.has(commandName)) return;
 
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
 			const command = bot.commands.get(commandName);
 			if (command.permissions && !command.permissions(msg)) return msg.reply('Missing permissions');
 			command.run(msg, args);
 		} catch (e) {
-			msg.reply('An error occured.');
-			console.error(e);
+			await msg.reply('An error occured.');
+			throw e;
 		}
 	});
 }

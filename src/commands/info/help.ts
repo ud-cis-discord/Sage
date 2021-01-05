@@ -15,7 +15,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 		const fields: Array<EmbedField> = [];
 		fields.push({
 			name: 'Useage',
-			value: `${PREFIX}${command.name} ${command.useage}`,
+			value: `${PREFIX}${command.name} ${command.useage? command.useage: ''}`,
 			inline: true
 		});
 		if (command.aliases) {
@@ -56,7 +56,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 		})
 
 		msg.author.send(helpStr, {split: { char: '\n' }})
-			.then(() => msg.channel.send('I\'ve sent all commands to your DMs'))
+			.then(() => { if(msg.channel.type !== 'dm') msg.channel.send('I\'ve sent all commands to your DMs')})
 			.catch(() => msg.channel.send('I couldnt send you a DM. Please enable DMs and try again'));
 	}
 }
