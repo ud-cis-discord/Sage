@@ -1,16 +1,18 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { SageClient } from '@lib/types/SageClient'
 import { BOT, PREFIX } from '@root/config';
+import { getCommand } from '@lib/utils';
 
 export const decription = `Provides info about all ${BOT.NAME} commands`;
 export const useage = '[command]';
 export const extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
+export const aliases = ['commands']
 
 export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 	const { commands } = msg.client as SageClient
 	if (cmd) {
-		if (!commands.has(cmd.toLowerCase())) return msg.channel.send(`**${cmd}** is not a valid command.`) 
-		const command = commands.get(cmd.toLowerCase());
+		const command = getCommand(msg.client as SageClient, cmd);
+		if (!command) return msg.channel.send(`**${cmd}** is not a valid command.`) 
 
 		const fields: Array<EmbedField> = [];
 		fields.push({
