@@ -5,3 +5,5 @@ export const BOT = {
 };
 
 export const PREFIX = 's;';
+
+export const MONGO = '';	// Mongo connection string here
