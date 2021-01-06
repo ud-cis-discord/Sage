@@ -1,5 +1,5 @@
 import { roleParser } from '@lib/arguments';
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, Role } from 'discord.js';
 import fetch from 'node-fetch';
 
 
@@ -7,9 +7,7 @@ import fetch from 'node-fetch';
 given role and a list of those users. If the list is too long to be sent in an embed,
 it should be uploaded to pastebin or similar and a link to the upload should be sent. */
 
-export async function run(msg: Message, [roleId]: [string]): Promise<Message> {
-	const role = msg.guild.roles.resolve(roleId);
-
+export async function run(msg: Message, [role]: [Role]): Promise<Message> {
 	let memberlist = role.members.map(m => m.user.username).sort().join(', ');
 
 	memberlist = memberlist.length > 1900 ? await moveToHastebin(memberlist) : memberlist;
@@ -23,8 +21,8 @@ export async function run(msg: Message, [roleId]: [string]): Promise<Message> {
 	return msg.channel.send(embed);
 }
 
-export async function argParser(msg: Message, input: string): Promise<Array<string>> {
-	return [(await roleParser(msg, input)).id];
+export async function argParser(msg: Message, input: string): Promise<Array<Role>> {
+	return [await roleParser(msg, input)];
 }
 
 async function moveToHastebin(memberlist: string): Promise<string> {
