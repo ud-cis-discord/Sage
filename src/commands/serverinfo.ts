@@ -1,12 +1,8 @@
-import { EmbedField, Message, MessageEmbed } from 'discord.js';
-import { SageClient } from '@lib/types/SageClient';
-import { BOT, PREFIX } from '@root/config';
+import { Message, MessageEmbed } from 'discord.js';
 
 export const decription = 'Provides information about the UDCIS discord server.';
-export const useage = '[command]';
-export const extendedHelp = '[...]';
 
-export async function run(msg: Message, [cmd]: [string]): Promise<Message> {
+export async function run(msg: Message): Promise<Message> {
 	const membersWithRoles = msg.guild.members.cache.filter(m => m.roles.cache.size > 1).size;
 	const percentage = Math.floor((msg.guild.members.cache.filter(m => m.roles.cache.size > 1).size / msg.guild.memberCount) * 100);
 
