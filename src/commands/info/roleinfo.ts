@@ -1,7 +1,6 @@
 import { roleParser } from '@root/src/lib/arguments';
 import { Message, MessageEmbed } from 'discord.js';
 import fetch from 'node-fetch';
-import prettyMilliseconds from 'pretty-ms';
 
 
 /* Takes one argument, a role name. Sends the current number of users in a
