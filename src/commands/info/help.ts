@@ -1,7 +1,7 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { SageClient } from '@lib/types/SageClient';
-import { BOT, PREFIX } from '@root/config';
 import { getCommand } from '@lib/utils';
+import { BOT, PREFIX } from '@root/config';
 
 export const decription = `Provides info about all ${BOT.NAME} commands`;
 export const useage = '[command]';
@@ -51,10 +51,14 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 		});
 
 		categories.forEach(cat => {
-			helpStr += `\n**${cat[0].toUpperCase()}${cat.slice(1)} Commands**\n`;
-			commands.filter(command => command.category === cat).forEach(command => {
-				helpStr += `\`${PREFIX}${command.name}\` ⇒ ${command.decription ? command.decription : 'No decirption provided'}\n`;
-			});
+			const useableCmds = commands.filter(command => command.category === cat && !(command.permissions && !command.permissions(msg)));
+			const categoryName = cat === 'commands' ? 'Genaral' : `${cat[0].toUpperCase()}${cat.slice(1)}`;
+			if (useableCmds.size > 0) {
+				helpStr += `\n**${categoryName} Commands**\n`;
+				useableCmds.forEach(command => {
+					helpStr += `\`${PREFIX}${command.name}\` ⇒ ${command.decription ? command.decription : 'No decirption provided'}\n`;
+				});
+			}
 		});
 
 		msg.author.send(helpStr, { split: { char: '\n' } })
