@@ -3,7 +3,7 @@ import prettyMilliseconds from 'pretty-ms';
 import { SageClient } from '@lib/types/SageClient';
 import { BOT } from '@root/config';
 
-export const decription = 'Displays info about Sage\'s current status';
+export const description = 'Displays info about Sage\'s current status';
 
 export function run(msg: Message): Promise<Message> {
 	const fields: Array<EmbedField> = [];

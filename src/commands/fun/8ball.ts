@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
 
-export const decription = 'Ask the 8ball a question and you shall get an answer.';
+export const description = 'Ask the 8ball a question and you shall get an answer.';
 export const extendedHelp = 'This command requires you to put a question mark at the end of your question.';
-export const useage = '[question]';
+export const usage = '[question]';
 
 const MAGIC8BALL_RESPONSES = [
 	'As I see it, yes.',

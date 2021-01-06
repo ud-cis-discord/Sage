@@ -1,6 +1,8 @@
 import { Message, MessageEmbed } from 'discord.js';
 
-export const decription = 'Provides information about the UDCIS discord server.';
+export const description = 'Provides information about the UDCIS discord server.';
+export const aliases = ['serverstats'];
+export const runInDM = false;
 
 export async function run(msg: Message): Promise<Message> {
 	const membersWithRoles = msg.guild.members.cache.filter(m => m.roles.cache.size > 1).size;

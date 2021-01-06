@@ -3,8 +3,8 @@ import { SageClient } from '@lib/types/SageClient';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 
-export const decription = `Provides info about all ${BOT.NAME} commands`;
-export const useage = '[command]';
+export const description = `Provides info about all ${BOT.NAME} commands`;
+export const usage = '[command]';
 export const extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
 export const aliases = ['commands'];
 
@@ -16,8 +16,8 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 
 		const fields: Array<EmbedField> = [];
 		fields.push({
-			name: 'Useage',
-			value: `${PREFIX}${command.name} ${command.useage ? command.useage : ''}`,
+			name: 'Usage',
+			value: `${PREFIX}${command.name} ${command.usage ? command.usage : ''}`,
 			inline: true
 		});
 		if (command.aliases) {
@@ -29,7 +29,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 		}
 		if (command.extendedHelp) {
 			fields.push({
-				name: 'Exteneded Help',
+				name: 'Extended Help',
 				value: command.extendedHelp,
 				inline: false
 			});
@@ -37,7 +37,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 
 		const embed = new MessageEmbed()
 			.setTitle(command.name)
-			.setDescription(command.decription ? command.decription : '')
+			.setDescription(command.description ? command.description : '')
 			.addFields(fields)
 			.setThumbnail(msg.client.user.avatarURL())
 			.setTimestamp(Date.now())
@@ -56,7 +56,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 			if (useableCmds.size > 0) {
 				helpStr += `\n**${categoryName} Commands**\n`;
 				useableCmds.forEach(command => {
-					helpStr += `\`${PREFIX}${command.name}\` ⇒ ${command.decription ? command.decription : 'No decirption provided'}\n`;
+					helpStr += `\`${PREFIX}${command.name}\` ⇒ ${command.description ? command.description : 'No decirption provided'}\n`;
 				});
 			}
 		});

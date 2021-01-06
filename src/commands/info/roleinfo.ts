@@ -1,11 +1,15 @@
-import { roleParser } from '@lib/arguments';
 import { Message, MessageEmbed, Role } from 'discord.js';
 import fetch from 'node-fetch';
+import { roleParser } from '@lib/arguments';
+import { ROLES } from '@root/config';
 
+export const description = 'Gives information about a role, including a list of the members who have it.';
+export const usage = '<role>';
+export const runInDM = false;
 
-/* Takes one argument, a role name. Sends the current number of users in a
-given role and a list of those users. If the list is too long to be sent in an embed,
-it should be uploaded to pastebin or similar and a link to the upload should be sent. */
+export function permissions(msg: Message): boolean {
+	return msg.member.roles.cache.has(ROLES.STAFF);
+}
 
 export async function run(msg: Message, [role]: [Role]): Promise<Message> {
 	let memberlist = role.members.map(m => m.user.username).sort().join(', ');

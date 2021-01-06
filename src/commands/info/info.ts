@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { BOT } from '@root/config';
 
-export const decription = `Provides information about ${BOT.NAME}.`;
+export const description = `Provides information about ${BOT.NAME}.`;
 
 export async function run(msg: Message): Promise<Message> {
 	const info

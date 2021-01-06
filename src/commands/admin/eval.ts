@@ -5,8 +5,8 @@ import fetch from 'node-fetch';
 import { BOT } from '@root/config';
 
 export const aliases = ['ev'];
-export const decription = 'Executes arbitrary JavaScript.';
-export const useage = '<javascript>';
+export const description = 'Executes arbitrary JavaScript.';
+export const usage = '<javascript>';
 
 export async function permissions(msg: Message): Promise<boolean> {
 	const team = (await msg.client.fetchApplication()).owner as Team;
@@ -16,7 +16,7 @@ export async function permissions(msg: Message): Promise<boolean> {
 export async function run(msg: Message, [js]: [string]): Promise<Message> {
 	if (!js) return msg.channel.send('Please provide JS.');
 
-	const responce = msg.channel.send('<a:loading:755121200929439745> processing...');
+	const response = msg.channel.send('<a:loading:755121200929439745> processing...');
 
 	const code = js.includes('await') ? `(async () => {\n${js}\n})();` : js;
 	let result;
@@ -29,7 +29,7 @@ export async function run(msg: Message, [js]: [string]): Promise<Message> {
 	}
 
 	const took = Date.now() - start;
-	result = inspect(result, { depth: 1 }).replace(BOT.TOKEN, 'token_was_here');
+	result = inspect(result, { depth: 0 }).replace(BOT.TOKEN, 'token_was_here');
 	let send: string;
 
 	if (result.length < 1900) {
@@ -39,5 +39,5 @@ export async function run(msg: Message, [js]: [string]): Promise<Message> {
 		send = `Result too long for Discord, uploaded to hastebin: <https://hastebin.com/${res.key}.js>\n\nTook ${prettyMilliseconds(took)}.`;
 	}
 
-	return (await responce).edit(send);
+	return (await response).edit(send);
 }

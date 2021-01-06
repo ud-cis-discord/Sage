@@ -7,9 +7,10 @@ export interface Command {
 	name: string;
 	category: string;
 	aliases?: Array<string>;
-	decription?: string;
-	useage?: string;
+	description?: string;
+	usage?: string;
 	extendedHelp?: string;
+	runInDM?: boolean;
 	permissions?(msg: Message): boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	argParser?(msg: Message, input: string): Array<any>;

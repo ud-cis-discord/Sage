@@ -22,7 +22,7 @@ function readdirRecursive(dir: string): string[] {
 	return results;
 }
 
-function regester(bot: SageClient): void {
+function register(bot: SageClient): void {
 	bot.commands = new Collection();
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
@@ -42,6 +42,8 @@ function regester(bot: SageClient): void {
 
 		const command = getCommand(bot, commandName);
 		if (!command) return;
+
+		if (msg.channel.type === 'dm' && command.runInDM === false) return msg.reply(`${command.name} is not avaliable in DMs.`);
 
 		if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
 
@@ -67,4 +69,4 @@ function regester(bot: SageClient): void {
 	});
 }
 
-export default regester;
+export default register;
