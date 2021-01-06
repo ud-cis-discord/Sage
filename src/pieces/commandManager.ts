@@ -43,7 +43,7 @@ function regester(bot: SageClient): void {
 		const command = getCommand(bot, commandName);
 		if (!command) return;
 
-		if (command.permissions && !command.permissions(msg)) return msg.reply('Missing permissions');
+		if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let args: Array<any>;
