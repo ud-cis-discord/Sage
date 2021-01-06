@@ -12,5 +12,5 @@ export interface Command {
 	extendedHelp?: string;
 	permissions?(msg: Message): boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	argParser?(input: string): Array<any>;
+	argParser?(msg: Message, input: string): Array<any>;
 }

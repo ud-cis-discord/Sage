@@ -49,7 +49,7 @@ function regester(bot: SageClient): void {
 		let args: Array<any>;
 		if (command.argParser) {
 			try {
-				args = await command.argParser(unparsedArgs);
+				args = await command.argParser(msg, unparsedArgs);
 			} catch (error) {
 				msg.channel.send(error);
 				return;
