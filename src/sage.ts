@@ -1,9 +1,15 @@
 import 'module-alias/register';
-import { BOT, PREFIX } from '@root/config';
+import { BOT, MONGO, PREFIX } from '@root/config';
 import { SageClient } from '@lib/types/SageClient';
 import commandManager from '@pieces/commandManager';
+import { MongoClient } from 'mongodb';
 
 const bot = new SageClient();
+
+MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
+	bot.mongo = client.db(BOT.NAME);
+});
+
 bot.login(BOT.TOKEN);
 
 bot.on('ready', () => {
