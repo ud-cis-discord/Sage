@@ -1,4 +1,4 @@
-import { roleParser } from '@root/src/lib/arguments';
+import { roleParser } from '@lib/arguments';
 import { Message, MessageEmbed } from 'discord.js';
 import fetch from 'node-fetch';
 
@@ -24,11 +24,11 @@ export async function run(msg: Message, [roleId]: [string]): Promise<Message> {
 }
 
 export async function argParser(msg: Message, input: string): Promise<Array<string>> {
-	return roleParser(msg, input);
+	return [(await roleParser(msg, input)).id];
 }
 
 async function moveToHastebin(memberlist: string): Promise<string> {
 	const url = 'https://hastebin.com/documents';
 	const retMsg = await fetch(`${url}`, { method: 'POST', body: memberlist }).then(r => r.json());
-	return `Result too long for Discord, uploaded to hastebin: <https://hastebin.com/${retMsg.key}.js>`;
+	return `Result too long for Discord, uploaded to hastebin: <https://hastebin.com/${retMsg.key}.txt>`;
 }
