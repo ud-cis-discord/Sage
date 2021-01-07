@@ -75,7 +75,8 @@ fs.readFile('./resources/emails.csv', async (err, data) => {
 });
 
 async function sendEmail(email: string, hash: string): Promise<void> {
-	const invite = await bot.guilds.cache.get(GUILDS.GATEWAY).systemChannel.createInvite({
+	const guild = await bot.guilds.fetch(GUILDS.GATEWAY);
+	const invite = await guild.systemChannel.createInvite({
 		maxAge: 0,
 		maxUses: 1,
 		unique: true,
