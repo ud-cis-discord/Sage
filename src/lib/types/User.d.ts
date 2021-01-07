@@ -4,6 +4,5 @@ export interface User {
 	discordId: string;
 	count: number;
 	isVerified: boolean;
-	isStaff: boolean;
 	roles: Array<string>;
 }
