@@ -3,6 +3,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
+import { TextChannel } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { SageClient } from '@lib/types/SageClient';
 import { BOT, GUILDS, MONGO } from '@root/config';
@@ -22,61 +23,66 @@ const mailer = nodemailer.createTransport({
 const bot = new SageClient();
 bot.login(BOT.TOKEN);
 
-fs.readFile('./resources/emails.csv', async (err, data) => {
-	if (err) {
-		console.error(err);
-		return;
-	}
+bot.once('ready', async () => {
+	const guild = await bot.guilds.fetch(GUILDS.GATEWAY);
+	const channel = guild.systemChannel;
 
-	await MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
-		bot.mongo = client.db(BOT.NAME);
-	});
-
-	const emails = data.toString().split('\n').map(email => email.trim());
-	let isStaff: boolean;
-
-	if (emails[0] === 'STAFF') {
-		isStaff = true;
-	} else if (emails[0] === 'STUDENT') {
-		isStaff = false;
-	} else {
-		console.error('First value must be STAFF or STUDENT');
-		process.exit(1);
-	}
-
-	emails.shift();
-	for (const email of emails) {
-		const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
-		console.log(email, ':', isStaff, ':', hash);
-
-		const entry: SageUser = await bot.mongo.collection('users').findOne({ email: email, hash: hash });
-
-		const newUser: SageUser = {
-			email: email,
-			hash: hash,
-			isStaff: isStaff,
-			discordId: '',
-			count: 0,
-			isVerified: false,
-			roles: []
-		};
-
-		if (entry) {			// User already on-boarded
-			if (isStaff) {		// Make staff is not already
-				bot.mongo.collection('users').updateOne(entry, { $set: { ...newUser } });
-			}
-			continue;
+	fs.readFile('./resources/emails.csv', async (err, data) => {
+		if (err) {
+			console.error(err);
+			return;
 		}
 
-		bot.mongo.collection('users').insertOne(newUser);
+		await MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
+			bot.mongo = client.db(BOT.NAME);
+		});
 
-		sendEmail(email, hash);
-	}
+		const emails = data.toString().split('\n').map(email => email.trim());
+		let isStaff: boolean;
+
+		if (emails[0] === 'STAFF') {
+			isStaff = true;
+		} else if (emails[0] === 'STUDENT') {
+			isStaff = false;
+		} else {
+			console.error('First value must be STAFF or STUDENT');
+			process.exit(1);
+		}
+
+		emails.shift();
+		for (const email of emails) {
+			const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
+			console.log(email, ':', isStaff, ':', hash);
+
+			const entry: SageUser = await bot.mongo.collection('users').findOne({ email: email, hash: hash });
+
+			const newUser: SageUser = {
+				email: email,
+				hash: hash,
+				isStaff: isStaff,
+				discordId: '',
+				count: 0,
+				isVerified: false,
+				roles: []
+			};
+
+			if (entry) {			// User already on-boarded
+				if (isStaff) {		// Make staff is not already
+					bot.mongo.collection('users').updateOne(entry, { $set: { ...newUser } });
+				}
+				continue;
+			}
+
+			bot.mongo.collection('users').insertOne(newUser);
+
+			sendEmail(email, hash, channel);
+		}
+	});
 });
 
-async function sendEmail(email: string, hash: string): Promise<void> {
-	const guild = await bot.guilds.fetch(GUILDS.GATEWAY);
-	const invite = await guild.systemChannel.createInvite({
+
+async function sendEmail(email: string, hash: string, channel: TextChannel): Promise<void> {
+	const invite = await channel.createInvite({
 		maxAge: 0,
 		maxUses: 1,
 		unique: true,
