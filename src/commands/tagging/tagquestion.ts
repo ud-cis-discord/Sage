@@ -3,7 +3,7 @@ import { SageClient } from '@lib/types/SageClient';
 import { Course } from '@lib/types/Course';
 import { Question } from '@root/src/lib/types/Question';
 
-export const description = 'Tags the specified question using the given assignemnt ID, for the';
+export const description = 'Tags the specified message with a given course and assignment ID.';
 export const usage = '<messageLink>|<courseID>|<assignmentID>';
 export const aliases = ['tagq', 'tag'];
 
