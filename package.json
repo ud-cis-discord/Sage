@@ -9,7 +9,8 @@
 		"clean": "rm -rf dist",
 		"test": "eslint src --ext .ts",
 		"lint": "eslint src --ext .ts --fix",
-		"dev": "tsc-watch --onSuccess \"node dist/src/sage.js\""
+		"dev": "tsc-watch --onSuccess \"node dist/src/sage.js\"",
+		"onboard": "node dist/onboard/onboard.js"
 	},
 	"repository": {
 		"type": "git",
@@ -26,6 +27,7 @@
 		"module-alias": "^2.2.2",
 		"mongodb": "^3.6.3",
 		"node-fetch": "^2.6.1",
+		"nodemailer": "^6.4.17",
 		"pretty-ms": "^7.0.1"
 	},
 	"_moduleAliases": {
@@ -37,6 +39,7 @@
 		"@types/mongodb": "^3.6.3",
 		"@types/node": "^14.14.20",
 		"@types/node-fetch": "^2.5.7",
+		"@types/nodemailer": "^6.4.0",
 		"@typescript-eslint/eslint-plugin": "^4.12.0",
 		"@typescript-eslint/parser": "^4.12.0",
 		"eslint": "^7.17.0",

@@ -1,5 +1,7 @@
 # Our Stuff
 config.ts
+resources/*
+!resources/.exists
 
 # Logs
 logs
