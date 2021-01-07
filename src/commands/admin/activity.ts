@@ -1,12 +1,13 @@
 import { SageClient } from '@lib/types/SageClient';
-import { ActivityType, Message } from 'discord.js';
-import { ROLES, BOT } from '@root/config';
+import { ActivityType, Message, Team } from 'discord.js';
+import { BOT } from '@root/config';
 
 export const description = `Sets ${BOT.NAME}'s activity to the given type and content`;
 export const usage = '<type|content>';
 
-export function permissions(msg: Message): boolean {
-	return msg.member.roles.cache.has(ROLES.ADMIN);
+export async function permissions(msg: Message): Promise<boolean> {
+	const team = (await msg.client.fetchApplication()).owner as Team;
+	return team.members.has(msg.author.id);
 }
 
 export async function run(msg: Message, [type, content]: [ActivityType, string]): Promise<Message> {
