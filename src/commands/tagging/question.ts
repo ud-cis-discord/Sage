@@ -2,6 +2,7 @@ import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { SageClient } from '@lib/types/SageClient';
 import { Course } from '@lib/types/Course';
 import { PREFIX } from '@root/config';
+import { Question } from '@lib/types/Question';
 
 export const description = 'Filters the questionTags collection for a given class and assignment';
 export const usage = '<courseID>|<assignmentID>';
@@ -11,7 +12,7 @@ export const aliases = ['q'];
 
 export async function run(msg: Message, [course, assignment]: [string, string]): Promise<Message> {
 	const bot = msg.client as SageClient;
-	const entries = await bot.mongo.collection('questions').find({ course: course, assignment: assignment }).toArray();
+	const entries: Array<Question> = await bot.mongo.collection('questions').find({ course: course, assignment: assignment }).toArray();
 	const fields: Array<EmbedField> = [];
 	if (entries.length === 0) {
 		return msg.channel.send(`There are no questions for ${course}, ${assignment}.
