@@ -63,6 +63,7 @@ bot.once('ready', async () => {
 				discordId: '',
 				count: 0,
 				isVerified: false,
+				pii: false,
 				roles: []
 			};
 
