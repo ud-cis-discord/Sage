@@ -1,8 +1,8 @@
 import { Message, Team } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { inspect } from 'util';
-import fetch from 'node-fetch';
 import { BOT } from '@root/config';
+import { sendToHastebin } from '@root/src/lib/utils';
 
 export const aliases = ['ev'];
 export const description = 'Executes arbitrary JavaScript.';
@@ -30,14 +30,12 @@ export async function run(msg: Message, [js]: [string]): Promise<Message> {
 
 	const took = Date.now() - start;
 	result = inspect(result, { depth: 0 }).replace(BOT.TOKEN, 'token_was_here');
-	let send: string;
 
+	let send = await sendToHastebin(result, 'js');
 	if (result.length < 1900) {
-		send = `\`\`\`js\n${result}\`\`\`\nTook ${prettyMilliseconds(took)}.`;
-	} else {
-		const res = await fetch('https://hastebin.com/documents', { method: 'POST', body: result }).then(r => r.json());
-		send = `Result too long for Discord, uploaded to hastebin: <https://hastebin.com/${res.key}.js>\n\nTook ${prettyMilliseconds(took)}.`;
+		send = `\`\`\`js\n${send}\`\`\`\n`;
 	}
 
+	send += `\nTook ${prettyMilliseconds(took)}.`;
 	return (await response).edit(send);
 }

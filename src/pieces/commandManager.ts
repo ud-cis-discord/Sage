@@ -2,7 +2,7 @@ import { Collection } from 'discord.js';
 import * as fs from 'fs';
 import { SageClient } from '@lib/types/SageClient';
 import { Command } from '@lib/types/Command';
-import { PREFIX } from '@root/config';
+import { MAINTAINERS, PREFIX } from '@root/config';
 import { getCommand } from '../lib/utils';
 
 function readdirRecursive(dir: string): string[] {
@@ -63,7 +63,7 @@ function register(bot: SageClient): void {
 		try {
 			command.run(msg, args);
 		} catch (e) {
-			await msg.reply('An error occured.');
+			await msg.reply(`An error occured. ${MAINTAINERS} have been notified.`);
 			throw e;
 		}
 	});
