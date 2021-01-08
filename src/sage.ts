@@ -2,6 +2,7 @@ import 'module-alias/register';
 import { BOT, MONGO, PREFIX } from '@root/config';
 import { SageClient } from '@lib/types/SageClient';
 import commandManager from '@pieces/commandManager';
+import roleHandler from '@pieces/roleHandler';
 import { MongoClient } from 'mongodb';
 
 const bot = new SageClient();
@@ -18,3 +19,4 @@ bot.on('ready', () => {
 });
 
 commandManager(bot);
+roleHandler(bot);
