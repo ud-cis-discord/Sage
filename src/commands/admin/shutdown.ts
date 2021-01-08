@@ -13,7 +13,9 @@ export async function permissions(msg: Message): Promise<boolean> {
 export async function run(msg: Message): Promise<void> {
 	const bot = msg.client as SageClient;
 	await bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
-	await msg.channel.send(`Shutting down ${BOT.NAME}`)
-		.then(() => bot.destroy());
-	process.exit(0);
+	msg.channel.send(`Shutting down ${BOT.NAME}`)
+		.then(() => {
+			bot.destroy();
+			process.exit(0);
+		});
 }
