@@ -23,7 +23,7 @@ export function argParser(msg: Message, input: string): [string] {
 
 	const validStatuses = ['online', 'idle', 'dnd', 'invisible'];
 
-	if (!validStatuses.includes(input = input.trim())) {
+	if (!validStatuses.includes(input = input.trim().toLowerCase())) {
 		throw `invalid status ${input}. Status must be one of ${validStatuses.join(', ')}`;
 	}
 
