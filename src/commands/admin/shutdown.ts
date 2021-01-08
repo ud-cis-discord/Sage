@@ -14,7 +14,6 @@ export async function run(msg: Message): Promise<void> {
 	const bot = msg.client as SageClient;
 	await bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
 	await msg.channel.send(`Shutting down ${BOT.NAME}`)
-		.then(() => bot.destroy())
-		.catch(err => console.error(err));
+		.then(() => bot.destroy());
 	process.exit(0);
 }
