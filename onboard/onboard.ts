@@ -6,7 +6,7 @@ import { MongoClient } from 'mongodb';
 import { TextChannel } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { SageClient } from '@lib/types/SageClient';
-import { BOT, GUILDS, MONGO } from '@root/config';
+import { BOT, EMAIL, GUILDS, MONGO } from '@root/config';
 
 const MESSAGE = `Hello,
 
@@ -91,7 +91,8 @@ async function sendEmail(email: string, hash: string, channel: TextChannel): Pro
 	});
 
 	mailer.sendMail({
-		from: 'Sage <bensegal+sage@udel.edu>',
+		from: EMAIL.SENDER,
+		replyTo: EMAIL.REPLY_TO,
 		to: email,
 		subject: 'Welcome to the UD CIS Discord!',
 		html: MESSAGE.replace('$hash', hash).replace('$invCode', invite.code)

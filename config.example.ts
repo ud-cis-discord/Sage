@@ -1,21 +1,31 @@
 export const BOT = {
-	TOKEN: '',		// Bot token here
-	CLIENT_ID: '',	// Client ID here
-	NAME: 'Sage'	// Bot Name
+	TOKEN: '',					// Bot token here
+	CLIENT_ID: '',				// Client ID here
+	NAME: 'Sage'				// Bot Name
 };
 
 export const PREFIX = 's;';
 
-export const MONGO = 'mongodb+srv://DevTest:YouDee4Admin@testsage.69pl9.mongodb.net/TestSage?retryWrites=true&w=majority';	// Mongo connection string here
+export const MONGO = '';		// Mongo connection string here
 
-export const GUILDS = {
+export const GUILDS = {			// Guild IDs for each guild
 	GATEWAY: '',
 	MAIN: ''
 };
 
-export const ROLES = {		// Role IDS for each role
+export const ROLES = {			// Role IDS for each role
 	ADMIN: '',
 	STAFF: '',
 	VERIFIED: '',
 	MUTED: ''
 };
+
+export const EMAIL = {
+	SENDER: '',					// The email address all emails should be sent from
+	REPLY_TO: '',				// The replyto address for all emails
+	REPORT_ADRESSES: [			// A list of all the email address to get the weekly report
+		''
+	]
+};
+
+export const MAINTAINERS = '';	// The current maintainers of this bot
