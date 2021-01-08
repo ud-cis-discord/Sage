@@ -1,7 +1,6 @@
 import { Message, Team } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { inspect } from 'util';
-import fetch from 'node-fetch';
 import { BOT } from '@root/config';
 import { sendToHastebin } from '@root/src/lib/utils';
 
