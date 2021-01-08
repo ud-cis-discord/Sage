@@ -1,13 +1,11 @@
-import { GuildMember } from 'discord.js';
-import { SageClient } from '@lib/types/SageClient';
+import { Client, GuildMember } from 'discord.js';
 import { GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const bot = member.client as SageClient;
-	const entry: SageUser = await bot.mongo.collection('users').findOne({ discordId: member.id });
+	const entry: SageUser = await member.client.mongo.collection('users').findOne({ discordId: member.id });
 
 	if (!entry) {
 		throw `User ${member.id} does not exist in the database.`;
@@ -25,7 +23,7 @@ function memberUpdate(_newMember: GuildMember, _oldMember: GuildMember): void {
 	return;
 }
 
-function register(bot: SageClient): void {
+function register(bot: Client): void {
 	bot.on('guildMemberAdd', memberAdd);
 	bot.on('guildMemberUpdate', memberUpdate);
 }

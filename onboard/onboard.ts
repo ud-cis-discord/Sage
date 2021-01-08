@@ -3,9 +3,8 @@ import fs from 'fs';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
-import { TextChannel } from 'discord.js';
+import { TextChannel, Client } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
-import { SageClient } from '@lib/types/SageClient';
 import { BOT, EMAIL, GUILDS, MONGO } from '@root/config';
 
 const MESSAGE = `Hello,
@@ -20,7 +19,7 @@ const mailer = nodemailer.createTransport({
 	port: 25
 });
 
-const bot = new SageClient();
+const bot = new Client();
 bot.login(BOT.TOKEN);
 
 bot.once('ready', async () => {

@@ -1,5 +1,4 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
-import { SageClient } from '@lib/types/SageClient';
 import { Course } from '@lib/types/Course';
 import { ROLES } from '@root/config';
 
@@ -15,8 +14,7 @@ export function permissions(msg: Message): boolean {
 }
 
 export async function run(msg: Message, [course, newAssignments]: [string, Array<string>]): Promise<Message> {
-	const bot = msg.client as SageClient;
-	const entry: Course = await bot.mongo.collection('courses').findOne({ name: course });
+	const entry: Course = await msg.client.mongo.collection('courses').findOne({ name: course });
 
 	const added: Array<string> = [];
 	const failed: Array<string> = [];
@@ -29,7 +27,7 @@ export async function run(msg: Message, [course, newAssignments]: [string, Array
 		}
 	});
 
-	bot.mongo.collection('courses').updateOne({ name: course }, { $set: { ...entry } });
+	msg.client.mongo.collection('courses').updateOne({ name: course }, { $set: { ...entry } });
 
 	const fields: Array<EmbedField> = [];
 	if (added.length > 0) {
@@ -59,11 +57,10 @@ export async function argParser(msg: Message, input: string): Promise<[string, A
 		throw `Usage: ${usage}`;
 	}
 
-	const bot = msg.client as SageClient;
 	const assignments = input.split('|').map(assignment => assignment.trim());
 	const course = assignments.shift();
 
-	if (await bot.mongo.collection('courses').countDocuments({ name: course }) !== 1) {
+	if (await msg.client.mongo.collection('courses').countDocuments({ name: course }) !== 1) {
 		throw `Could not find course: ${course}`;
 	}
 

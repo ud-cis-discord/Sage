@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { SageClient } from '@lib/types/SageClient';
 import { Course } from '@lib/types/Course';
 import { ROLES } from '@root/config';
 
@@ -14,8 +13,7 @@ export function permissions(msg: Message): boolean {
 
 export async function run(msg: Message, [course]: [string]): Promise<Message> {
 	const newCourse: Course = { name: course, assignments: [] };
-	const bot = msg.client as SageClient;
-	await bot.mongo.collection('courses').insertOne(newCourse);
+	await msg.client.mongo.collection('courses').insertOne(newCourse);
 	return msg.channel.send(`Added course with ID ${course}`);
 }
 
