@@ -25,6 +25,7 @@
 	"dependencies": {
 		"discord.js": "^12.5.1",
 		"module-alias": "^2.2.2",
+		"moment": "^2.29.1",
 		"mongodb": "^3.6.3",
 		"node-fetch": "^2.6.1",
 		"nodemailer": "^6.4.17",
