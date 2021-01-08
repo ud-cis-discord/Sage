@@ -29,7 +29,7 @@ export async function run(msg: Message, [js]: [string]): Promise<Message> {
 	}
 
 	const took = Date.now() - start;
-	result = inspect(result, { depth: 0 }).replace(BOT.TOKEN, 'token_was_here');
+	result = inspect(result, { depth: 0 }).replace(RegExp(`${BOT.TOKEN}`, 'g'), 'token_was_here');
 
 	let send = await sendToHastebin(result, 'js');
 	if (result.length < 1900) {

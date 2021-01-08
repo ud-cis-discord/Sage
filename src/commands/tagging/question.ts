@@ -19,7 +19,7 @@ export async function run(msg: Message, [course, assignment]: [string, string]):
 	To add questions, use the tag command (\`${PREFIX}help tag\`)`.replace('\t', ''));
 	}
 	entries.forEach(doc => {
-		fields.push({ name: doc.header, value: `[Click to view](${doc.link})`, inline: true });
+		fields.push({ name: doc.header.replace(/\n/g, ' '), value: `[Click to view](${doc.link})`, inline: false });
 	});
 	const embed = new MessageEmbed()
 		.setTitle(`Questions for ${course} ${assignment}`)
