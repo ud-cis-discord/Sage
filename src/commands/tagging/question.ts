@@ -1,5 +1,4 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
-import { SageClient } from '@lib/types/SageClient';
 import { Course } from '@lib/types/Course';
 import { PREFIX } from '@root/config';
 import { Question } from '@lib/types/Question';
@@ -11,8 +10,7 @@ export const aliases = ['q'];
 // never assume that students are not dumb
 
 export async function run(msg: Message, [course, assignment]: [string, string]): Promise<Message> {
-	const bot = msg.client as SageClient;
-	const entries: Array<Question> = await bot.mongo.collection('questions').find({ course: course, assignment: assignment }).toArray();
+	const entries: Array<Question> = await msg.client.mongo.collection('questions').find({ course: course, assignment: assignment }).toArray();
 	const fields: Array<EmbedField> = [];
 	if (entries.length === 0) {
 		return msg.channel.send(`There are no questions for ${course}, ${assignment}.
@@ -35,9 +33,7 @@ export async function argParser(msg: Message, input: string): Promise<[string, s
 		throw `Usage: ${usage}`;
 	}
 
-	const bot = msg.client as SageClient;
-
-	const entry: Course = await bot.mongo.collection('courses').findOne({ name: course });
+	const entry: Course = await msg.client.mongo.collection('courses').findOne({ name: course });
 	if (!entry) {
 		throw `Could not find course: **${course}**`;
 	}

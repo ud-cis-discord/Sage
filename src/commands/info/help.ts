@@ -1,5 +1,4 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
-import { SageClient } from '@lib/types/SageClient';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 
@@ -9,9 +8,9 @@ export const extendedHelp = 'If given no arguments, a list of all commands you h
 export const aliases = ['commands'];
 
 export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
-	const { commands } = msg.client as SageClient;
+	const { commands } = msg.client;
 	if (cmd) {
-		const command = getCommand(msg.client as SageClient, cmd);
+		const command = getCommand(msg.client, cmd);
 		if (!command) return msg.channel.send(`**${cmd}** is not a valid command.`);
 
 		const fields: Array<EmbedField> = [];

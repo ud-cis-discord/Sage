@@ -1,10 +1,11 @@
 import 'module-alias/register';
 import { BOT, MONGO, PREFIX } from '@root/config';
-import { SageClient } from '@lib/types/SageClient';
 import commandManager from '@pieces/commandManager';
+import roleHandler from '@pieces/roleHandler';
 import { MongoClient } from 'mongodb';
+import { Client } from 'discord.js';
 
-const bot = new SageClient();
+const bot = new Client();
 
 MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
 	bot.mongo = client.db(BOT.NAME);
@@ -18,3 +19,4 @@ bot.on('ready', () => {
 });
 
 commandManager(bot);
+roleHandler(bot);

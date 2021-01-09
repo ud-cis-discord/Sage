@@ -1,8 +1,8 @@
+import { Client } from 'discord.js';
 import fetch from 'node-fetch';
-import { Command } from './types/Command';
-import { SageClient } from './types/SageClient';
+import { Command } from '@lib/types/Command';
 
-export function getCommand(bot: SageClient, cmd: string): Command {
+export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
 	return bot.commands.get(cmd) || bot.commands.find(command => command.aliases && command.aliases.includes(cmd));
 }

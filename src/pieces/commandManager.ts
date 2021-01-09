@@ -1,6 +1,5 @@
-import { Collection } from 'discord.js';
+import { Collection, Client } from 'discord.js';
 import * as fs from 'fs';
-import { SageClient } from '@lib/types/SageClient';
 import { Command } from '@lib/types/Command';
 import { MAINTAINERS, PREFIX } from '@root/config';
 import { getCommand } from '../lib/utils';
@@ -22,7 +21,7 @@ function readdirRecursive(dir: string): string[] {
 	return results;
 }
 
-function register(bot: SageClient): void {
+function register(bot: Client): void {
 	bot.commands = new Collection();
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
