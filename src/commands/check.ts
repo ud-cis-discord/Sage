@@ -13,7 +13,7 @@ export async function run(msg: Message, [here]: [string]): Promise<void> {
 	if (here) {
 		msg.channel.send(`You have sent ${user.count} message${user.count === 1 ? '' : 's'}`);
 	} else {
-		msg.author.send(`You have sent ${user.count} message${user.count === 1 ? '' : 's'}`, { split: { char: '\n' } })
+		msg.author.send(`You have sent ${user.count} message${user.count === 1 ? '' : 's'}`)
 			.then(() => { if (msg.channel.type !== 'dm') msg.channel.send('Your message count has been sent to your DMss'); })
 			.catch(() => msg.channel.send('I couldnt send you a DM. Please enable DMs and try again'));
 	}
