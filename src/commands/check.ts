@@ -1,4 +1,4 @@
-import { Message, GuildMember } from 'discord.js';
+import { Message } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 
 export const description = `Displays the users current message count. 
