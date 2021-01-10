@@ -1,4 +1,3 @@
-import { SageClient } from '@lib/types/SageClient';
 import { ActivityType, Message, Team } from 'discord.js';
 import { BOT } from '@root/config';
 
@@ -11,7 +10,7 @@ export async function permissions(msg: Message): Promise<boolean> {
 }
 
 export async function run(msg: Message, [type, content]: [ActivityType, string]): Promise<Message> {
-	const bot = msg.client as SageClient;
+	const bot = msg.client;
 	bot.user.setActivity(`${content}`, { type: type });
 	return msg.channel.send(`set ${BOT.NAME}'s activity to ${type} ${content}`);
 }

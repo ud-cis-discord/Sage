@@ -1,5 +1,4 @@
 import { BOT } from '@root/config';
-import { SageClient } from '@lib/types/SageClient';
 import { Message, Team } from 'discord.js';
 
 export const description = `Sets ${BOT.NAME}'s status.`;
@@ -10,7 +9,7 @@ export async function permissions(msg: Message): Promise<boolean> {
 	return team.members.has(msg.author.id);
 }
 export async function run(msg: Message, [status]: ['online' | 'idle' | 'dnd' | 'invisible']): Promise<Message> {
-	const bot = msg.client as SageClient;
+	const bot = msg.client;
 	await bot.user.setStatus(status);
 
 	return msg.channel.send(`Set ${BOT.NAME}'s status to ${status}`);

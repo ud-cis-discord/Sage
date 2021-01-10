@@ -1,5 +1,4 @@
 import { BOT } from '@root/config';
-import { SageClient } from '@lib/types/SageClient';
 import { Message, Team } from 'discord.js';
 
 export const aliases = ['sd'];
@@ -11,7 +10,7 @@ export async function permissions(msg: Message): Promise<boolean> {
 }
 
 export async function run(msg: Message): Promise<void> {
-	const bot = msg.client as SageClient;
+	const bot = msg.client;
 	await bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
 	msg.channel.send(`Shutting down ${BOT.NAME}`)
 		.then(() => {
