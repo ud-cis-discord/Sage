@@ -12,13 +12,14 @@ function register(bot: Client): void {
 			return;
 		}
 
-		if (await bot.mongo.collection('users').countDocuments({ discordId: msg.author.id }) !== 1) {
-			throw `member ${msg.author.username} (${msg.author.id}) not in database`;
-		}
-
 		await bot.mongo.collection('users').updateOne(
 			{ discordId: msg.author.id },
-			{ $inc: { count: 1 } });
+			{ $inc: { count: 1 } })
+			.then(updated => {
+				if (updated.modifiedCount === 0) {
+					throw `member ${msg.author.username} (${msg.author.id}) not in database`;
+				}
+			});
 	});
 }
 
