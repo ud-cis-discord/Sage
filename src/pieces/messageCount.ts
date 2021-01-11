@@ -12,7 +12,7 @@ function register(bot: Client): void {
 			return;
 		}
 
-		await bot.mongo.collection('users').updateOne(
+		bot.mongo.collection('users').updateOne(
 			{ discordId: msg.author.id },
 			{ $inc: { count: 1 } })
 			.then(updated => {
