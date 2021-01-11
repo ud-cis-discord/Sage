@@ -2,7 +2,7 @@ import { Client, TextChannel } from 'discord.js';
 import { PREFIX } from '@root/config';
 
 function register(bot: Client): void {
-	bot.on('message', async msg => {
+	bot.on('message', msg => {
 		if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
 			return;
 		}
