@@ -19,22 +19,13 @@ const mailer = nodemailer.createTransport({
 	port: 25
 });
 
-const bot = new Client();
-bot.login(BOT.TOKEN);
-
-bot.once('ready', async () => {
-	const guild = await bot.guilds.fetch(GUILDS.GATEWAY);
-	const channel = guild.systemChannel;
-
+MongoClient.connect(MONGO, { useUnifiedTopology: true }).then(client => {
+	const db = client.db(BOT.NAME).collection('users');
 	fs.readFile('./resources/emails.csv', async (err, data) => {
 		if (err) {
 			console.error(err);
 			return;
 		}
-
-		await MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
-			bot.mongo = client.db(BOT.NAME);
-		});
 
 		const emails = data.toString().split('\n').map(email => email.trim());
 		let isStaff: boolean;
@@ -50,10 +41,12 @@ bot.once('ready', async () => {
 
 		emails.shift();
 		for (const email of emails) {
+			if (email === '') continue;
+
 			const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
 			console.log(email, ':', isStaff, ':', hash);
 
-			const entry: SageUser = await bot.mongo.collection('users').findOne({ email: email, hash: hash });
+			const entry: SageUser = await db.findOne({ email: email, hash: hash });
 
 			const newUser: SageUser = {
 				email: email,
@@ -68,32 +61,25 @@ bot.once('ready', async () => {
 
 			if (entry) {			// User already on-boarded
 				if (isStaff) {		// Make staff is not already
-					bot.mongo.collection('users').updateOne(entry, { $set: { ...newUser } });
+					db.updateOne(entry, { $set: { ...newUser } });
 				}
 				continue;
 			}
 
-			bot.mongo.collection('users').insertOne(newUser);
+			db.insertOne(newUser);
 
-			sendEmail(email, hash, channel);
+			sendEmail(email, hash);
 		}
 	});
+	process.exit();
 });
 
-
-async function sendEmail(email: string, hash: string, channel: TextChannel): Promise<void> {
-	const invite = await channel.createInvite({
-		maxAge: 0,
-		maxUses: 1,
-		unique: true,
-		reason: 'Onboarding someone.'
-	});
-
+async function sendEmail(email: string, hash: string): Promise<void> {
 	mailer.sendMail({
 		from: EMAIL.SENDER,
 		replyTo: EMAIL.REPLY_TO,
 		to: email,
 		subject: 'Welcome to the UD CIS Discord!',
-		html: MESSAGE.replace('$hash', hash).replace('$invCode', invite.code)
+		html: MESSAGE.replace('$hash', hash).replace('$invCode', GUILDS.GATEWAY_INVITE)
 	});
 }

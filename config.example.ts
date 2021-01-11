@@ -9,8 +9,9 @@ export const PREFIX = 's;';
 export const MONGO = '';		// Mongo connection string here
 
 export const GUILDS = {			// Guild IDs for each guild
+	MAIN: '',
 	GATEWAY: '',
-	MAIN: ''
+	GATEWAY_INVITE: ''
 };
 
 export const ROLES = {			// Role IDS for each role
