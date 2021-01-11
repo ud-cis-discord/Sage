@@ -69,6 +69,7 @@ MongoClient.connect(MONGO, { useUnifiedTopology: true }).then(client => {
 			sendEmail(email, hash);
 		}
 	});
+	process.exit();
 });
 
 async function sendEmail(email: string, hash: string): Promise<void> {
