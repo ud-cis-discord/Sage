@@ -3,7 +3,7 @@ import { PREFIX } from '@root/config';
 
 function register(bot: Client): void {
 	bot.on('message', async msg => {
-		if (msg.channel.type !== 'text' || msg.author === bot.user) {
+		if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
 			return;
 		}
 
@@ -12,8 +12,8 @@ function register(bot: Client): void {
 			return;
 		}
 
-		if (msg.content.toLowerCase().startsWith(PREFIX)) {
-			return;
+		if (await bot.mongo.collection('users').countDocuments({ discordId: msg.author.id }) !== 1) {
+			throw `member ${msg.author.username} (${msg.author.id}) not in database`;
 		}
 
 		await bot.mongo.collection('users').updateOne(
