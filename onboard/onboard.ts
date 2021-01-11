@@ -41,6 +41,8 @@ MongoClient.connect(MONGO, { useUnifiedTopology: true }).then(client => {
 
 		emails.shift();
 		for (const email of emails) {
+			if (email === '') continue;
+
 			const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
 			console.log(email, ':', isStaff, ':', hash);
 
