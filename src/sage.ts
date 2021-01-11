@@ -2,6 +2,7 @@ import 'module-alias/register';
 import { BOT, MONGO, PREFIX } from '@root/config';
 import commandManager from '@pieces/commandManager';
 import roleHandler from '@pieces/roleHandler';
+import messageCount from './pieces/messageCount';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 
@@ -20,3 +21,4 @@ bot.on('ready', () => {
 
 commandManager(bot);
 roleHandler(bot);
+messageCount(bot);
