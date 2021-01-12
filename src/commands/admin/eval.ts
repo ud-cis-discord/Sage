@@ -1,4 +1,4 @@
-import { Message, Team } from 'discord.js';
+import { Message } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { inspect } from 'util';
 import { BOT } from '@root/config';
