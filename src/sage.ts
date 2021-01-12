@@ -22,5 +22,5 @@ bot.on('ready', () => {
 	commandManager(bot);
 	roleHandler(bot);
 	verification(bot);
-  messageCount(bot);
+	messageCount(bot);
 });
