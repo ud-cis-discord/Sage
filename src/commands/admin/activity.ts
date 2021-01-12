@@ -1,12 +1,12 @@
-import { ActivityType, Message, Team } from 'discord.js';
+import { ActivityType, Message } from 'discord.js';
 import { BOT } from '@root/config';
+import { botMasterPerms } from '@lib/permissions';
 
 export const description = `Sets ${BOT.NAME}'s activity to the given type and content`;
 export const usage = '<type>|<content>';
 
 export async function permissions(msg: Message): Promise<boolean> {
-	const team = (await msg.client.fetchApplication()).owner as Team;
-	return team.members.has(msg.author.id);
+	return botMasterPerms(msg);
 }
 
 export async function run(msg: Message, [type, content]: [ActivityType, string]): Promise<Message> {

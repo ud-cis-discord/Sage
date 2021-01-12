@@ -1,13 +1,14 @@
 import { BOT } from '@root/config';
-import { Message, Team } from 'discord.js';
+import { botMasterPerms } from '@lib/permissions';
+import { Message } from 'discord.js';
 
 export const description = `Sets ${BOT.NAME}'s status.`;
 export const usage = '<online|idle|dnd|invisible>';
 
 export async function permissions(msg: Message): Promise<boolean> {
-	const team = (await msg.client.fetchApplication()).owner as Team;
-	return team.members.has(msg.author.id);
+	return botMasterPerms(msg);
 }
+
 export async function run(msg: Message, [status]: ['online' | 'idle' | 'dnd' | 'invisible']): Promise<Message> {
 	const bot = msg.client;
 	await bot.user.setStatus(status);

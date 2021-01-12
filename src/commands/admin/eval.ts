@@ -2,15 +2,15 @@ import { Message, Team } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { inspect } from 'util';
 import { BOT } from '@root/config';
-import { sendToHastebin } from '@root/src/lib/utils';
+import { sendToHastebin } from '@lib/utils';
+import { botMasterPerms } from '@lib/permissions';
 
 export const aliases = ['ev'];
 export const description = 'Executes arbitrary JavaScript.';
 export const usage = '<javascript>';
 
 export async function permissions(msg: Message): Promise<boolean> {
-	const team = (await msg.client.fetchApplication()).owner as Team;
-	return team.members.has(msg.author.id);
+	return botMasterPerms(msg);
 }
 
 export async function run(msg: Message, [js]: [string]): Promise<Message> {

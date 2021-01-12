@@ -1,14 +1,14 @@
 import { Message, MessageEmbed, Role } from 'discord.js';
 import { roleParser } from '@lib/arguments';
 import { sendToHastebin } from '@lib/utils';
-import { ROLES } from '@root/config';
+import { staffPerms } from '@lib/permissions';
 
 export const description = 'Gives information about a role, including a list of the members who have it.';
 export const usage = '<role>';
 export const runInDM = false;
 
 export function permissions(msg: Message): boolean {
-	return msg.member.roles.cache.has(ROLES.STAFF);
+	return staffPerms(msg);
 }
 
 export async function run(msg: Message, [role]: [Role]): Promise<Message> {

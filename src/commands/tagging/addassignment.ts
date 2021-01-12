@@ -1,6 +1,6 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
-import { ROLES } from '@root/config';
+import { staffPerms } from '@lib/permissions';
 
 // Never assume staff are not dumb (the reason this is so long)
 
@@ -10,7 +10,7 @@ export const runInDM = false;
 export const aliases = ['adda'];
 
 export function permissions(msg: Message): boolean {
-	return msg.member.roles.cache.has(ROLES.STAFF);
+	return staffPerms(msg);
 }
 
 export async function run(msg: Message, [course, newAssignments]: [string, Array<string>]): Promise<Message> {
