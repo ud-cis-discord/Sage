@@ -3,15 +3,33 @@ import fs from 'fs';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
-import { TextChannel, Client } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, EMAIL, GUILDS, MONGO } from '@root/config';
 
-const MESSAGE = `Hello,
+const MESSAGE = `<!DOCTYPE html>
+<html>
 
-You are part of a class which is using the UD CIS Discord Server in S21. 
-Hash: $hash
-Invite: https://discord.gg/$invCode
+<head>
+	<title>Discord Verification</title>
+</head>
+
+<body>
+
+	<h1 style="color:#00539F">Welcome!</h1>
+	<p>You're getting this email because you're part of a class in the UD CIS Department that is using <span style="color:#738ADB">Discord</span> as its primary means of communication.</p>
+	<p>To get set up and verified on the server, follow the instructions listed on <a href="google.com">this page.</a></p>
+	<p>
+		Click on <a href="https://discord.gg/$invCode">this link</a> for an invite to the gateway server.
+	<p>Once you're on the server, right click Sage's name on the right side of the screen and select 'Message'. 
+	<br>Send just your hash code and join the official server using the link that Sage sends back.
+	</p>
+	<p>Your hash code is: <span style="color:blueviolet">$hash</span></p>
+	<p><br>We hope to see you on the server soon!<br>- The <span style="color:#738ADB">Discord</span> Admin Team</p>
+	
+
+</body>
+
+</html>
 `;
 
 const mailer = nodemailer.createTransport({
@@ -22,6 +40,7 @@ const mailer = nodemailer.createTransport({
 MongoClient.connect(MONGO, { useUnifiedTopology: true }).then(client => {
 	const db = client.db(BOT.NAME).collection('users');
 	fs.readFile('./resources/emails.csv', async (err, data) => {
+		console.log('here');
 		if (err) {
 			console.error(err);
 			return;
@@ -70,8 +89,8 @@ MongoClient.connect(MONGO, { useUnifiedTopology: true }).then(client => {
 
 			sendEmail(email, hash);
 		}
+		process.exit();
 	});
-	process.exit();
 });
 
 async function sendEmail(email: string, hash: string): Promise<void> {
