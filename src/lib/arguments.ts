@@ -24,17 +24,18 @@ export async function userParser(msg: Message, input: string): Promise<GuildMemb
 	const gMembers = await msg.guild.members.fetch();
 
 	let retMembers = gMembers.filter(member => member.user.id === input);
-	if (retMembers.size === 1) {
-		return retMembers.array()[0];
+	if (retMembers.size !== 1) {
+		retMembers = gMembers.filter(member => member.user.username.toLowerCase() === input);
+		if (retMembers.size !== 1) {
+			retMembers = gMembers.filter(member => member.nickname ? member.nickname.toLowerCase() === input : false);
+		}
 	}
-
-	retMembers = gMembers.filter(member => member.user.username.toLowerCase() === input);
 
 	if (retMembers.size < 1) {
-		throw 'No member with that username or ID exists.';
+		throw 'No member with that username, nickname, or ID exists.';
 	}
 	if (retMembers.size > 1) {
-		throw 'Multiple members with that username exist, enter ID to get a specific user';
+		throw 'Multiple members with that username or nickname exist, try entering an ID to get a specific user';
 	}
 
 	return retMembers.array()[0];
