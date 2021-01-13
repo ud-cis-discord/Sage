@@ -6,7 +6,7 @@ export const aliases = ['sd'];
 export const description = `Sets ${BOT.NAME}'s activity to 'Playing Shutting Down...' and ends the process.`;
 
 export async function permissions(msg: Message): Promise<boolean> {
-	return botMasterPerms(msg);
+	return await botMasterPerms(msg);
 }
 
 export async function run(msg: Message): Promise<void> {

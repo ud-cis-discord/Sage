@@ -10,7 +10,7 @@ export const description = 'Executes arbitrary JavaScript.';
 export const usage = '<javascript>';
 
 export async function permissions(msg: Message): Promise<boolean> {
-	return botMasterPerms(msg);
+	return await botMasterPerms(msg);
 }
 
 export async function run(msg: Message, [js]: [string]): Promise<Message> {

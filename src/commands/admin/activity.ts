@@ -6,7 +6,7 @@ export const description = `Sets ${BOT.NAME}'s activity to the given type and co
 export const usage = '<type>|<content>';
 
 export async function permissions(msg: Message): Promise<boolean> {
-	return botMasterPerms(msg);
+	return await botMasterPerms(msg);
 }
 
 export async function run(msg: Message, [type, content]: [ActivityType, string]): Promise<Message> {

@@ -6,7 +6,7 @@ export const description = `Sets ${BOT.NAME}'s status.`;
 export const usage = '<online|idle|dnd|invisible>';
 
 export async function permissions(msg: Message): Promise<boolean> {
-	return botMasterPerms(msg);
+	return await botMasterPerms(msg);
 }
 
 export async function run(msg: Message, [status]: ['online' | 'idle' | 'dnd' | 'invisible']): Promise<Message> {
