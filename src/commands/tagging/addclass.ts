@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { Course } from '@lib/types/Course';
-import { ROLES } from '@root/config';
+import { adminPerms } from '@lib/permissions';
 
 export const description = 'Adds a course ID to the database to be used for question and assignment tags.';
 export const usage = '<course ID>';
@@ -8,7 +8,7 @@ export const runInDM = false;
 export const aliases = ['addc'];
 
 export function permissions(msg: Message): boolean {
-	return msg.member.roles.cache.has(ROLES.ADMIN);
+	return adminPerms(msg);
 }
 
 export async function run(msg: Message, [course]: [string]): Promise<Message> {

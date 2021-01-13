@@ -1,12 +1,12 @@
 import { BOT } from '@root/config';
-import { Message, Team } from 'discord.js';
+import { botMasterPerms } from '@lib/permissions';
+import { Message } from 'discord.js';
 
 export const aliases = ['sd'];
 export const description = `Sets ${BOT.NAME}'s activity to 'Playing Shutting Down...' and ends the process.`;
 
 export async function permissions(msg: Message): Promise<boolean> {
-	const team = (await msg.client.fetchApplication()).owner as Team;
-	return team.members.has(msg.author.id);
+	return await botMasterPerms(msg);
 }
 
 export async function run(msg: Message): Promise<void> {
