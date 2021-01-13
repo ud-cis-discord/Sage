@@ -19,17 +19,23 @@ export async function roleParser(msg: Message, input: string): Promise<Role> {
 }
 
 export async function userParser(msg: Message, input: string): Promise<GuildMember> {
-	input = input.replace(/<@&(\d+)>/, '$1').trim();
+	input = input.replace(/<@!?(\d+)>/, '$1').trim().toLowerCase();
 
 	const gMembers = await msg.guild.members.fetch();
-	if (gMembers.has('input')) {
-		return gMembers.get('input');
+
+	let retMembers = gMembers.filter(member => member.user.id === input);
+	if (retMembers.size === 1) {
+		return retMembers.array()[0];
 	}
 
-	const retMember = gMembers.filter(member => member.user.username === input);
+	retMembers = gMembers.filter(member => member.user.username.toLowerCase() === input);
 
-	if (retMember.size < 1) {
+	if (retMembers.size < 1) {
 		throw 'No member with that username or ID exists.';
 	}
-	return retMember.array()[0];
+	if (retMembers.size > 1) {
+		throw 'Multiple members with that username exist, enter ID to get a specific user';
+	}
+
+	return retMembers.array()[0];
 }
