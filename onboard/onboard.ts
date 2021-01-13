@@ -55,11 +55,14 @@ async function main() {
 	}
 
 	emails.shift();
+	console.log(`${'email'.padEnd(18)} | ${'staff'.padEnd(5)} | hash
+-------------------------------------------------------------------------`);
 	for (const email of emails) {
 		if (email === '') continue;
 
 		const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
-		console.log(email, ':', isStaff, ':', hash);
+
+		console.log(`${email.padEnd(18)} | ${isStaff.toString().padEnd(5)} | ${hash}`);
 
 		const entry: SageUser = await db.findOne({ email: email, hash: hash });
 
