@@ -1,8 +1,7 @@
-import { Message, OverwriteResolvable, Guild } from 'discord.js';
+import { Message, OverwriteResolvable, Guild, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { adminPerms } from '@lib/permissions';
 import { GUILDS, ROLES } from '@root/config';
-import { TextChannel } from 'discord.js';
 
 export const description = 'Adds a course ID to the database to be used for question and assignment tags.';
 export const usage = '<course ID>';
