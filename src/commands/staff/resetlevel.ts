@@ -27,7 +27,12 @@ export async function run(msg: Message, [member, amount]: [GuildMember, number])
 
 	if (amount < 0) {
 		entry.count += amount;
-		retStr = `Subtracted ${amount * -1} from ${member.user.username}'s message count.`;
+		if (entry.count < 0) {
+			entry.count = 0;
+			retStr = `Subtracted ${amount * -1} from ${member.user.username}'s message count (bottomed out at 0).`;
+		} else {
+			retStr = `Subtracted ${amount * -1} from ${member.user.username}'s message count.`;
+		}
 	} else {
 		entry.count = amount;
 		retStr = `Set ${member.user.username}'s message count to ${amount}.`;
