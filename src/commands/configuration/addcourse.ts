@@ -3,7 +3,7 @@ import { Course } from '@lib/types/Course';
 import { adminPerms } from '@lib/permissions';
 import { GUILDS, ROLES } from '@root/config';
 
-export const description = 'Adds a course ID to the database to be used for question and assignment tags.';
+export const description = 'Creates a corses category and adds all nessary channels/roles.';
 export const usage = '<course ID>';
 export const runInDM = false;
 export const aliases = ['addc', 'createcourse', 'createc'];
