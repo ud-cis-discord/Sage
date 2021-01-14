@@ -20,7 +20,7 @@ export async function run(msg: Message, [member, amount]: [GuildMember, number])
 
 	if (!entry) {
 		throw `User ${member.user.username} (${member.user.id}) not in database. Contact ${MAINTAINERS} 
-		if you think this is an error.`;
+	if you think this is an error.`;
 	}
 
 	let retStr: string;
