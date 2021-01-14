@@ -19,8 +19,18 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	});
 }
 
-function memberUpdate(_newMember: GuildMember, _oldMember: GuildMember): void {
-	return;
+async function memberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void> {
+	if (newMember.roles.cache.size === oldMember.roles.cache.size) return;
+
+	newMember.client.mongo.collection('users').updateOne({ discordId: newMember.id }, {
+		$set: {
+			roles: newMember.roles.cache.keyArray().filter(role => role !== GUILDS.MAIN)
+		}
+	}).then(updated => {
+		if (updated.modifiedCount !== 1) {
+			throw `User ${newMember.id} does not exist in the database.`;
+		}
+	});
 }
 
 function register(bot: Client): void {
