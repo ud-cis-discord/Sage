@@ -19,7 +19,7 @@ export async function run(msg: Message, [cmd]: [Role]): Promise<Message> {
 
 	if (await assignables.countDocuments(newRole) > 0) {
 		assignables.findOneAndDelete(newRole);
-		return msg.channel.send(`The role \`${cmd.name}\` has been deleted.`);
+		return msg.channel.send(`The role \`${cmd.name}\` has been removed.`);
 	} else {
 		assignables.insertOne(newRole);
 		return msg.channel.send(`The role \`${cmd.name}\` has been added.`);
