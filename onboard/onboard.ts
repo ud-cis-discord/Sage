@@ -74,7 +74,8 @@ async function main() {
 			count: 0,
 			isVerified: false,
 			pii: false,
-			roles: []
+			roles: [],
+			courses: []
 		};
 
 		if (entry) {			// User already on-boarded

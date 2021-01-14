@@ -34,15 +34,24 @@ function register(bot: Client): void {
 		bot.commands.set(name, command);
 	}
 	bot.on('message', async (msg) => {
-		if (!msg.content.startsWith(PREFIX) || msg.author.bot) return;
+		if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'dm') || msg.author.bot) return;
 
-		const commandName = msg.content.slice(PREFIX.length).trim().split(' ')[0];
+		let commandName: string;
+		if (msg.channel.type !== 'dm' || msg.content.toLowerCase().startsWith(PREFIX)) {
+			[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
+		} else {
+			[commandName] = msg.content.split(' ');
+		}
 		const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
 
 		const command = getCommand(bot, commandName);
 		if (!command) return;
 
 		if (msg.channel.type === 'dm' && command.runInDM === false) return msg.reply(`${command.name} is not avaliable in DMs.`);
+		if (msg.channel.type === 'text' && command.runInGuild === false) {
+			await msg.reply('That command is not avaliable here. Try again in DMs.');
+			return msg.delete();
+		}
 
 		if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
 

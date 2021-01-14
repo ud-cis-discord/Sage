@@ -11,6 +11,7 @@ export interface Command {
 	usage?: string;
 	extendedHelp?: string;
 	runInDM?: boolean;
+	runInGuild?:boolean;
 	permissions?(msg: Message): boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	argParser?(msg: Message, input: string): Array<any>;
