@@ -1,12 +1,34 @@
 import { Course } from '@lib/types/Course';
-import { MAINTAINERS } from '@root/config';
-import { SageUser } from '@root/src/lib/types/SageUser';
-import { Message } from 'discord.js';
+import { MAINTAINERS, PREFIX } from '@root/config';
+import { PVQuestion } from '@lib/types/PVQuestion';
+import { SageUser } from '@lib/types/SageUser';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
 export const runInGuild = false;
 
-export function run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
-	return msg.channel.send(`Course: ${course.name}\nQuestion: ${question}`);
+export async function run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
+	const questionId = `${msg.author.id.slice(msg.author.id.length - 4)}${msg.id.slice(msg.id.length - 4)}`;
+
+	const embed = new MessageEmbed()
+		.setAuthor(msg.author.tag, msg.author.avatarURL())
+		.setTitle(`Question #${questionId}`)
+		.setDescription(question)
+		.setFooter(`To respond to this question, use ${PREFIX}sudoreply ${questionId} <responce>`);
+
+	const staffChannel = await msg.client.channels.fetch(course.channels.staff) as TextChannel;
+	const questionMessage = await staffChannel.send(embed);
+	const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
+
+	const entry: PVQuestion = {
+		owner: msg.author.id,
+		type: 'private',
+		questionId,
+		messageLink
+	};
+
+	msg.client.mongo.collection('pvQuestions').insertOne(entry);
+
+	return msg.channel.send(`Your question has been sent to the staff, any responces will be sent here. Question ID: ${questionId}`);
 }
 
 export async function argParser(msg: Message, input: string): Promise<[Course, string]> {
