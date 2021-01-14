@@ -17,7 +17,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 	const asker = await msg.client.users.fetch(question.owner);
 	const embed = new MessageEmbed()
 		.setAuthor(`${msg.author.tag} replied to question ${question.questionId}`, msg.author.avatarURL())
-		.setDescription(responce)
+		.setDescription(response)
 		.setFooter(`To respond do ${PREFIX}reply ${question.questionId} <response>`);
 
 	return asker.send(embed)

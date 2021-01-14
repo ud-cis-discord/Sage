@@ -7,7 +7,6 @@ export const usage = '<questionID> <responce>';
 export const runInGuild = false;
 
 export async function run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
-	// return msg.channel.send(`question: ${question.questionId}\nresponce: ${responce}`);
 	const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
 	const channel = await msg.client.channels.fetch(channelId) as TextChannel;
 
@@ -16,7 +15,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 
 	const embed = new MessageEmbed()
 		.setAuthor(`${shownAuthor} responded to ${question.questionId}`, shownAvatar)
-		.setDescription(`${responce}\n\n[Jump to question](${question.messageLink})`);
+		.setDescription(`${response}\n\n[Jump to question](${question.messageLink})`);
 
 	return channel.send(embed)
 		.then(() => msg.channel.send('I\'ve forwarded your message along.'));
