@@ -22,7 +22,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 
 	return asker.send(embed)
 		.then(() => msg.channel.send(`I've sent your responce to ${asker.username}.`))
-		.catch(() => msg.channel.send(`I couldn't send your resonce. ${asker.username} may have DMs disabled.`));
+		.catch(() => msg.channel.send(`I couldn't send your response. ${asker.username} may have DMs disabled.`));
 }
 
 export async function argParser(msg: Message, input: string): Promise<[PVQuestion, string]> {
