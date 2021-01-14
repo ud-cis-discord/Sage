@@ -4,7 +4,7 @@ import { roleParser } from '@lib/arguments';
 
 export const description = `Use this command to assign a role to yourself! 
 Use the argument 'list' to see a list of all self-assignable roles.`;
-export const usage = '[list] or <role>';
+export const usage = '[Role|list]';
 export const aliases = ['role'];
 export const runInDM = false;
 
