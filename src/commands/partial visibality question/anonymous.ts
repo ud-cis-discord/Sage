@@ -39,7 +39,7 @@ It is recomended you reply in public, but sudoreply can be used **in a staff cha
 
 	msg.client.mongo.collection('pvQuestions').insertOne(entry);
 
-	return msg.channel.send(`Your question has been sent to your course anonymously. To reply anonymously, use \`${PREFIX}reply ${questionId} <responce>\`.`);
+	return msg.channel.send(`Your question has been sent to your course anonymously. To reply anonymously, use \`${PREFIX}reply ${questionId} <response>\`.`);
 }
 
 export async function argParser(msg: Message, input: string): Promise<[Course, string]> {
