@@ -13,7 +13,7 @@ export function permissions(msg: Message): boolean {
 	return staffPerms(msg);
 }
 
-export async function run(msg: Message, [question, responce]: [PVQuestion, string]): Promise<Message> {
+export async function run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
 	const asker = await msg.client.users.fetch(question.owner);
 	const embed = new MessageEmbed()
 		.setAuthor(`${msg.author.tag} replied to question ${question.questionId}`, msg.author.avatarURL())
