@@ -51,7 +51,7 @@ export async function argParser(msg: Message, input: string): Promise<[Course, s
 			question = input;
 		}
 	} else {
-		const inputedCourse = courses.find(c => c.name === input.split(' ')[0]);
+		const inputtedCourse = courses.find(c => c.name === input.split(' ')[0]);
 		if (!inputedCourse) {
 			throw `I wasn't able to determine your course baised off of your enrollment or your input. Please specify the corse at the begining of your question.
 Avaliable corses: \`${courses.map(c => c.name).join('`, `')}\``;
