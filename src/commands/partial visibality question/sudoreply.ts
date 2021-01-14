@@ -5,7 +5,7 @@ import { Message, MessageEmbed } from 'discord.js';
 
 export const description = `Reply to a question asked through ${BOT.NAME}.`;
 export const usage = '<questionID> <responce>';
-export const extendedHelp = 'Responces get sent to the askers DMs. This command will tell you it failed if it cannont send the DM.';
+export const extendedHelp = 'Responses get sent to the askers DMs. This command will tell you it failed if it cannot send the DM.';
 export const runInDM = false;
 export const aliases = ['sreply'];
 
