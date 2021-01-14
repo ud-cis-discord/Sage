@@ -21,7 +21,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 		.setFooter(`To respond do ${PREFIX}reply ${question.questionId} <response>`);
 
 	return asker.send(embed)
-		.then(() => msg.channel.send(`I've sent your responce to ${asker.username}.`))
+		.then(() => msg.channel.send(`I've sent your response to ${asker.username}.`))
 		.catch(() => msg.channel.send(`I couldn't send your response. ${asker.username} may have DMs disabled.`));
 }
 
