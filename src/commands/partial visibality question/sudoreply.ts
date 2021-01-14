@@ -18,7 +18,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 	const embed = new MessageEmbed()
 		.setAuthor(`${msg.author.tag} replied to question ${question.questionId}`, msg.author.avatarURL())
 		.setDescription(responce)
-		.setFooter(`To respond do ${PREFIX}reply ${question.questionId} <responce>`);
+		.setFooter(`To respond do ${PREFIX}reply ${question.questionId} <response>`);
 
 	return asker.send(embed)
 		.then(() => msg.channel.send(`I've sent your responce to ${asker.username}.`))
