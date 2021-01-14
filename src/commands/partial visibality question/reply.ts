@@ -6,7 +6,7 @@ export const description = `Reply to a question you previously asked with ${BOT.
 export const usage = '<questionID> <responce>';
 export const runInGuild = false;
 
-export async function run(msg: Message, [question, responce]: [PVQuestion, string]): Promise<Message> {
+export async function run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
 	// return msg.channel.send(`question: ${question.questionId}\nresponce: ${responce}`);
 	const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
 	const channel = await msg.client.channels.fetch(channelId) as TextChannel;
