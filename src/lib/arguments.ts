@@ -1,4 +1,4 @@
-import { Message, Role } from 'discord.js';
+import { Message, Role, GuildMember } from 'discord.js';
 
 export async function roleParser(msg: Message, input: string): Promise<Role> {
 	input = input.replace(/<@&(\d+)>/, '$1').trim();
@@ -16,4 +16,27 @@ export async function roleParser(msg: Message, input: string): Promise<Role> {
 		throw 'Multiple roles with that name exist. Lookup by ID for role information.';
 	}
 	return roleList.array()[0];
+}
+
+export async function userParser(msg: Message, input: string): Promise<GuildMember> {
+	input = input.replace(/<@!?(\d+)>/, '$1').trim().toLowerCase();
+
+	const gMembers = await msg.guild.members.fetch();
+
+	let retMembers = gMembers.filter(member => member.user.id === input);
+	if (retMembers.size !== 1) {
+		retMembers = gMembers.filter(member => member.user.username.toLowerCase() === input);
+		if (retMembers.size !== 1) {
+			retMembers = gMembers.filter(member => member.nickname ? member.nickname.toLowerCase() === input : false);
+		}
+	}
+
+	if (retMembers.size < 1) {
+		throw 'No member with that username, nickname, or ID exists.';
+	}
+	if (retMembers.size > 1) {
+		throw 'Multiple members with that username or nickname exist, try entering an ID to get a specific user';
+	}
+
+	return retMembers.array()[0];
 }
