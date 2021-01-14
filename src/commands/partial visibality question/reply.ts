@@ -1,6 +1,9 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
+import { BOT } from '@root/config';
 import { MessageEmbed, Message, TextChannel } from 'discord.js';
 
+export const description = `Reply to a question you previously asked with ${BOT.NAME}.`;
+export const usage = '<questionID> <responce>';
 export const runInGuild = false;
 
 export async function run(msg: Message, [question, responce]: [PVQuestion, string]): Promise<Message> {

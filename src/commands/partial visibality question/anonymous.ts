@@ -1,9 +1,12 @@
-import { MAINTAINERS, PREFIX } from '@root/config';
+import { BOT, MAINTAINERS, PREFIX } from '@root/config';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { PVQuestion } from '@lib/types/PVQuestion';
 
+export const description = 'Send an anonymous question in your classes general channel.';
+export const usage = '[course] <question>';
+export const extendedHelp = `${BOT.NAME} will automaticly determine your course if you are only enrolled in one!`;
 export const aliases = ['anon'];
 export const runInGuild = false;
 

@@ -1,9 +1,17 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
-import { PREFIX } from '@root/config';
+import { BOT, PREFIX } from '@root/config';
+import { staffPerms } from '@lib/permissions';
 import { Message, MessageEmbed } from 'discord.js';
 
+export const description = `Reply to a question asked through ${BOT.NAME}.`;
+export const usage = '<questionID> <responce>';
+export const extendedHelp = 'Responces get sent to the askers DMs. This command will tell you it failed if it cannont send the DM.';
 export const runInDM = false;
 export const aliases = ['sreply'];
+
+export function permissions(msg: Message): boolean {
+	return staffPerms(msg);
+}
 
 export async function run(msg: Message, [question, responce]: [PVQuestion, string]): Promise<Message> {
 	const asker = await msg.client.users.fetch(question.owner);
