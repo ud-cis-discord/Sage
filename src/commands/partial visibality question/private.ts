@@ -1,5 +1,4 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
-import { staffPerms } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
@@ -9,10 +8,6 @@ export const description = 'Send a question to all course staff privatly.';
 export const usage = '[course] <question>';
 export const extendedHelp = `${BOT.NAME} will automaticly determine your course if you are only enrolled in one!`;
 export const runInGuild = false;
-
-export function permissions(msg: Message): boolean {
-	return staffPerms(msg);
-}
 
 export async function run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
 	const questionId = `${msg.author.id.slice(msg.author.id.length - 4)}${msg.id.slice(msg.id.length - 4)}`;
