@@ -3,6 +3,7 @@ import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, MAINTAINERS, PREFIX } from '@root/config';
+import { generateQuestionId } from '@lib/utils';
 
 export const description = 'Send a question to all course staff privatly.';
 export const usage = '[course] <question>';
@@ -10,7 +11,7 @@ export const extendedHelp = `${BOT.NAME} will automaticly determine your course 
 export const runInGuild = false;
 
 export async function run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
-	const questionId = `${msg.author.id.slice(msg.author.id.length - 4)}${msg.id.slice(msg.id.length - 4)}`;
+	const questionId = await generateQuestionId(msg);
 
 	const embed = new MessageEmbed()
 		.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())

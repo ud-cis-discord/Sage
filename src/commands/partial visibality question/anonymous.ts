@@ -1,8 +1,9 @@
-import { BOT, MAINTAINERS, PREFIX } from '@root/config';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { generateQuestionId } from '@lib/utils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { PVQuestion } from '@lib/types/PVQuestion';
+import { BOT, MAINTAINERS, PREFIX } from '@root/config';
 
 export const description = 'Send an anonymous question in your classes general channel.';
 export const usage = '[course] <question>';
@@ -11,7 +12,7 @@ export const aliases = ['anon'];
 export const runInGuild = false;
 
 export async function run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
-	const questionId = `${msg.author.id.slice(msg.author.id.length - 4)}${msg.id.slice(msg.id.length - 4)}`;
+	const questionId = await generateQuestionId(msg);
 
 	const studentEmbed = new MessageEmbed()
 		.setAuthor(`Anonymous asked Question ${questionId}`)
