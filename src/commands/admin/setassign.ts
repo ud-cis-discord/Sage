@@ -1,7 +1,7 @@
 import { Message, Role } from 'discord.js';
-import { ROLES } from '@root/config';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { roleParser } from '@lib/arguments';
+import { adminPerms } from '@root/src/lib/permissions';
 
 export const description = `Adds a role to the assignable collection of the database 
 if that role is not already in it. If the role is already in the collection, it removes it.`;
@@ -10,7 +10,7 @@ export const aliases = ['addassign'];
 export const runInDM = false;
 
 export function permissions(msg: Message): boolean {
-	return msg.member.roles.cache.has(ROLES.ADMIN);
+	return adminPerms(msg);
 }
 
 export async function run(msg: Message, [cmd]: [Role]): Promise<Message> {
