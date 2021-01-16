@@ -2,6 +2,7 @@
 config.ts
 resources/*
 !resources/.exists
+src/commands/admin/eval.ts
 
 # Logs
 logs
