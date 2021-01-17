@@ -1,7 +1,7 @@
 import { Message, Role } from 'discord.js';
-import { AssignableRole } from '../../lib/types/AssignableRole';
+import { AssignableRole } from '@lib/types/AssignableRole';
 import { roleParser } from '@lib/arguments';
-import { adminPerms } from '@root/src/lib/permissions';
+import { adminPerms } from '@lib/permissions';
 
 export const description = `Adds a role to the assignable collection of the database 
 if that role is not already in it. If the role is already in the collection, it removes it.`;

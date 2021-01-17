@@ -1,5 +1,5 @@
 import { Message, Role } from 'discord.js';
-import { AssignableRole } from '../lib/types/AssignableRole';
+import { AssignableRole } from '@lib/types/AssignableRole';
 import { roleParser } from '@lib/arguments';
 
 export const description = `Use this command to assign a role to yourself! 
