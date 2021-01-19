@@ -47,9 +47,9 @@ function register(bot: Client): void {
 		const command = getCommand(bot, commandName);
 		if (!command) return;
 
-		if (msg.channel.type === 'dm' && command.runInDM === false) return msg.reply(`${command.name} is not avaliable in DMs.`);
+		if (msg.channel.type === 'dm' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
 		if (msg.channel.type === 'text' && command.runInGuild === false) {
-			await msg.reply('That command is not avaliable here. Try again in DMs.');
+			await msg.reply('That command is not available here. Try again in DMs.');
 			return msg.delete();
 		}
 
@@ -71,7 +71,7 @@ function register(bot: Client): void {
 		try {
 			command.run(msg, args);
 		} catch (e) {
-			await msg.reply(`An error occured. ${MAINTAINERS} have been notified.`);
+			await msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
 			throw e;
 		}
 	});

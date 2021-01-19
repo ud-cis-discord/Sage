@@ -24,7 +24,7 @@ export const ROLES = {			// Role IDS for each role
 export const EMAIL = {
 	SENDER: '',					// The email address all emails should be sent from
 	REPLY_TO: '',				// The replyto address for all emails
-	REPORT_ADRESSES: [			// A list of all the email address to get the weekly report
+	REPORT_ADDRESSES: [			// A list of all the email address to get the weekly report
 		''
 	]
 };
