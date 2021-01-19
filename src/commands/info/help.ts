@@ -51,7 +51,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 
 		categories.forEach(cat => {
 			const useableCmds = commands.filter(command => command.category === cat && !(command.permissions && !command.permissions(msg)));
-			const categoryName = cat === 'commands' ? 'Genaral' : `${cat[0].toUpperCase()}${cat.slice(1)}`;
+			const categoryName = cat === 'commands' ? 'General' : `${cat[0].toUpperCase()}${cat.slice(1)}`;
 			if (useableCmds.size > 0) {
 				helpStr += `\n**${categoryName} Commands**\n`;
 				useableCmds.forEach(command => {
