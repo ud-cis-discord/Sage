@@ -16,8 +16,8 @@
 		"type": "git",
 		"url": "git+https://github.com/ud-cis-discord/SageV2.git"
 	},
-	"author": "Ben Segal, Josh Lyon, Ren Ross",
-	"license": "UNLICENSED",
+	"author": "Josh Lyon, Ren Ross & Ben Segal",
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/ud-cis-discord/SageV2/issues"
 	},
