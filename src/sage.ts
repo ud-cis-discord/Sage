@@ -1,5 +1,5 @@
 import 'module-alias/register';
-import { BOT, MONGO, PREFIX } from '@root/config';
+import { BOT, DB, PREFIX } from '@root/config';
 import commandManager from '@pieces/commandManager';
 import roleHandler from '@pieces/roleHandler';
 import messageCount from '@pieces/messageCount';
@@ -9,7 +9,7 @@ import { Client } from 'discord.js';
 
 const bot = new Client();
 
-MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
+MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) => {
 	bot.mongo = client.db(BOT.NAME);
 });
 

@@ -1,7 +1,7 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
-import { PREFIX } from '@root/config';
-import { Question } from '@lib/types/Question';
+import { DB, PREFIX } from '@root/config';
+import { QuestionTag } from '@root/src/lib/types/QuestionTag';
 
 export const description = 'Filters the questionTags collection for a given class and assignment';
 export const usage = '<courseID>|<assignmentID>';
@@ -10,7 +10,7 @@ export const aliases = ['q'];
 // never assume that students are not dumb
 
 export async function run(msg: Message, [course, assignment]: [string, string]): Promise<Message> {
-	const entries: Array<Question> = await msg.client.mongo.collection('questions').find({ course: course, assignment: assignment }).toArray();
+	const entries: Array<QuestionTag> = await msg.client.mongo.collection(DB.QTAGS).find({ course: course, assignment: assignment }).toArray();
 	const fields: Array<EmbedField> = [];
 	if (entries.length === 0) {
 		return msg.channel.send(`There are no questions for ${course}, ${assignment}.
@@ -33,13 +33,13 @@ export async function argParser(msg: Message, input: string): Promise<[string, s
 		throw `Usage: ${usage}`;
 	}
 
-	const entry: Course = await msg.client.mongo.collection('courses').findOne({ name: course });
+	const entry: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: course });
 	if (!entry) {
 		throw `Could not find course: **${course}**`;
 	}
 
 	if (!entry.assignments.includes(assignment)) {
-		throw `Could not find assignment **${assignment}** in course: **${course}**.\n${course} curently has these assignments:\n\`${entry.assignments.join('`, `')}\``;
+		throw `Could not find assignment **${assignment}** in course: **${course}**.\n${course} currently has these assignments:\n\`${entry.assignments.join('`, `')}\``;
 	}
 
 	return [course, assignment];

@@ -1,6 +1,7 @@
 import { Message, Role } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { roleParser } from '@lib/arguments';
+import { DB } from '@root/config';
 
 export const description = `Use this command to assign a role to yourself! 
 Use the argument 'list' to see a list of all self-assignable roles.`;
@@ -9,7 +10,7 @@ export const aliases = ['role'];
 export const runInDM = false;
 
 export async function run(msg: Message, [cmd]: [Role | 'list']): Promise<Message> {
-	const assignables = msg.client.mongo.collection('assignables');
+	const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
 	// const role: AssignableRole = { id: arg.id };
 
 	if (cmd === 'list') {

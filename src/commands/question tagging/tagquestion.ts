@@ -1,6 +1,7 @@
 import { Message, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
-import { Question } from '@lib/types/Question';
+import { QuestionTag } from '@root/src/lib/types/QuestionTag';
+import { DB } from '@root/config';
 
 export const description = 'Tags the specified message with a given course and assignment ID.';
 export const usage = '<messageLink>|<courseID>|<assignmentID>';
@@ -9,7 +10,7 @@ export const aliases = ['tagq', 'tag'];
 // never assume that students are not dumb
 
 export async function run(msg: Message, [messageLink, courseId, assignmentId]: [string, string, string]): Promise<Message> {
-	const entry = await msg.client.mongo.collection('questions').findOne({ link: messageLink, course: courseId, assignment: assignmentId });
+	const entry = await msg.client.mongo.collection(DB.QTAGS).findOne({ link: messageLink, course: courseId, assignment: assignmentId });
 
 	if (entry) {
 		return msg.channel.send(`That message has already been tagged for ${assignmentId}`);
@@ -20,17 +21,17 @@ export async function run(msg: Message, [messageLink, courseId, assignmentId]: [
 	const question = await channel.messages.fetch(messageId);
 
 	if (!question) {
-		return msg.channel.send('I couldnt find a message with that message link.');
+		return msg.channel.send('I couldn\'t find a message with that message link.');
 	}
 
-	const newQuestion: Question = {
+	const newQuestion: QuestionTag = {
 		link: messageLink,
 		course: courseId,
 		assignment: assignmentId,
 		header: question.cleanContent.length < 200 ? question.cleanContent : `${question.cleanContent.slice(0, 200)}...`
 	};
 
-	msg.client.mongo.collection('questions').insertOne(newQuestion);
+	msg.client.mongo.collection(DB.QTAGS).insertOne(newQuestion);
 	msg.channel.send('Added that message to the database.');
 }
 
@@ -47,13 +48,13 @@ export async function argParser(msg: Message, input: string): Promise<[string, s
 		throw `**${newLink}** is not a valid Discord message link.`;
 	}
 
-	const entry: Course = await msg.client.mongo.collection('courses').findOne({ name: course });
+	const entry: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: course });
 	if (!entry) {
 		throw `Could not find course: **${course}**`;
 	}
 
 	if (!entry.assignments.includes(assignment)) {
-		throw `Could not find assignment **${assignment}** in course: **${course}**.\n${course} curently has these assignments:\n\`${entry.assignments.join('`, `')}\``;
+		throw `Could not find assignment **${assignment}** in course: **${course}**.\n${course} currently has these assignments:\n\`${entry.assignments.join('`, `')}\``;
 	}
 
 	return [match[0], course, assignment];

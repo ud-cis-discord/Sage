@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
 import { SageUser } from '@lib/types/SageUser';
-import { BOT, EMAIL, GUILDS, MONGO } from '@root/config';
+import { BOT, DB, EMAIL, GUILDS } from '@root/config';
 
 const MESSAGE = `<!DOCTYPE html>
 <html>
@@ -38,8 +38,8 @@ const mailer = nodemailer.createTransport({
 });
 
 async function main() {
-	const client = await MongoClient.connect(MONGO, { useUnifiedTopology: true });
-	const db = client.db(BOT.NAME).collection('users');
+	const client = await MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true });
+	const db = client.db(BOT.NAME).collection(DB.USERS);
 	const data = fs.readFileSync('./resources/emails.csv');
 
 	const emails = data.toString().split('\n').map(email => email.trim());

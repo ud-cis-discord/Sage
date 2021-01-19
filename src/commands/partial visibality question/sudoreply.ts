@@ -1,10 +1,10 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
-import { BOT, PREFIX } from '@root/config';
+import { BOT, DB, PREFIX } from '@root/config';
 import { staffPerms } from '@lib/permissions';
 import { Message, MessageEmbed } from 'discord.js';
 
 export const description = `Reply to a question asked through ${BOT.NAME}.`;
-export const usage = '<questionID> <responce>';
+export const usage = '<questionID> <response>';
 export const extendedHelp = 'Responses get sent to the askers DMs. This command will tell you it failed if it cannot send the DM.';
 export const runInDM = false;
 export const aliases = ['sreply'];
@@ -26,7 +26,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 }
 
 export async function argParser(msg: Message, input: string): Promise<[PVQuestion, string]> {
-	const question: PVQuestion = await msg.client.mongo.collection('pvQuestions').findOne({ questionId: input.split(' ')[0] });
+	const question: PVQuestion = await msg.client.mongo.collection(DB.PVQ).findOne({ questionId: input.split(' ')[0] });
 
 	if (!question) throw `Could not find question with an ID of **${input.split(' ')[0]}**.`;
 

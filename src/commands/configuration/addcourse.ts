@@ -1,9 +1,9 @@
 import { Message, OverwriteResolvable, Guild, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { adminPerms } from '@lib/permissions';
-import { GUILDS, ROLES } from '@root/config';
+import { DB, GUILDS, ROLES } from '@root/config';
 
-export const description = 'Creates a corses category and adds all nessary channels/roles.';
+export const description = 'Creates a corses category and adds all necessary channels/roles.';
 export const usage = '<course ID>';
 export const runInDM = false;
 export const aliases = ['addc', 'createcourse', 'createc'];
@@ -70,7 +70,7 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 		},
 		assignments: []
 	};
-	await msg.client.mongo.collection('courses').insertOne(newCourse);
+	await msg.client.mongo.collection(DB.COURSES).insertOne(newCourse);
 	return (await response).edit(`Added course with ID ${course}`);
 }
 
@@ -79,8 +79,8 @@ export async function argParser(msg: Message, input: string): Promise<Array<stri
 		throw `Usage: ${usage}`;
 	}
 
-	if (await msg.client.mongo.collection('courses').countDocuments({ name: input }) > 0) {
-		throw `${input} has already been regestered as a course.`;
+	if (await msg.client.mongo.collection(DB.COURSES).countDocuments({ name: input }) > 0) {
+		throw `${input} has already been registered as a course.`;
 	}
 
 	return [input];
