@@ -67,7 +67,7 @@ export async function argParser(msg: Message, input: string): Promise<[string, s
 	} else {
 		const inputtedCourse = courses.find(c => c.name === input.split(' ')[0]);
 		if (!inputtedCourse) {
-			throw 'I wasn\'t able to determine your course biased off of your enrollment or your input. Please specify the corse at the beginning of your question.' +
+			throw 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
 			`\nAvailable corses: \`${courses.map(c => c.name).join('`, `')}\``;
 		}
 		course = inputtedCourse;
