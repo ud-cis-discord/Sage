@@ -1,10 +1,12 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
-import { DB, PREFIX } from '@root/config';
-import { QuestionTag } from '@root/src/lib/types/QuestionTag';
+import { QuestionTag } from '@lib/types/QuestionTag';
+import { SageUser } from '@lib/types/SageUser';
+import { BOT, DB, MAINTAINERS, PREFIX } from '@root/config';
 
 export const description = 'Filters the questionTags collection for a given class and assignment';
-export const usage = '<courseID>|<assignmentID>';
+export const extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
+export const usage = '[courseID] <assignmentID>';
 export const aliases = ['q'];
 
 // never assume that students are not dumb
@@ -47,20 +49,35 @@ export async function run(msg: Message, [course, assignment]: [string, string]):
 }
 
 export async function argParser(msg: Message, input: string): Promise<[string, string]> {
-	const [course, assignment] = input.split('|').map(arg => arg.trim());
-	if (!course || !assignment) {
-		throw `Usage: ${usage}`;
+	const user: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+
+	if (!user) throw `Something went wrong. Please contact ${MAINTAINERS}`;
+
+	let course: Course;
+	let assignment: string;
+	const courses: Array<Course> = await msg.client.mongo.collection(DB.COURSES).find().toArray();
+
+	if (user.courses.length === 1) {
+		course = courses.find(c => c.name === user.courses[0]);
+		if (input.startsWith(course.name)) {
+			assignment = input.slice(course.name.length).trim();
+		} else {
+			assignment = input;
+		}
+	} else {
+		const inputtedCourse = courses.find(c => c.name === input.split(' ')[0]);
+		if (!inputtedCourse) {
+			throw 'I wasn\'t able to determine your course biased off of your enrollment or your input. Please specify the corse at the beginning of your question.' +
+			`\nAvailable corses: \`${courses.map(c => c.name).join('`, `')}\``;
+		}
+		course = inputtedCourse;
+		assignment = input.slice(course.name.length).trim();
 	}
 
-	const entry: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: course });
-	if (!entry) {
-		throw `Could not find course: **${course}**`;
+	if (!course.assignments.includes(assignment)) {
+		throw `I couldn't find an assignment called **${assignment}** for CISC ${course.name}\n` +
+		`Assignments for CISC ${course.name}: ${course.assignments.length > 0 ? `\`${course.assignments.join('`, `')}\``
+			: 'It looks like there aren\'t any yet, ask a staff member to add some.'}`;
 	}
-
-	if (!entry.assignments.includes(assignment)) {
-		throw `Could not find assignment **${assignment}** in course: **${course}**.\n` +
-		`${course} currently has these assignments:\n\`${entry.assignments.join('`, `')}\``;
-	}
-
-	return [course, assignment];
+	return [course.name, assignment];
 }
