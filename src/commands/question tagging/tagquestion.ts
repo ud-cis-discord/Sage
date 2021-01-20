@@ -4,7 +4,9 @@ import { QuestionTag } from '@root/src/lib/types/QuestionTag';
 import { DB } from '@root/config';
 
 export const description = 'Tags the specified message with a given course and assignment ID.';
-export const usage = '<messageLink>|<courseID>|<assignmentID>';
+export const extendedHelp = 'This command must be used by replying to a message.';
+export const usage = '<assignmentID>';
+export const runInDM = false;
 export const aliases = ['tagq', 'tag'];
 
 // never assume that students are not dumb
@@ -36,26 +38,22 @@ export async function run(msg: Message, [messageLink, courseId, assignmentId]: [
 }
 
 export async function argParser(msg: Message, input: string): Promise<[string, string, string]> {
-	const [link, course, assignment] = input.split('|').map(arg => arg.trim());
-	if (!link || !course || !assignment) {
-		throw `Usage: ${usage}`;
+	if (input === '' || !msg.reference) throw `Usage: ${usage}\n${extendedHelp}`;
+
+	const link = `https://discord.com/channels/${msg.reference.guildID}/${msg.reference.channelID}/${msg.reference.messageID}`;
+	const assignment = input.trim();
+
+	if (!('parentID' in msg.channel)) throw 'This command is only available in Text channels.';
+	const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentID });
+
+	if (!course) throw 'This command must be run in a class specific channel';
+
+	if (!course.assignments.includes(assignment)) {
+		throw `Could not find assignment **${assignment}** in course: **${course.name}**.\n` +
+		`CISC ${course.name} currently has these assignments: ${course.assignments.length > 0
+			? `\`${course.assignments.join('`, `')}\``
+			: 'It looks like there aren\'t any yet, ask a staff member to add some.'}`;
 	}
 
-	const newLink = link.replace('canary.', '');
-	const match = newLink.match(/https:\/\/discord\.com\/channels(\/(\d)+){3}/);
-
-	if (!match) {
-		throw `**${newLink}** is not a valid Discord message link.`;
-	}
-
-	const entry: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: course });
-	if (!entry) {
-		throw `Could not find course: **${course}**`;
-	}
-
-	if (!entry.assignments.includes(assignment)) {
-		throw `Could not find assignment **${assignment}** in course: **${course}**.\n${course} currently has these assignments:\n\`${entry.assignments.join('`, `')}\``;
-	}
-
-	return [match[0], course, assignment];
+	return [link, course.name, assignment];
 }
