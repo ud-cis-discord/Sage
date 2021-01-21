@@ -1,13 +1,14 @@
+
 import { Client, GuildMember, PartialGuildMember, TextChannel } from 'discord.js';
 import { logError } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
-import { GUILDS, LOG } from '@root/config';
+import { DB, GUILDS, LOG } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const entry: SageUser = await member.client.mongo.collection('users').findOne({ discordId: member.id });
+	const entry: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
 	if (!entry) {
 		throw new DatabaseError(`User ${member.user.tag} (${member.id}) does not exist in the database.`);
@@ -25,7 +26,8 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 	if (newMember.roles.cache.size === oldMember.roles.cache.size) return;
 	let error: boolean;
 
-	await newMember.client.mongo.collection('users').updateOne({ discordId: newMember.id }, {
+	await newMember.client.mongo.collection(DB.USERS).updateOne({ discordId: newMember.id }, {
+
 		$set: {
 			roles: newMember.roles.cache.keyArray().filter(role => role !== GUILDS.MAIN)
 		}

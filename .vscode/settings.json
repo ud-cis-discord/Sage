@@ -5,5 +5,16 @@
     "eslint.validate": ["typescript"],
 	"typescript.tsdk": "node_modules\\typescript\\lib",
 	"typescript.preferences.quoteStyle": "single",
-	"cmake.configureOnOpen": false
+	"cmake.configureOnOpen": false,
+	"cSpell.words": [
+		"CISC",
+		"QTAGS",
+		"assignables",
+		"createc",
+		"createcourse",
+		"sreply",
+		"sudoreply",
+		"tagq",
+		"udel"
+	]
 }

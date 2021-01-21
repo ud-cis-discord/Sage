@@ -2,8 +2,8 @@ import { staffPerms } from '@lib/permissions';
 import { userParser } from '@lib/arguments';
 import { SageUser } from '@lib/types/SageUser';
 import { GuildMember, Message } from 'discord.js';
-import { MAINTAINERS } from '@root/config';
 import { DatabaseError } from '@root/src/lib/types/errors';
+
 
 export const description = 'Resets a given user\'s message count.';
 export const usage = '<user>|[to_subtract|to_set_to]';
@@ -17,7 +17,7 @@ export function permissions(msg: Message): boolean {
 }
 
 export async function run(msg: Message, [member, amount]: [GuildMember, number]): Promise<Message> {
-	const entry: SageUser = await msg.client.mongo.collection('users').findOne({ discordId: member.user.id });
+	const entry: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: member.user.id });
 
 	if (!entry) {
 		throw new DatabaseError(`User ${member.user.username} (${member.user.id}) not in database`);
@@ -38,7 +38,7 @@ export async function run(msg: Message, [member, amount]: [GuildMember, number])
 		retStr = `Set ${member.user.username}'s message count to ${amount}.`;
 	}
 
-	await msg.client.mongo.collection('users').updateOne(
+	await msg.client.mongo.collection(DB.USERS).updateOne(
 		{ discordId: member.user.id },
 		{ $set: { count: entry.count } });
 

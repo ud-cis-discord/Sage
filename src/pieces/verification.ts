@@ -1,21 +1,21 @@
 import { Client, Message, Guild, TextChannel } from 'discord.js';
 import { logError } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
-import { GUILDS, LOG, MAINTAINERS, ROLES } from '@root/config';
+import { DB, GUILDS, LOG, MAINTAINERS, ROLES } from '@root/config';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
 	if (msg.channel.type !== 'dm' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
 
 	const givenHash = msg.content.trim();
 
-	if (await bot.mongo.collection('users').countDocuments({ discordId: msg.author.id }) > 0) {
+	if (await bot.mongo.collection(DB.USERS).countDocuments({ discordId: msg.author.id }) > 0) {
 		return msg.reply(`Your Discord account has already been verified. Contact ${MAINTAINERS} if you think this is an error.`);
 	}
 
-	const entry: SageUser = await bot.mongo.collection('users').findOne({ hash: givenHash });
+	const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ hash: givenHash });
 
-	if (!entry) {
-		return msg.reply(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
+  if (!entry) {
+		  return msg.reply(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
 	}
 
 	if (entry.isVerified) return;
@@ -35,16 +35,16 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 		}
 	}
 
-	bot.mongo.collection('users').updateOne(
-		{ hash: givenHash },
-		{ $set: { ...entry } })
-		.then(async () => {
-			const invite = await guild.systemChannel.createInvite({
-				maxAge: 0,
-				maxUses: 1,
-				unique: true,
-				reason: `${msg.author.username} (${msg.author.id}) verified.`
-			});
+		bot.mongo.collection(DB.USERS).updateOne(
+			{ hash: givenHash },
+			{ $set: { ...entry } })
+			.then(async () => {
+				const invite = await guild.systemChannel.createInvite({
+					maxAge: 0,
+					maxUses: 1,
+					unique: true,
+					reason: `${msg.author.username} (${msg.author.id}) verified.`
+				});
 
 			return msg.reply(`Thank you for verifying! You can now join the server.\nhttps://discord.gg/${invite.code}`);
 		});

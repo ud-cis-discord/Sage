@@ -2,6 +2,7 @@ import { Client, Message, MessageEmbed, EmbedField } from 'discord.js';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
 import * as fs from 'fs';
+import { DB } from '@root/config';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -18,7 +19,7 @@ export async function sendToHastebin(input: string, filetype = 'txt'): Promise<s
 export async function generateQuestionId(msg: Message, depth = 1): Promise<string> {
 	const potentialId = `${msg.author.id.slice(msg.author.id.length - depth)}${msg.id.slice(msg.id.length - depth)}`;
 
-	if (await msg.client.mongo.collection('pvQuestions').countDocuments({ questionId: potentialId }) > 0) {
+	if (await msg.client.mongo.collection(DB.PVQ).countDocuments({ questionId: potentialId }) > 0) {
 		return generateQuestionId(msg, depth + 1);
 	}
 

@@ -1,7 +1,7 @@
 import { Client, TextChannel } from 'discord.js';
 import { logError } from '@lib/utils';
 import { DatabaseError } from '@lib/types/errors';
-import { LOG, PREFIX } from '@root/config';
+import { LOG, PREFIX, DB } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
@@ -15,7 +15,7 @@ async function register(bot: Client): Promise<void> {
 			return;
 		}
 
-		bot.mongo.collection('users').updateOne(
+		bot.mongo.collection(DB.USERS).updateOne(
 			{ discordId: msg.author.id },
 			{ $inc: { count: 1 } })
 			.then(async updated => {

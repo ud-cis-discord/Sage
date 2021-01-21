@@ -1,4 +1,4 @@
-import { EMAIL, MAINTAINERS } from '@root/config';
+import { DB, EMAIL, MAINTAINERS } from '@root/config';
 import { userParser } from '@lib/arguments';
 import { staffPerms } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
@@ -15,7 +15,7 @@ export function permissions(msg: Message): boolean {
 }
 
 export async function run(msg: Message, member: GuildMember): Promise<void> {
-	const entry: SageUser = await msg.client.mongo.collection('users').findOne({ discordId: member.user.id });
+	const entry: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: member.user.id });
 
 	if (!entry) {
 		throw new DatabaseError(`User ${member.user.username} (${member.user.id}) not in database`);
@@ -39,7 +39,7 @@ export async function run(msg: Message, member: GuildMember): Promise<void> {
 		]);
 
 	if (!entry.pii) {
-		const sender: SageUser = await msg.client.mongo.collection('users').findOne({ discordId: msg.author.id });
+		const sender: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
 		msg.channel.send(`That user has not opted in to have their information shared over Discord. 
 An email has been sent to you containing the requested data.`);
 		sendEmail(sender.email, member.user.username, entry);
@@ -47,7 +47,7 @@ An email has been sent to you containing the requested data.`);
 	}
 
 	msg.author.send(embed).then(() => msg.channel.send('I\'ve sent the requested info to your DMs'))
-		.catch(() => msg.channel.send('I couldnt send you a DM. Please enable DMs and try again'));
+		.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again'));
 	return;
 }
 
