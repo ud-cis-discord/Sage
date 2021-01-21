@@ -14,8 +14,8 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 
 	const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ hash: givenHash });
 
-  if (!entry) {
-		  return msg.reply(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
+	if (!entry) {
+		return msg.reply(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
 	}
 
 	if (entry.isVerified) return;
@@ -35,16 +35,16 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 		}
 	}
 
-		bot.mongo.collection(DB.USERS).updateOne(
-			{ hash: givenHash },
-			{ $set: { ...entry } })
-			.then(async () => {
-				const invite = await guild.systemChannel.createInvite({
-					maxAge: 0,
-					maxUses: 1,
-					unique: true,
-					reason: `${msg.author.username} (${msg.author.id}) verified.`
-				});
+	bot.mongo.collection(DB.USERS).updateOne(
+		{ hash: givenHash },
+		{ $set: { ...entry } })
+		.then(async () => {
+			const invite = await guild.systemChannel.createInvite({
+				maxAge: 0,
+				maxUses: 1,
+				unique: true,
+				reason: `${msg.author.username} (${msg.author.id}) verified.`
+			});
 
 			return msg.reply(`Thank you for verifying! You can now join the server.\nhttps://discord.gg/${invite.code}`);
 		});

@@ -1,4 +1,3 @@
-
 import { Client, GuildMember, PartialGuildMember, TextChannel } from 'discord.js';
 import { logError } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';

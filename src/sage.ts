@@ -2,7 +2,7 @@ import 'module-alias/register';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
-import { DB, BOT, MONGO, PREFIX } from '@root/config';
+import { DB, BOT, PREFIX } from '@root/config';
 
 const bot = new Client();
 

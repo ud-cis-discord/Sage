@@ -1,4 +1,4 @@
-import { DB, EMAIL, MAINTAINERS } from '@root/config';
+import { DB, EMAIL } from '@root/config';
 import { userParser } from '@lib/arguments';
 import { staffPerms } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
