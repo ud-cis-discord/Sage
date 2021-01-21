@@ -1,6 +1,7 @@
 import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { staffPerms } from '@lib/permissions';
+import { DB } from '@root/config';
 
 // Never assume staff are not dumb (the reason this is so long)
 
@@ -14,7 +15,7 @@ export function permissions(msg: Message): boolean {
 }
 
 export async function run(msg: Message, [course, newAssignments]: [string, Array<string>]): Promise<Message> {
-	const entry: Course = await msg.client.mongo.collection('courses').findOne({ name: course });
+	const entry: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: course });
 
 	const added: Array<string> = [];
 	const failed: Array<string> = [];
@@ -27,7 +28,7 @@ export async function run(msg: Message, [course, newAssignments]: [string, Array
 		}
 	});
 
-	msg.client.mongo.collection('courses').updateOne({ name: course }, { $set: { ...entry } });
+	msg.client.mongo.collection(DB.COURSES).updateOne({ name: course }, { $set: { ...entry } });
 
 	const fields: Array<EmbedField> = [];
 	if (added.length > 0) {
@@ -60,7 +61,7 @@ export async function argParser(msg: Message, input: string): Promise<[string, A
 	const assignments = input.split('|').map(assignment => assignment.trim());
 	const course = assignments.shift();
 
-	if (await msg.client.mongo.collection('courses').countDocuments({ name: course }) !== 1) {
+	if (await msg.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) !== 1) {
 		throw `Could not find course: ${course}`;
 	}
 

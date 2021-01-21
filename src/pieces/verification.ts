@@ -1,6 +1,6 @@
 import { Client } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
-import { GUILDS, MAINTAINERS, ROLES } from '@root/config';
+import { DB, GUILDS, MAINTAINERS, ROLES } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
@@ -11,11 +11,11 @@ async function register(bot: Client): Promise<void> {
 
 		const givenHash = msg.content.trim();
 
-		if (await bot.mongo.collection('users').countDocuments({ discordId: msg.author.id }) > 0) {
+		if (await bot.mongo.collection(DB.USERS).countDocuments({ discordId: msg.author.id }) > 0) {
 			return msg.reply(`Your Discord account has already been verified. Contact ${MAINTAINERS} if you think this is an error.`);
 		}
 
-		const entry: SageUser = await bot.mongo.collection('users').findOne({ hash: givenHash });
+		const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ hash: givenHash });
 
 		if (!entry) {
 			return msg.reply(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
@@ -38,7 +38,7 @@ async function register(bot: Client): Promise<void> {
 			}
 		}
 
-		bot.mongo.collection('users').updateOne(
+		bot.mongo.collection(DB.USERS).updateOne(
 			{ hash: givenHash },
 			{ $set: { ...entry } })
 			.then(async () => {

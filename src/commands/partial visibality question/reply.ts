@@ -1,9 +1,9 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
-import { BOT } from '@root/config';
+import { BOT, DB } from '@root/config';
 import { MessageEmbed, Message, TextChannel } from 'discord.js';
 
 export const description = `Reply to a question you previously asked with ${BOT.NAME}.`;
-export const usage = '<questionID> <responce>';
+export const usage = '<questionID> <response>';
 export const runInGuild = false;
 
 export async function run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
@@ -22,7 +22,7 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 }
 
 export async function argParser(msg: Message, input: string): Promise<[PVQuestion, string]> {
-	const question: PVQuestion = await msg.client.mongo.collection('pvQuestions').findOne({ questionId: input.split(' ')[0] });
+	const question: PVQuestion = await msg.client.mongo.collection(DB.PVQ).findOne({ questionId: input.split(' ')[0] });
 
 	if (!question) throw `Could not find question with an ID of **${input.split(' ')[0]}**.`;
 	if (question.owner !== msg.author.id) throw `You are not the owner of ${question.questionId}.`;

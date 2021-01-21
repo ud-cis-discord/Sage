@@ -2,6 +2,7 @@ import { Message, Role } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { roleParser } from '@lib/arguments';
 import { adminPerms } from '@lib/permissions';
+import { DB } from '@root/config';
 
 export const description = `Adds a role to the assignable collection of the database 
 if that role is not already in it. If the role is already in the collection, it removes it.`;
@@ -14,7 +15,7 @@ export function permissions(msg: Message): boolean {
 }
 
 export async function run(msg: Message, [cmd]: [Role]): Promise<Message> {
-	const assignables = msg.client.mongo.collection('assignables');
+	const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
 	const newRole: AssignableRole = { id: cmd.id };
 
 	if (await assignables.countDocuments(newRole) > 0) {

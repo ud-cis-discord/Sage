@@ -1,11 +1,11 @@
 import { Client, GuildMember } from 'discord.js';
-import { GUILDS } from '@root/config';
+import { DB, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const entry: SageUser = await member.client.mongo.collection('users').findOne({ discordId: member.id });
+	const entry: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
 	if (!entry) {
 		throw `User ${member.id} does not exist in the database.`;
@@ -22,7 +22,7 @@ async function memberAdd(member: GuildMember): Promise<void> {
 async function memberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void> {
 	if (newMember.roles.cache.size === oldMember.roles.cache.size) return;
 
-	newMember.client.mongo.collection('users').updateOne({ discordId: newMember.id }, {
+	newMember.client.mongo.collection(DB.USERS).updateOne({ discordId: newMember.id }, {
 		$set: {
 			roles: newMember.roles.cache.keyArray().filter(role => role !== GUILDS.MAIN)
 		}

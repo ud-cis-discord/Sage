@@ -1,5 +1,5 @@
 import { Client, TextChannel } from 'discord.js';
-import { PREFIX } from '@root/config';
+import { DB, PREFIX } from '@root/config';
 
 function register(bot: Client): void {
 	bot.on('message', msg => {
@@ -12,7 +12,7 @@ function register(bot: Client): void {
 			return;
 		}
 
-		bot.mongo.collection('users').updateOne(
+		bot.mongo.collection(DB.USERS).updateOne(
 			{ discordId: msg.author.id },
 			{ $inc: { count: 1 } })
 			.then(updated => {

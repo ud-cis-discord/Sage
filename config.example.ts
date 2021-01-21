@@ -6,7 +6,14 @@ export const BOT = {
 
 export const PREFIX = 's;';
 
-export const MONGO = '';		// Mongo connection string here
+export const DB = {
+	CONNECTION: '', 			// Mongo connection string here
+	USERS: 'users',
+	PVQ: 'pvQuestions',
+	QTAGS: 'questionTags',
+	ASSIGNABLE: 'assignable',
+	COURSES: 'courses'
+};
 
 export const GUILDS = {			// Guild IDs for each guild
 	MAIN: '',
