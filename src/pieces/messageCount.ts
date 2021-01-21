@@ -1,7 +1,10 @@
 import { Client, TextChannel } from 'discord.js';
-import { PREFIX } from '@root/config';
+import { logError } from '@lib/utils';
+import { DatabaseError } from '@lib/types/errors';
+import { LOG, PREFIX } from '@root/config';
 
-function register(bot: Client): void {
+async function register(bot: Client): Promise<void> {
+	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	bot.on('message', msg => {
 		if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
 			return;
@@ -15,9 +18,9 @@ function register(bot: Client): void {
 		bot.mongo.collection('users').updateOne(
 			{ discordId: msg.author.id },
 			{ $inc: { count: 1 } })
-			.then(updated => {
+			.then(async updated => {
 				if (updated.modifiedCount === 0) {
-					throw `member ${msg.author.username} (${msg.author.id}) not in database`;
+					errLog.send(await logError(new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`)));
 				}
 			});
 	});

@@ -3,6 +3,7 @@ import { userParser } from '@lib/arguments';
 import { SageUser } from '@lib/types/SageUser';
 import { GuildMember, Message } from 'discord.js';
 import { MAINTAINERS } from '@root/config';
+import { DatabaseError } from '@root/src/lib/types/errors';
 
 export const description = 'Resets a given user\'s message count.';
 export const usage = '<user>|[to_subtract|to_set_to]';
@@ -19,8 +20,7 @@ export async function run(msg: Message, [member, amount]: [GuildMember, number])
 	const entry: SageUser = await msg.client.mongo.collection('users').findOne({ discordId: member.user.id });
 
 	if (!entry) {
-		throw `User ${member.user.username} (${member.user.id}) not in database. Contact ${MAINTAINERS} 
-	if you think this is an error.`;
+		throw new DatabaseError(`User ${member.user.username} (${member.user.id}) not in database`);
 	}
 
 	let retStr: string;

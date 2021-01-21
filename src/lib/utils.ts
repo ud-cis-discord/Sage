@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js';
+import { Client, Message, MessageEmbed, EmbedField } from 'discord.js';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
 import * as fs from 'fs';
@@ -40,4 +40,39 @@ export function readdirRecursive(dir: string): string[] {
 		}
 	});
 	return results;
+}
+
+export async function logError(error: Error): Promise<MessageEmbed> {
+	let errTitle = '';
+	let errMessage = '';
+	const fields: Array<EmbedField> = [];
+
+	if (error.name) {
+		errTitle = error.name;
+	} else {
+		errTitle = error.toString();
+	}
+
+	if (error.message) {
+		errMessage = error.message.length < 1900
+			? `\`\`\`\n${error.message}\`\`\``
+			: await sendToHastebin(error.message);
+	}
+
+	if (error.stack) {
+		fields.push({
+			name: 'Stack Trace',
+			value: error.stack.length < 1900
+				? `\`\`\`js\n${error.stack}\`\`\``
+				: await sendToHastebin(error.stack, 'js'),
+			inline: false
+		});
+	}
+
+	return new MessageEmbed()
+		.setTitle(errTitle)
+		.setDescription(errMessage)
+		.addFields(fields)
+		.setTimestamp()
+		.setColor('RED');
 }

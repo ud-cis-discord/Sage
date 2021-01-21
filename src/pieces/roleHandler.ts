@@ -1,6 +1,8 @@
-import { Client, GuildMember } from 'discord.js';
-import { GUILDS } from '@root/config';
+import { Client, GuildMember, PartialGuildMember, TextChannel } from 'discord.js';
+import { logError } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
+import { DatabaseError } from '@lib/types/errors';
+import { GUILDS, LOG } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -8,10 +10,10 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	const entry: SageUser = await member.client.mongo.collection('users').findOne({ discordId: member.id });
 
 	if (!entry) {
-		throw `User ${member.id} does not exist in the database.`;
+		throw new DatabaseError(`User ${member.user.tag} (${member.id}) does not exist in the database.`);
 	}
 	if (!entry.isVerified) {
-		throw `User ${member.id} is not verified.`;
+		throw new Error(`User ${member.user.tag} (${member.id}) is not verified.`);
 	}
 
 	entry.roles.forEach(role => {
@@ -19,23 +21,35 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	});
 }
 
-async function memberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void> {
+async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): Promise<void> {
 	if (newMember.roles.cache.size === oldMember.roles.cache.size) return;
+	let error: boolean;
 
-	newMember.client.mongo.collection('users').updateOne({ discordId: newMember.id }, {
+	await newMember.client.mongo.collection('users').updateOne({ discordId: newMember.id }, {
 		$set: {
 			roles: newMember.roles.cache.keyArray().filter(role => role !== GUILDS.MAIN)
 		}
 	}).then(updated => {
-		if (updated.modifiedCount !== 1) {
-			throw `User ${newMember.id} does not exist in the database.`;
-		}
+		error = updated.modifiedCount !== 1;
 	});
+
+	if (error) {
+		throw new DatabaseError(`User ${newMember.user.tag} (${newMember.id}) does not exist in the database.`);
+	}
 }
 
-function register(bot: Client): void {
-	bot.on('guildMemberAdd', memberAdd);
-	bot.on('guildMemberUpdate', memberUpdate);
+async function register(bot: Client): Promise<void> {
+	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
+	bot.on('guildMemberAdd', member => {
+		memberAdd(member)
+			.catch(async error => errLog.send(await logError(error)));
+	});
+	bot.on('guildMemberUpdate', async (oldMember, newMember) => {
+		memberUpdate(oldMember, newMember)
+			.catch(async (error: Error) => {
+				errLog.send(await logError(error));
+			});
+	});
 }
 
 export default register;
