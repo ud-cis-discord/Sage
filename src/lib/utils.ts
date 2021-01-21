@@ -1,6 +1,7 @@
 import { Client, Message } from 'discord.js';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
+import * as fs from 'fs';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -22,4 +23,21 @@ export async function generateQuestionId(msg: Message, depth = 1): Promise<strin
 	}
 
 	return potentialId;
+}
+
+export function readdirRecursive(dir: string): string[] {
+	let results = [];
+	const list = fs.readdirSync(dir);
+	list.forEach((file) => {
+		file = `${dir}/${file}`;
+		const stat = fs.statSync(file);
+		if (stat && stat.isDirectory()) {
+			/* Recurse into a subdirectory */
+			results = results.concat(readdirRecursive(file));
+		} else {
+			/* Is a file */
+			results.push(file);
+		}
+	});
+	return results;
 }

@@ -1,11 +1,8 @@
 import 'module-alias/register';
-import { BOT, MONGO, PREFIX } from '@root/config';
-import commandManager from '@pieces/commandManager';
-import roleHandler from '@pieces/roleHandler';
-import messageCount from '@pieces/messageCount';
-import verification from '@pieces/verification';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
+import { readdirRecursive } from '@lib/utils';
+import { BOT, MONGO, PREFIX } from '@root/config';
 
 const bot = new Client();
 
@@ -15,12 +12,17 @@ MongoClient.connect(MONGO, { useUnifiedTopology: true }).then((client) => {
 
 bot.login(BOT.TOKEN);
 
-bot.on('ready', () => {
+bot.once('ready', async () => {
+	const pieceFiles = readdirRecursive('./dist/src/pieces');
+	for (const file of pieceFiles) {
+		const piece = await import(`@root/../${file}`);
+		const dirs = file.split('/');
+		const name = dirs[dirs.length - 1].split('.')[0];
+		if (typeof piece.default !== 'function') throw `Invalid piece: ${name}`;
+		piece.default(bot);
+		console.log(`${name} piece loaded.`);
+	}
+
 	console.log(`${BOT.NAME} online\n${bot.ws.ping}ms WS ping\nLogged into ${bot.guilds.cache.size} guilds\nServing ${bot.users.cache.size} users`);
 	bot.user.setActivity(`${PREFIX}help`, { type: 'PLAYING' });
-
-	commandManager(bot);
-	roleHandler(bot);
-	verification(bot);
-	messageCount(bot);
 });

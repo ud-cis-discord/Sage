@@ -1,32 +1,13 @@
 import { Collection, Client } from 'discord.js';
-import * as fs from 'fs';
 import { Command } from '@lib/types/Command';
 import { MAINTAINERS, PREFIX } from '@root/config';
-import { getCommand } from '../lib/utils';
+import { getCommand, readdirRecursive } from '@lib/utils';
 
-function readdirRecursive(dir: string): string[] {
-	let results = [];
-	const list = fs.readdirSync(dir);
-	list.forEach((file) => {
-		file = `${dir}/${file}`;
-		const stat = fs.statSync(file);
-		if (stat && stat.isDirectory()) {
-			/* Recurse into a subdirectory */
-			results = results.concat(readdirRecursive(file));
-		} else {
-			/* Is a file */
-			results.push(file);
-		}
-	});
-	return results;
-}
-
-function register(bot: Client): void {
+async function register(bot: Client): Promise<void> {
 	bot.commands = new Collection();
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const command: Command = require(`@root/../${file}`);
+		const command: Command = await import(`@root/../${file}`);
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
 		command.name = name;

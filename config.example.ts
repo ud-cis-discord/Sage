@@ -29,4 +29,11 @@ export const EMAIL = {
 	]
 };
 
+export const LOG = {			// Channel IDs for the various logs
+	ERROR: '',
+	SERVER: '',
+	MEMBER: '',
+	MOD: ''
+};
+
 export const MAINTAINERS = '';	// The current maintainers of this bot
