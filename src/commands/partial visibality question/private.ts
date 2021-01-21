@@ -29,7 +29,7 @@ export async function run(msg: Message, [course, question]: [Course, string]): P
 		messageLink
 	};
 
-	msg.client.mongo.collection(DB.COURSES).insertOne(entry);
+	msg.client.mongo.collection(DB.PVQ).insertOne(entry);
 
 	return msg.channel.send(`Your question has been sent to the staff, any responses will be sent here. Question ID: ${questionId}`);
 }
