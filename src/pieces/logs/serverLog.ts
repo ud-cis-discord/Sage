@@ -1,6 +1,7 @@
 import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, LOG } from '@root/config';
-import { Client, GuildChannel, DMChannel, TextChannel, MessageEmbed, EmbedField, Permissions, GuildEmoji } from 'discord.js';
+import { Client, GuildChannel, DMChannel, TextChannel, MessageEmbed, EmbedField, Permissions, GuildEmoji, Invite } from 'discord.js';
+import prettyMilliseconds from 'pretty-ms';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
@@ -143,6 +144,69 @@ async function processEmojiUpdate(oldEmote: GuildEmoji, newEmote: GuildEmoji, se
 		.setTimestamp());
 }
 
+async function processInviteCreate(invite: Invite, serverLog: TextChannel): Promise<void> {
+	if (invite.guild.id !== GUILDS.MAIN) return;
+	const [logEntry] = (await invite.guild.fetchAuditLogs({ type: 'INVITE_CREATE', limit: 1 })).entries.array();
+
+	if (logEntry.reason?.startsWith('[no log]')) return;
+
+	const fields: Array<EmbedField> = [];
+
+	if (logEntry.reason) {
+		fields.push({
+			name: 'Reason',
+			value: logEntry.reason,
+			inline: false
+		});
+	}
+
+	fields.push({
+		name: 'Channel',
+		value: invite.channel.toString(),
+		inline: true
+	});
+	fields.push({
+		name: 'Code',
+		value: invite.code,
+		inline: true
+	});
+	fields.push({
+		name: 'Uses',
+		value: invite.maxUses === 0
+			? 'Infinite'
+			: `${invite.maxUses}`,
+		inline: true
+	});
+	fields.push({
+		name: 'Age',
+		value: invite.maxAge === 0
+			? 'Infinite'
+			: prettyMilliseconds(invite.maxAge * 1e3, { verbose: true }),
+		inline: true
+	});
+
+	serverLog.send(new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`New invite created`)
+		.setDescription(invite.temporary ? 'This invite has temporary on.' : '')
+		.addFields(fields)
+		.setColor('GREEN')
+		.setTimestamp());
+}
+
+async function processInviteDelete(invite: Invite, serverLog: TextChannel): Promise<void> {
+	if (invite.guild.id !== GUILDS.MAIN) return;
+	const [logEntry] = (await invite.guild.fetchAuditLogs({ type: 'INVITE_DELETE', limit: 1 })).entries.array();
+
+	if (logEntry.reason?.startsWith('[no log]')) return;
+
+	serverLog.send(new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`Invite to ${invite.channel.name} deleted`)
+		.setColor('GREEN')
+		.setTimestamp());
+}
+
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	const serverLog = await bot.channels.fetch(LOG.SERVER) as TextChannel;
@@ -174,6 +238,16 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('emojiUpdate', (oldEmote, newEmote) => {
 		processEmojiUpdate(oldEmote, newEmote, serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('inviteCreate', invite => {
+		processInviteCreate(invite, serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('inviteDelete', invite => {
+		processInviteDelete(invite, serverLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }

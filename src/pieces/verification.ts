@@ -43,7 +43,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 				maxAge: 0,
 				maxUses: 1,
 				unique: true,
-				reason: `${msg.author.username} (${msg.author.id}) verified.`
+				reason: `[no log] ${msg.author.username} (${msg.author.id}) verified.`
 			});
 
 			return msg.reply(`Thank you for verifying! You can now join the server.\nhttps://discord.gg/${invite.code}`);
