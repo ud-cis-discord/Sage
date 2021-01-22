@@ -1,8 +1,7 @@
 import { GUILDS, LOG } from '@root/config';
 import { generateLogEmbed } from '@lib/utils';
-import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, User } from 'discord.js';
+import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
-import { EmbedField } from 'discord.js';
 
 async function processMemberAdd(member: GuildMember, channel: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
