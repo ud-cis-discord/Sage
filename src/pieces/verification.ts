@@ -1,5 +1,5 @@
 import { Client, Message, Guild, TextChannel } from 'discord.js';
-import { logError } from '@lib/utils';
+import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, GUILDS, LOG, MAINTAINERS, ROLES } from '@root/config';
 
@@ -58,7 +58,7 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('message', async msg => {
 		verify(msg, bot, guild)
-			.catch(async error => errLog.send(await logError(error)));
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }
 

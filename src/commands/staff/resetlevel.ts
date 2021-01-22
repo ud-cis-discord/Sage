@@ -1,9 +1,9 @@
+import { GuildMember, Message } from 'discord.js';
 import { staffPerms } from '@lib/permissions';
 import { userParser } from '@lib/arguments';
 import { SageUser } from '@lib/types/SageUser';
-import { GuildMember, Message } from 'discord.js';
-import { DatabaseError } from '@root/src/lib/types/errors';
-
+import { DatabaseError } from '@lib/types/errors';
+import { DB } from '@root/config';
 
 export const description = 'Resets a given user\'s message count.';
 export const usage = '<user>|[to_subtract|to_set_to]';

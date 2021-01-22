@@ -43,7 +43,7 @@ export function readdirRecursive(dir: string): string[] {
 	return results;
 }
 
-export async function logError(error: Error): Promise<MessageEmbed> {
+export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
 	let errTitle = '';
 	let errMessage = '';
 	const fields: Array<EmbedField> = [];

@@ -1,6 +1,6 @@
 import { Collection, Client, TextChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { getCommand, logError, readdirRecursive } from '@lib/utils';
+import { getCommand, generateLogEmbed, readdirRecursive } from '@lib/utils';
 import { LOG, MAINTAINERS, PREFIX } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
@@ -58,7 +58,7 @@ async function register(bot: Client): Promise<void> {
 			await command.run(msg, args);
 		} catch (e) {
 			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-			errLog.send(await logError(e));
+			errLog.send(await generateLogEmbed(e));
 		}
 	});
 }
