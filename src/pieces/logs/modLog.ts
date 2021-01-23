@@ -1,7 +1,6 @@
-import { GUILDS, LOG, ROLES } from '@root/config';
+import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
-import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember, PartialGuildMember } from 'discord.js';
-import { inspect } from 'util';
+import { GUILDS, LOG, ROLES } from '@root/config';
 
 async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
 	if (guild.id !== GUILDS.MAIN) return;
