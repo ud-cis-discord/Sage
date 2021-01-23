@@ -1,7 +1,7 @@
-import { GUILDS, LOG } from '@root/config';
-import { generateLogEmbed } from '@lib/utils';
-import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField } from 'discord.js';
+import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField, User, PartialUser } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
+import { generateLogEmbed } from '@lib/utils';
+import { GUILDS, LOG } from '@root/config';
 
 async function processMemberAdd(member: GuildMember, channel: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -109,6 +109,32 @@ async function processMemberUpdate(oldMember:GuildMember | PartialGuildMember, n
 	}
 }
 
+async function processUserUpdate(oldUser: User | PartialUser, newUser: User, channel: TextChannel): Promise<void> {
+	let toSend = false;
+	const embed = new MessageEmbed()
+		.setAuthor(newUser.tag, newUser.avatarURL({ dynamic: true }))
+		.setColor('DARK_GOLD')
+		.setFooter(`Discord ID: ${newUser.id}`)
+		.setTimestamp();
+
+	if (!toSend && oldUser.tag !== newUser.tag) {
+		toSend = true;
+		embed.setTitle(`${oldUser.tag} changed their tag to ${newUser.tag}`);
+	}
+
+	if (!toSend && oldUser.avatar !== newUser.avatar) {
+		toSend = true;
+		embed.setTitle(`${newUser.tag} changed their pfp`)
+			.setDescription('↓ New pfp ↓ | Old pfp →')
+			.setImage(newUser.avatarURL({ dynamic: true }))
+			.setThumbnail(oldUser.avatarURL({ dynamic: true }));
+	}
+
+	if (toSend) {
+		channel.send(embed);
+	}
+}
+
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	const memLog = await bot.channels.fetch(LOG.MEMBER) as TextChannel;
@@ -125,6 +151,11 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('guildMemberUpdate', (oldMember, newMember) => {
 		processMemberUpdate(oldMember, newMember, memLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('userUpdate', (oldUser, newUser) => {
+		processUserUpdate(oldUser, newUser, memLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }
