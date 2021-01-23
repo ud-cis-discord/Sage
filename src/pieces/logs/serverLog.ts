@@ -10,7 +10,8 @@ import {
 	Invite,
 	Message,
 	PartialMessage,
-	MessageAttachment
+	MessageAttachment,
+	Role
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { generateLogEmbed } from '@lib/utils';
@@ -30,8 +31,28 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 		});
 	}
 
+	channel.permissionOverwrites.forEach(overwrite => {
+		const target = overwrite.type === 'role'
+			? channel.guild.roles.cache.get(overwrite.id).name
+			: channel.guild.members.cache.get(overwrite.id).user.tag;
+		const allowed = overwrite.allow.bitfield !== 0
+			? Permissions.ALL === overwrite.allow.bitfield
+				? '`ALL`'
+				: `\`${overwrite.allow.toArray().join('`, `')}\``
+			: '`NONE`';
+		const denied = overwrite.deny.bitfield !== 0
+			? `\`${overwrite.deny.toArray().join('`, `')}\``
+			: '`NONE`';
+
+		fields.push({
+			name: `Overwrites for ${target}`,
+			value: `**Allowed**\n${allowed}\n**Denied**\n${denied}`,
+			inline: false
+		});
+	});
+
 	serverLog.send(new MessageEmbed()
-		.setAuthor(`${logEntry.executor.tag} (${logEntry.executor.id})`, logEntry.executor.avatarURL({ dynamic: true }))
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Created new ${channel.type} channel, #${channel.name}`)
 		.setDescription(`${channel.name} is in the ${channel.parent ? channel.parent.name : 'none'} category.`)
 		.addFields(fields)
@@ -55,7 +76,7 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 	}
 
 	serverLog.send(new MessageEmbed()
-		.setAuthor(`${logEntry.executor.tag} (${logEntry.executor.id})`, logEntry.executor.avatarURL({ dynamic: true }))
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted ${channel.type} channel, #${channel.name}`)
 		.addFields(fields)
 		.setFooter(`Channel ID: ${channel.id}`)
@@ -69,7 +90,7 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 	let toSend = false;
 	const [logEntry] = (await newChannel.guild.fetchAuditLogs({ type: 'CHANNEL_UPDATE', limit: 1 })).entries.array();
 	const embed = new MessageEmbed()
-		.setAuthor(`${logEntry.executor.tag} (${logEntry.executor.id})`, logEntry.executor.avatarURL({ dynamic: true }))
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setFooter(`Channel ID: ${newChannel.id}`)
 		.setColor('PURPLE')
 		.setTimestamp();
@@ -270,7 +291,7 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 	messages.forEach((msg, msgIdx) => {
 		if ('name' in msg.channel) {
 			buffer += `Message ${msgIdx} sent in #${msg.channel.name} by ${msg.author.tag} (${msg.author.id}) at ${msg.createdAt.toLocaleString()} ` +
-			`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)\n`;
+				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)\n`;
 
 			if (msg.attachments.size > 0) {
 				buffer += `Attachments: ${msg.attachments.map(attachment => attachment.name).join(', ')}\n`;
@@ -290,10 +311,104 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 	serverLog.send(new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
+		.setDescription(logEntry.reason ? `**Reason**\n${logEntry.reason}` : '')
 		.attachFiles([new MessageAttachment(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), 'Messages.txt')])
 		.setColor('ORANGE')
 		.setFooter(`Deleter ID: ${logEntry.executor.id}`)
 		.setTimestamp());
+}
+
+async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<void> {
+	if (role.guild.id !== GUILDS.MAIN) return;
+
+	const [logEntry] = (await role.guild.fetchAuditLogs({ type: 'ROLE_CREATE', limit: 1 })).entries.array();
+
+	const fields: Array<EmbedField> = [];
+
+	if (logEntry.reason) {
+		fields.push({
+			name: 'Reason',
+			value: logEntry.reason,
+			inline: false
+		});
+	}
+
+	fields.push({
+		name: 'Permissions',
+		value: role.permissions.bitfield !== 0
+			? Permissions.ALL === role.permissions.bitfield
+				? '`ALL`'
+				: `\`${role.permissions.toArray().join('`, `')}\``
+			: '`NONE`',
+		inline: false
+	});
+
+	serverLog.send(new MessageEmbed()
+		.setAuthor(`${logEntry.executor.tag}`, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`Created new role @${role.name}`)
+		.addFields(fields)
+		.setFooter(`Role ID: ${role.id}`)
+		.setColor('DARK_BLUE')
+		.setTimestamp());
+}
+
+async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<void> {
+	if (role.guild.id !== GUILDS.MAIN) return;
+
+	const [logEntry] = (await role.guild.fetchAuditLogs({ type: 'ROLE_DELETE', limit: 1 })).entries.array();
+
+	const fields: Array<EmbedField> = [];
+
+	if (logEntry.reason) {
+		fields.push({
+			name: 'Reason',
+			value: logEntry.reason,
+			inline: false
+		});
+	}
+
+	serverLog.send(new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`Deleted role @${role.name}`)
+		.addFields(fields)
+		.setFooter(`Role ID: ${role.id}`)
+		.setColor('DARK_BLUE')
+		.setTimestamp());
+}
+
+async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextChannel): Promise<void> {
+	if (newRole.guild.id !== GUILDS.MAIN) return;
+
+	const [logEntry] = (await newRole.guild.fetchAuditLogs({ type: 'ROLE_UPDATE', limit: 1 })).entries.array();
+	let toSend = false;
+	const embed = new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`@${newRole.name} role updated`)
+		.setColor('DARK_BLUE')
+		.setFooter(`Role ID: ${newRole.id}`)
+		.setTimestamp();
+
+	if (newRole.name !== oldRole.name) {
+		toSend = true;
+		embed.addField('New name', newRole.name, true);
+		embed.addField('Old name', oldRole.name, true);
+	}
+
+	if (!newRole.permissions.equals(oldRole.permissions)) {
+		toSend = true;
+		embed.addField(
+			'Permissions',
+			newRole.permissions.bitfield !== 0
+				? Permissions.ALL === newRole.permissions.bitfield
+					? '`ALL`'
+					: `\`${newRole.permissions.toArray().join('`, `')}\``
+				: '`NONE`'
+		);
+	}
+
+	if (toSend) {
+		serverLog.send(embed);
+	}
 }
 
 async function register(bot: Client): Promise<void> {
@@ -347,6 +462,21 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('messageDeleteBulk', messages => {
 		processBulkDelete(messages.array().reverse(), serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('roleCreate', role => {
+		processRoleCreate(role, serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('roleDelete', role => {
+		processRoleDelete(role, serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('roleUpdate', (oldRole, newRole) => {
+		processRoleUpdate(oldRole, newRole, serverLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }
