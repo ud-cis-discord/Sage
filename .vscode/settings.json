@@ -8,6 +8,7 @@
 	"cmake.configureOnOpen": false,
 	"cSpell.words": [
 		"CISC",
+		"Deleter",
 		"QTAGS",
 		"assignables",
 		"createc",

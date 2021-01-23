@@ -1,7 +1,20 @@
+import {
+	Client,
+	GuildChannel,
+	DMChannel,
+	TextChannel,
+	MessageEmbed,
+	EmbedField,
+	Permissions,
+	GuildEmoji,
+	Invite,
+	Message,
+	PartialMessage,
+	MessageAttachment
+} from 'discord.js';
+import prettyMilliseconds from 'pretty-ms';
 import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, LOG } from '@root/config';
-import { Client, GuildChannel, DMChannel, TextChannel, MessageEmbed, EmbedField, Permissions, GuildEmoji, Invite } from 'discord.js';
-import prettyMilliseconds from 'pretty-ms';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
@@ -207,6 +220,82 @@ async function processInviteDelete(invite: Invite, serverLog: TextChannel): Prom
 		.setTimestamp());
 }
 
+async function processMessageDelete(msg: Message | PartialMessage, serverLog: TextChannel): Promise<void> {
+	if (!('name' in msg.channel) || msg.guild.id !== GUILDS.MAIN) return;
+	const embed = new MessageEmbed()
+		.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
+		.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
+			`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
+		.setFooter(`Message ID: ${msg.id} | Author ID: ${msg.author.id}`)
+		.setColor('ORANGE')
+		.setTimestamp();
+
+	if (msg.attachments.size > 0) {
+		embed.addField('Attachments', `\`${msg.attachments.map(attachment => attachment.name).join('`, `')}\``);
+	}
+
+	const edits = msg.edits.reverse();
+
+	if (edits.length < 24 && edits.every(m => m.content.length < 1000) && edits.map(m => m.content).join().length < 5500) {
+		embed.setDescription(edits.pop().content);
+		edits.forEach((edit, idx) => {
+			embed.addField(`Message ${idx + 1}`, edit.content);
+		});
+	} else {
+		let buffer = 'Last displayed content:\n';
+		buffer += `${edits.pop().content}\n\n`;
+
+		edits.forEach((edit, idx) => {
+			buffer += `Message ${idx + 1}\n${edit.content}\n\n`;
+		});
+
+		const file = new MessageAttachment(Buffer.from(buffer.trim()), 'Message.txt');
+
+		embed.setDescription('Too much data to display, sent as a file.')
+			.attachFiles([file]);
+	}
+
+	serverLog.send(embed);
+}
+
+async function processBulkDelete(messages: Array<Message | PartialMessage>, serverLog: TextChannel): Promise<void> {
+	if (!('name' in messages[0].channel) || messages[0].guild.id !== GUILDS.MAIN) return;
+
+	const [logEntry] = (await serverLog.guild.fetchAuditLogs({ type: 'MESSAGE_BULK_DELETE', limit: 1 })).entries.array();
+
+	const spacer = '\n\n**************************************************************************\n\n';
+	let buffer = '';
+
+	// I present, the most ugly code in the entire codebase.
+	messages.forEach((msg, msgIdx) => {
+		if ('name' in msg.channel) {
+			buffer += `Message ${msgIdx} sent in #${msg.channel.name} by ${msg.author.tag} (${msg.author.id}) at ${msg.createdAt.toLocaleString()} ` +
+			`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)\n`;
+
+			if (msg.attachments.size > 0) {
+				buffer += `Attachments: ${msg.attachments.map(attachment => attachment.name).join(', ')}\n`;
+			}
+
+			const edits = msg.edits.reverse();
+			buffer += `Last displayed content of message ${msgIdx}:\n${edits.pop().content}\n\n`;
+
+			edits.forEach((edit, editIdx) => {
+				buffer += `Message ${msgIdx}, edit ${editIdx}\n${edit.content}\n\n`;
+			});
+
+			buffer = buffer.trim() + spacer;
+		}
+	});
+
+	serverLog.send(new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
+		.attachFiles([new MessageAttachment(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), 'Messages.txt')])
+		.setColor('ORANGE')
+		.setFooter(`Deleter ID: ${logEntry.executor.id}`)
+		.setTimestamp());
+}
+
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	const serverLog = await bot.channels.fetch(LOG.SERVER) as TextChannel;
@@ -248,6 +337,16 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('inviteDelete', invite => {
 		processInviteDelete(invite, serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('messageDelete', message => {
+		processMessageDelete(message, serverLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('messageDeleteBulk', messages => {
+		processBulkDelete(messages.array().reverse(), serverLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }
