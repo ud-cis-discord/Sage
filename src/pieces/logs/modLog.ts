@@ -1,4 +1,4 @@
-import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember } from 'discord.js';
+import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember, PartialGuildMember } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, LOG, ROLES } from '@root/config';
 
@@ -77,6 +77,24 @@ async function processMemberUpdate(member: GuildMember, modLog: TextChannel): Pr
 	}
 }
 
+async function processMemberRemove(member: GuildMember | PartialGuildMember, modLog: TextChannel): Promise<void> {
+	if (member.guild.id !== GUILDS.MAIN) return;
+
+	const [logEntry] = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries.array();
+
+	console.log(Date.now() - logEntry.createdTimestamp);
+	if (!('id' in logEntry.target)
+		|| logEntry.target.id !== member.id
+		|| (Date.now() - logEntry.createdTimestamp) > 10) return;
+
+	modLog.send(new MessageEmbed()
+		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
+		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
+		.setColor('YELLOW')
+		.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
+		.setTimestamp());
+}
+
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	const modLog = await bot.channels.fetch(LOG.MOD) as TextChannel;
@@ -93,6 +111,11 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('guildMemberUpdate', (_oldMember, newMember) => {
 		processMemberUpdate(newMember, modLog)
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
+	});
+
+	bot.on('guildMemberRemove', member => {
+		processMemberRemove(member, modLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }
