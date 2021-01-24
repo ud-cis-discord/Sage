@@ -34,6 +34,7 @@ export async function run(msg: Message, [target, reason]: [Message, string]): Pr
 	target.author.send(`Your message was deleted in ${target.channel} by ${msg.author.tag}. Below is the given reason:\n${reason}`)
 		.catch(async () => {
 			const targetUser: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: target.author.id });
+			if (!targetUser) throw `${target.author.tag} (${target.author.id}) is not in the database`;
 			sendEmail(targetUser.email, msg.author.tag, reason);
 		});
 
@@ -69,7 +70,7 @@ function sendEmail(recipient: string, mod: string, reason: string): void {
 <html>
 <body>
 
-	<h1>You were issued a warning on the UD CIS Discord server by ${mod}</h1>
+	<h3>You were issued a warning on the UD CIS Discord server by ${mod}</h3>
 	<p>Reason for warning:</p>
 	<p>${reason}</p>
 
