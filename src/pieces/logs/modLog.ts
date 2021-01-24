@@ -50,8 +50,8 @@ async function processBanRemove(guild: Guild, target: User, modLog: TextChannel)
 		.setTimestamp());
 }
 
-async function processMemberUpdate(member: GuildMember, modLog: TextChannel): Promise<void> {
-	if (member.guild.id !== GUILDS.MAIN) return;
+async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, member: GuildMember, modLog: TextChannel): Promise<void> {
+	if (member.guild.id !== GUILDS.MAIN || oldMember.roles.cache.equals(member.roles.cache)) return;
 
 	const logEntries = (await member.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 5 })).entries.array();
 	const logEntry = logEntries.find(entry => {
@@ -82,7 +82,6 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 
 	const [logEntry] = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries.array();
 
-	console.log(Date.now() - logEntry.createdTimestamp);
 	if (!('id' in logEntry.target)
 		|| logEntry.target.id !== member.id
 		|| (Date.now() - logEntry.createdTimestamp) > 10) return;
@@ -109,8 +108,8 @@ async function register(bot: Client): Promise<void> {
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 
-	bot.on('guildMemberUpdate', (_oldMember, newMember) => {
-		processMemberUpdate(newMember, modLog)
+	bot.on('guildMemberUpdate', (oldMember, newMember) => {
+		processMemberUpdate(oldMember, newMember, modLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 
