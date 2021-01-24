@@ -16,10 +16,10 @@ export async function run(msg: Message, [course, question]: [Course, string]): P
 	const embed = new MessageEmbed()
 		.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
 		.setDescription(question)
-		.setFooter(`To respond to this question, use ${PREFIX}sudoreply ${questionId} <response>`);
+		.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${questionId} <response>`);
 
-	const staffChannel = await msg.client.channels.fetch(course.channels.staff) as TextChannel;
-	const questionMessage = await staffChannel.send(embed);
+	const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
+	const questionMessage = await privateChannel.send(embed);
 	const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
 	const entry: PVQuestion = {
