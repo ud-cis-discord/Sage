@@ -26,7 +26,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 
 	const enrollStr = entry.courses.length > 0
 		? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or unenroll from your current course,` +
-			`send \`${PREFIX}enroll <courseCode>\`.`
+			` send \`${PREFIX}enroll <courseCode>\`.`
 		: '';
 
 	bot.mongo.collection(DB.USERS).updateOne(
