@@ -16,7 +16,6 @@ import {
 import prettyMilliseconds from 'pretty-ms';
 import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, LOG } from '@root/config';
-import { inspect } from 'util';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
