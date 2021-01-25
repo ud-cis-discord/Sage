@@ -93,9 +93,12 @@ async function main() {
 			courses: []
 		};
 
+		if (isStaff) {
+			newUser.roles.push(ROLES.STAFF);
+		}
+
 		if (entry) {			// User already on-boarded
 			if (isStaff) {		// Make staff is not already
-				newUser.roles.push(ROLES.STAFF);
 				await db.updateOne(entry, { $set: { ...newUser } });
 			}
 			continue;
