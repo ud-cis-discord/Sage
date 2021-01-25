@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
 import { SageUser } from '@lib/types/SageUser';
+import { Course } from '@lib/types/Course';
 import { BOT, DB, EMAIL, GUILDS, ROLES } from '@root/config';
 
 const MESSAGE = `<!DOCTYPE html>
@@ -42,6 +43,7 @@ async function main() {
 	const db = client.db(BOT.NAME).collection(DB.USERS);
 	const args = process.argv.slice(2);
 	let emails: Array<string>;
+	let course: Course;
 
 	if (args.length > 0) {
 		if (args[0].toLowerCase() === 'staff') {
@@ -52,6 +54,9 @@ async function main() {
 	} else {
 		const data = fs.readFileSync('./resources/emails.csv');
 		emails = data.toString().split('\n').map(email => email.trim());
+		let courseId: string;
+		[emails[0], courseId] = emails[0].split(',').map(str => str.trim());
+		course = await client.db(BOT.NAME).collection(DB.COURSES).findOne({ name: courseId });
 	}
 
 	let isStaff: boolean;
@@ -92,6 +97,15 @@ async function main() {
 			roles: [],
 			courses: []
 		};
+
+		if (course) {
+			if (isStaff) {
+				newUser.roles.push(course.roles.staff);
+			} else {
+				newUser.roles.push(course.roles.student);
+				newUser.courses.push(course.name);
+			}
+		}
 
 		if (isStaff) {
 			newUser.roles.push(ROLES.STAFF);
