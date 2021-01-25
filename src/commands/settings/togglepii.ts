@@ -16,5 +16,6 @@ export async function run(msg: Message): Promise<Message> {
 
 	msg.client.mongo.collection(DB.USERS).updateOne({ discordId: msg.author.id }, { $set: { pii: entry.pii } });
 
-	return msg.author.send(`Your personally identifiable information is now${entry.pii ? ' ABLE' : ' UNABLE'} to be sent by instructors over Discord.`);
+	return msg.channel.send(`Your personally identifiable information is now${entry.pii ? ' ABLE' : ' UNABLE'} to be sent by instructors over Discord.
+${entry.pii ? '' : 'It is still available to staff outside of Discord.'}`);
 }

@@ -11,7 +11,6 @@ export const runInDM = false;
 
 export async function run(msg: Message, [cmd]: [Role | 'list']): Promise<Message> {
 	const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
-	// const role: AssignableRole = { id: arg.id };
 
 	if (cmd === 'list') {
 		return msg.channel.send(`Here is the list of self-assignable roles: 

@@ -39,6 +39,7 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 		id: ROLES.MUTED,
 		deny: 'SEND_MESSAGES'
 	}];
+	const staffPerms = [standardPerms[0], standardPerms[1]];
 
 	const categoryChannel = await msg.guild.channels.create(`CISC ${course}`, {
 		type: 'category',
@@ -53,7 +54,14 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 		type: 'text',
 		parent: categoryChannel.id,
 		topic: '[no message count]',
-		permissionOverwrites: standardPerms.splice(0, 2),
+		permissionOverwrites: staffPerms,
+		reason
+	});
+	const privateQuestionChannel = await msg.guild.channels.create(`${course}_private_qs`, {
+		type: 'text',
+		parent: categoryChannel.id,
+		topic: '[no message count]',
+		permissionOverwrites: staffPerms,
 		reason
 	});
 
@@ -62,7 +70,8 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 		channels: {
 			category: categoryChannel.id,
 			general: generalChannel.id,
-			staff: staffChannel.id
+			staff: staffChannel.id,
+			private: privateQuestionChannel.id
 		},
 		roles: {
 			staff: staffRole.id,

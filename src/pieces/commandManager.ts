@@ -1,38 +1,24 @@
-import { Collection, Client } from 'discord.js';
-import * as fs from 'fs';
+import { Collection, Client, TextChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { MAINTAINERS, PREFIX } from '@root/config';
-import { getCommand } from '../lib/utils';
+import { getCommand, generateLogEmbed, readdirRecursive } from '@lib/utils';
+import { LOG, MAINTAINERS, PREFIX } from '@root/config';
 
-function readdirRecursive(dir: string): string[] {
-	let results = [];
-	const list = fs.readdirSync(dir);
-	list.forEach((file) => {
-		file = `${dir}/${file}`;
-		const stat = fs.statSync(file);
-		if (stat && stat.isDirectory()) {
-			/* Recurse into a subdirectory */
-			results = results.concat(readdirRecursive(file));
-		} else {
-			/* Is a file */
-			results.push(file);
-		}
-	});
-	return results;
-}
-
-function register(bot: Client): void {
+async function register(bot: Client): Promise<void> {
+	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	bot.commands = new Collection();
+
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const command: Command = require(`@root/../${file}`);
+		const command: Command = await import(`@root/../${file}`);
+
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
 		command.name = name;
 		command.category = dirs[dirs.length - 2];
+
 		bot.commands.set(name, command);
 	}
+
 	bot.on('message', async (msg) => {
 		if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'dm') || msg.author.bot) return;
 
@@ -69,10 +55,10 @@ function register(bot: Client): void {
 		}
 
 		try {
-			command.run(msg, args);
+			await command.run(msg, args);
 		} catch (e) {
-			await msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-			throw e;
+			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
+			errLog.send(await generateLogEmbed(e));
 		}
 	});
 }

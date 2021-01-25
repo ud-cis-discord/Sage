@@ -1,12 +1,15 @@
-import { Client, TextChannel, Message, MessageEmbed, Role } from 'discord.js';
-import { DB, PREFIX, ROLES } from '@root/config';
+import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
+import { generateLogEmbed } from '@lib/utils';
+import { DatabaseError } from '@lib/types/errors';
+import { LOG, PREFIX, DB, ROLES } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 const xpRatio = 1.25;
 const startingColor = 80;
 const greenIncrement = 8;
 
-function register(bot: Client): void {
+async function register(bot: Client): Promise<void> {
+	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
 	bot.on('message', async msg => {
 		if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
 			return;
@@ -45,7 +48,14 @@ function register(bot: Client): void {
 			msg.member.roles.add(addRole);
 		}
 
-		await bot.mongo.collection(DB.USERS).updateOne({ discordId: msg.author.id }, { $set: { ...entry } });
+		bot.mongo.collection(DB.USERS).updateOne(
+			{ discordId: msg.author.id },
+			{ $set: { ...entry } })
+			.then(async updated => {
+				if (updated.modifiedCount === 0) {
+					errLog.send(await generateLogEmbed(new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`)));
+				}
+			});
 	});
 }
 
@@ -64,7 +74,7 @@ async function sendLevelDM(msg: Message, user: SageUser): Promise<Message> {
 		.addField('XP to next level:', user.levelExp, true)
 		.setColor(createLevelHex(user.level));
 
-	return msg.author.send(embed);
+	return msg.author.send(embed).catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again.'));
 }
 
 function createLevelHex(level: number): string {

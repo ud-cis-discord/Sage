@@ -4,6 +4,7 @@ export interface Course {
 		category: string;
 		general: string;
 		staff: string;
+		private: string;
 	}
 	roles: {
 		student: string;

@@ -16,5 +16,5 @@ export async function run(msg: Message): Promise<Message> {
 
 	msg.client.mongo.collection(DB.USERS).updateOne({ discordId: msg.author.id }, { $set: { levelPings: entry.levelPings } });
 
-	return msg.author.send(`You will now${entry.levelPings ? '' : ' no longer'} receive notifications from Sage on a level up.`);
+	return msg.channel.send(`You will${entry.levelPings ? ' now' : ' no longer'} receive notifications from Sage on a level up.`);
 }
