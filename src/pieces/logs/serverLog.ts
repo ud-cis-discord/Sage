@@ -232,7 +232,6 @@ async function processInviteCreate(invite: Invite, serverLog: TextChannel): Prom
 async function processInviteDelete(invite: Invite, serverLog: TextChannel): Promise<void> {
 	if (invite.guild.id !== GUILDS.MAIN) return;
 	const [logEntry] = (await invite.guild.fetchAuditLogs({ type: 'INVITE_DELETE', limit: 1 })).entries.array();
-	// console.log(inspect(logEntry, { depth: null }));
 
 	if (logEntry.reason?.startsWith('[no log]')) return;
 	if (logEntry.changes.find(change => change.key === 'code').old !== invite.code) return;
