@@ -1,6 +1,7 @@
-import { DB, MAINTAINERS } from '@root/config';
+import { DB } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 import { Message } from 'discord.js';
+import { DatabaseError } from '@lib/types/errors';
 
 export const description = `Toggles whether or not your personally identifiable information will be sent by instructors over Discord.`;
 export const aliases = ['pii'];
@@ -9,7 +10,7 @@ export async function run(msg: Message): Promise<Message> {
 	const entry: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
 
 	if (!entry) {
-		throw `Something went wrong. Please contact ${MAINTAINERS}`;
+		throw new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`);
 	}
 
 	entry.pii = !entry.pii;

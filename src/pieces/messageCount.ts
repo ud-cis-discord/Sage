@@ -12,74 +12,80 @@ const maxLevel = 20;
 
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
-	bot.on('message', async msg => {
-		if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
-			return;
+	bot.on('message', async msg => countMessages(msg, errLog)
+		.catch(async error => errLog.send(await generateLogEmbed(error)))
+	);
+}
+
+async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
+	const bot = msg.client;
+
+	if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
+		return;
+	}
+
+	const channel = msg.channel as TextChannel;
+
+	const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+
+	if (!entry) {
+		throw new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`);
+	}
+
+	if (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]'))) {
+		entry.count++;
+	}
+
+	if (--entry.curExp <= 0) {
+		entry.curExp = entry.levelExp = Math.floor(entry.levelExp * xpRatio);
+		entry.level++;
+		if (entry.levelPings) {
+			sendLevelPing(msg, entry);
 		}
-
-		const channel = msg.channel as TextChannel;
-
-		const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
-
-		if (!entry) {
-			throw `member ${msg.author.username} (${msg.author.id}) not in database`;
-		}
-
-		if (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]'))) {
-			entry.count++;
-		}
-
-		if (--entry.curExp <= 0) {
-			entry.curExp = entry.levelExp = Math.floor(entry.levelExp * xpRatio);
-			entry.level++;
-			if (entry.levelPings) {
-				sendLevelPing(msg, entry);
-			}
-			let addRole: Role;
-			if (!(addRole = msg.guild.roles.cache.find(r => r.name === `Level ${entry.level}`))
+		let addRole: Role;
+		if (!(addRole = msg.guild.roles.cache.find(r => r.name === `Level ${entry.level}`))
 			&& entry.level <= maxLevel) { // make a new level role if it doesn't exist
-				addRole = await msg.guild.roles.create({
-					data: {
-						name: `Level ${entry.level}`,
-						color: createLevelHex(entry.level),
-						position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
-						permissions: 0
-					},
-					reason: `${msg.author.username} is the first to get to Level ${entry.level}`
-				});
-			}
-
-			if (entry.level <= maxLevel) {
-				msg.member.roles.remove(msg.member.roles.cache.find(r => r.name.startsWith('Level')), `${msg.author.username} leveled up.`);
-				msg.member.roles.add(addRole, `${msg.author.username} leveled up.`);
-			}
-
-			if (entry.level > maxLevel
-				&& !(addRole = msg.guild.roles.cache.find(r => r.name === `Power User`))) {
-				addRole = await msg.guild.roles.create({
-					data: {
-						name: `Power User`,
-						color: maxGreen,
-						position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
-						permissions: 0
-					}
-				});
-			}
-			if (entry.level > maxLevel && !msg.member.roles.cache.find(r => r.name === 'Power User')) {
-				msg.member.roles.remove(msg.member.roles.cache.find(r => r.name.startsWith('Level')), `${msg.author.username} leveled up.`);
-				msg.member.roles.add(addRole, `${msg.author.username} leveled up.`);
-			}
+			addRole = await msg.guild.roles.create({
+				data: {
+					name: `Level ${entry.level}`,
+					color: createLevelHex(entry.level),
+					position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
+					permissions: 0
+				},
+				reason: `${msg.author.username} is the first to get to Level ${entry.level}`
+			});
 		}
 
-		bot.mongo.collection(DB.USERS).updateOne(
-			{ discordId: msg.author.id },
-			{ $set: { ...entry } })
-			.then(async updated => {
-				if (updated.modifiedCount === 0) {
-					errLog.send(await generateLogEmbed(new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`)));
+		if (entry.level <= maxLevel) {
+			await msg.member.roles.remove(msg.member.roles.cache.find(r => r.name.startsWith('Level')), `${msg.author.username} leveled up.`);
+			msg.member.roles.add(addRole, `${msg.author.username} leveled up.`);
+		}
+
+		if (entry.level > maxLevel
+			&& !(addRole = msg.guild.roles.cache.find(r => r.name === `Power User`))) {
+			addRole = await msg.guild.roles.create({
+				data: {
+					name: `Power User`,
+					color: maxGreen,
+					position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
+					permissions: 0
 				}
 			});
-	});
+		}
+		if (entry.level > maxLevel && !msg.member.roles.cache.find(r => r.name === 'Power User')) {
+			msg.member.roles.remove(msg.member.roles.cache.find(r => r.name.startsWith('Level')), `${msg.author.username} leveled up.`);
+			msg.member.roles.add(addRole, `${msg.author.username} leveled up.`);
+		}
+	}
+
+	bot.mongo.collection(DB.USERS).updateOne(
+		{ discordId: msg.author.id },
+		{ $set: { ...entry } })
+		.then(async updated => {
+			if (updated.modifiedCount === 0) {
+				errLog.send(await generateLogEmbed(new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`)));
+			}
+		});
 }
 
 async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
