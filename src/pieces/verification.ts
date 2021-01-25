@@ -2,7 +2,6 @@ import { Client, Message, Guild, TextChannel } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, GUILDS, LOG, MAINTAINERS, ROLES } from '@root/config';
-import { link } from 'fs';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
 	if (msg.channel.type !== 'dm' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
@@ -31,7 +30,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 		.then(async () => {
 			const member = guild.members.cache.get(msg.author.id);
 			if (member) {
-				member.roles.add(entry.roles, `${member.user.username} (${member.id}) just verified.`);
+				entry.roles.forEach(role => member.roles.add(role, `${member.user.username} (${member.id}) just verified.`));
 				return msg.reply('I see you\'re already on the server. I\'ve added your roles for this semester.');
 			}
 
