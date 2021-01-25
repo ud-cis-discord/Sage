@@ -4,7 +4,8 @@ export interface SageUser {
 	discordId: string;
 	pii: boolean;
 	count: number;
-	exp: number;
+	levelExp: number;
+	curExp: number;
 	level: number;
 	levelPings: boolean;
 	isVerified: boolean;

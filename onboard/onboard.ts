@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
 import { SageUser } from '@lib/types/SageUser';
-import { BOT, DB, EMAIL, GUILDS } from '@root/config';
+import { BOT, DB, EMAIL, GUILDS, FIRST_LEVEL } from '@root/config';
 
 const MESSAGE = `<!DOCTYPE html>
 <html>
@@ -72,7 +72,8 @@ async function main() {
 			isStaff: isStaff,
 			discordId: '',
 			count: 0,
-			exp: 0,
+			levelExp: FIRST_LEVEL,
+			curExp: FIRST_LEVEL,
 			level: 1,
 			levelPings: true,
 			isVerified: false,

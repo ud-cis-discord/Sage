@@ -15,6 +15,8 @@ export const DB = {
 	COURSES: 'courses'
 };
 
+export const FIRST_LEVEL = 10;
+
 export const GUILDS = {			// Guild IDs for each guild
 	MAIN: '',
 	GATEWAY: '',
