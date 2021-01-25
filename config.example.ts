@@ -27,7 +27,8 @@ export const ROLES = {			// Role IDS for each role
 	ADMIN: '',
 	STAFF: '',
 	VERIFIED: '',
-	MUTED: ''
+	MUTED: '',
+	LEVEL_ONE: ''
 };
 
 export const EMAIL = {
