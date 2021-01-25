@@ -2,6 +2,7 @@ import { Client, Message, Guild, TextChannel } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, GUILDS, LOG, MAINTAINERS, ROLES } from '@root/config';
+import { link } from 'fs';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
 	if (msg.channel.type !== 'dm' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
@@ -23,22 +24,17 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 	entry.isVerified = true;
 	entry.discordId = msg.author.id;
 	entry.roles.push(ROLES.VERIFIED);
-	if (entry.isStaff) {
-		entry.roles.push(ROLES.STAFF);
-	}
-
-	const member = guild.members.cache.get(msg.author.id);
-	if (member) {
-		member.roles.add(ROLES.VERIFIED);
-		if (entry.isStaff) {
-			member.roles.add(ROLES.STAFF);
-		}
-	}
 
 	bot.mongo.collection(DB.USERS).updateOne(
 		{ hash: givenHash },
 		{ $set: { ...entry } })
 		.then(async () => {
+			const member = guild.members.cache.get(msg.author.id);
+			if (member) {
+				member.roles.add(entry.roles, `${member.user.username} (${member.id}) just verified.`);
+				return msg.reply('I see you\'re already on the server. I\'ve added your roles for this semester.');
+			}
+
 			const invite = await guild.systemChannel.createInvite({
 				maxAge: 0,
 				maxUses: 1,
@@ -46,7 +42,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 				reason: `[no log] ${msg.author.username} (${msg.author.id}) verified.`
 			});
 
-			return msg.reply(`Thank you for verifying! You can now join the server.\nhttps://discord.gg/${invite.code}`);
+			return msg.reply(`Thank you for verifying! You can now join the server.\n${invite.url}`);
 		});
 }
 
