@@ -23,6 +23,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 	entry.isVerified = true;
 	entry.discordId = msg.author.id;
 	entry.roles.push(ROLES.VERIFIED);
+	entry.roles.push(ROLES.LEVEL_ONE);
 	if (entry.isStaff) {
 		entry.roles.push(ROLES.STAFF);
 	}
