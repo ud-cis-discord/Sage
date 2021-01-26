@@ -114,8 +114,7 @@ async function main() {
 		if (isStaff) {
 			newUser.roles.push(ROLES.STAFF);
 		}
-    
-    newUser.roles.push(ROLES.LEVEL_ONE);
+		newUser.roles.push(ROLES.LEVEL_ONE);
 
 		if (entry) {			// User already on-boarded
 			if (isStaff) {		// Make staff is not already
