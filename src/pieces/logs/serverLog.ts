@@ -233,6 +233,7 @@ async function processInviteDelete(invite: Invite, serverLog: TextChannel): Prom
 	const [logEntry] = (await invite.guild.fetchAuditLogs({ type: 'INVITE_DELETE', limit: 1 })).entries.array();
 
 	if (logEntry.reason?.startsWith('[no log]')) return;
+	if (logEntry.changes.find(change => change.key === 'code').old !== invite.code) return;
 
 	serverLog.send(new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))

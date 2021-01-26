@@ -4,7 +4,8 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
 import { SageUser } from '@lib/types/SageUser';
-import { BOT, DB, EMAIL, GUILDS, FIRST_LEVEL } from '@root/config';
+import { Course } from '@lib/types/Course';
+import { BOT, DB, EMAIL, GUILDS, ROLES, FIRST_LEVEL } from '@root/config';
 
 const MESSAGE = `<!DOCTYPE html>
 <html>
@@ -40,14 +41,29 @@ const mailer = nodemailer.createTransport({
 async function main() {
 	const client = await MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true });
 	const db = client.db(BOT.NAME).collection(DB.USERS);
-	const data = fs.readFileSync('./resources/emails.csv');
+	const args = process.argv.slice(2);
+	let emails: Array<string>;
+	let course: Course;
 
-	const emails = data.toString().split('\n').map(email => email.trim());
+	if (args.length > 0) {
+		if (args[0].toLowerCase() === 'staff') {
+			emails = args;
+		} else {
+			emails = ['STUDENT', ...args];
+		}
+	} else {
+		const data = fs.readFileSync('./resources/emails.csv');
+		emails = data.toString().split('\n').map(email => email.trim());
+		let courseId: string;
+		[emails[0], courseId] = emails[0].split(',').map(str => str.trim());
+		course = await client.db(BOT.NAME).collection(DB.COURSES).findOne({ name: courseId });
+	}
+
 	let isStaff: boolean;
 
-	if (emails[0] === 'STAFF') {
+	if (emails[0].toLowerCase() === 'staff') {
 		isStaff = true;
-	} else if (emails[0] === 'STUDENT') {
+	} else if (emails[0].toLowerCase() === 'student') {
 		isStaff = false;
 	} else {
 		console.error('First value must be STAFF or STUDENT');
@@ -59,6 +75,10 @@ async function main() {
 -------------------------------------------------------------------------`);
 	for (const email of emails) {
 		if (email === '') continue;
+		if (!email.endsWith('@udel.edu')) {
+			console.error(`${email} is not a valid udel email.`);
+			continue;
+		}
 
 		const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
 
@@ -82,6 +102,21 @@ async function main() {
 			courses: []
 		};
 
+		if (course) {
+			if (isStaff) {
+				newUser.roles.push(course.roles.staff);
+			} else {
+				newUser.roles.push(course.roles.student);
+				newUser.courses.push(course.name);
+			}
+		}
+
+		if (isStaff) {
+			newUser.roles.push(ROLES.STAFF);
+		}
+    
+    newUser.roles.push(ROLES.LEVEL_ONE);
+
 		if (entry) {			// User already on-boarded
 			if (isStaff) {		// Make staff is not already
 				await db.updateOne(entry, { $set: { ...newUser } });
@@ -92,6 +127,7 @@ async function main() {
 		await db.insertOne(newUser);
 
 		sendEmail(email, hash);
+		await sleep(1000);
 	}
 
 	client.close();
@@ -105,6 +141,12 @@ async function sendEmail(email: string, hash: string): Promise<void> {
 		to: email,
 		subject: 'Welcome to the UD CIS Discord!',
 		html: MESSAGE.replace('$hash', hash).replace('$invCode', GUILDS.GATEWAY_INVITE)
+	});
+}
+
+function sleep(ms: number) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
 	});
 }
 

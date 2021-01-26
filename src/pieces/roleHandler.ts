@@ -23,18 +23,14 @@ async function memberAdd(member: GuildMember): Promise<void> {
 
 async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): Promise<void> {
 	if (newMember.roles.cache.size === oldMember.roles.cache.size) return;
-	let error: boolean;
 
-	await newMember.client.mongo.collection(DB.USERS).updateOne({ discordId: newMember.id }, {
-
+	const updated = await newMember.client.mongo.collection(DB.USERS).updateOne({ discordId: newMember.id }, {
 		$set: {
 			roles: newMember.roles.cache.keyArray().filter(role => role !== GUILDS.MAIN)
 		}
-	}).then(updated => {
-		error = updated.modifiedCount !== 1;
 	});
 
-	if (error) {
+	if (updated.matchedCount !== 1) {
 		throw new DatabaseError(`User ${newMember.user.tag} (${newMember.id}) does not exist in the database.`);
 	}
 }

@@ -1,7 +1,7 @@
 import { Client, Message, Guild, TextChannel } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
-import { DB, GUILDS, LOG, MAINTAINERS, ROLES } from '@root/config';
+import { DB, GUILDS, LOG, MAINTAINERS, PREFIX, ROLES } from '@root/config';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
 	if (msg.channel.type !== 'dm' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
@@ -23,23 +23,22 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 	entry.isVerified = true;
 	entry.discordId = msg.author.id;
 	entry.roles.push(ROLES.VERIFIED);
-	entry.roles.push(ROLES.LEVEL_ONE);
-	if (entry.isStaff) {
-		entry.roles.push(ROLES.STAFF);
-	}
 
-	const member = guild.members.cache.get(msg.author.id);
-	if (member) {
-		member.roles.add(ROLES.VERIFIED);
-		if (entry.isStaff) {
-			member.roles.add(ROLES.STAFF);
-		}
-	}
+	const enrollStr = entry.courses.length > 0
+		? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or unenroll from your current course,` +
+			` send \`${PREFIX}enroll <courseCode>\`.`
+		: '';
 
 	bot.mongo.collection(DB.USERS).updateOne(
 		{ hash: givenHash },
 		{ $set: { ...entry } })
 		.then(async () => {
+			const member = guild.members.cache.get(msg.author.id);
+			if (member) {
+				entry.roles.forEach(role => member.roles.add(role, `${member.user.username} (${member.id}) just verified.`));
+				return msg.reply(`I see you're already on the server. I've added your roles for this semester.\n${enrollStr}`);
+			}
+
 			const invite = await guild.systemChannel.createInvite({
 				maxAge: 0,
 				maxUses: 1,
@@ -47,7 +46,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 				reason: `[no log] ${msg.author.username} (${msg.author.id}) verified.`
 			});
 
-			return msg.reply(`Thank you for verifying! You can now join the server.\nhttps://discord.gg/${invite.code}`);
+			return msg.reply(`Thank you for verifying! You can now join the server.\n${invite.url}\n\n${enrollStr}`);
 		});
 }
 
