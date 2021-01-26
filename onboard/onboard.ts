@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
 import { SageUser } from '@lib/types/SageUser';
 import { Course } from '@lib/types/Course';
-import { BOT, DB, EMAIL, GUILDS, ROLES } from '@root/config';
+import { BOT, DB, EMAIL, GUILDS, ROLES, FIRST_LEVEL } from '@root/config';
 
 const MESSAGE = `<!DOCTYPE html>
 <html>
@@ -92,6 +92,10 @@ async function main() {
 			isStaff: isStaff,
 			discordId: '',
 			count: 0,
+			levelExp: FIRST_LEVEL,
+			curExp: FIRST_LEVEL,
+			level: 1,
+			levelPings: true,
 			isVerified: false,
 			pii: false,
 			roles: [],
@@ -110,6 +114,8 @@ async function main() {
 		if (isStaff) {
 			newUser.roles.push(ROLES.STAFF);
 		}
+    
+    newUser.roles.push(ROLES.LEVEL_ONE);
 
 		if (entry) {			// User already on-boarded
 			if (isStaff) {		// Make staff is not already

@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
 
@@ -15,12 +15,31 @@ export async function run(msg: Message, [here]: [string]): Promise<void> {
 		msg.reply(`I couldn't find you in the database, if you think this is an error please contact ${MAINTAINERS}.`);
 		return;
 	}
+
+	const embed = new MessageEmbed()
+		.setTitle(`${msg.author.username}'s Progress`)
+		.setThumbnail(msg.author.avatarURL())
+		.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'}`, true)
+		.addField('Level Progress', `You're **${user.curExp}** messages away from **Level ${user.level + 1}**
+		${progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
 	if (here === 'here') {
-		msg.channel.send(`You have sent ${user.count} message${user.count === 1 ? '' : 's'}.`);
+		msg.channel.send(embed);
 	} else {
-		msg.author.send(`You have sent ${user.count} message${user.count === 1 ? '' : 's'}.`)
+		msg.author.send(embed)
 			.then(() => { if (msg.channel.type !== 'dm') msg.channel.send('Your message count has been sent to your DMs.'); })
 			.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again.'));
 	}
 	return;
+}
+
+function progressBar(value: number, maxValue: number, size: number): string {
+	const percentage = value / maxValue; // Calculate the percentage of the bar
+	const progress = Math.round(size * percentage); // Calculate the number of square caracters to fill the progress side.
+	const emptyProgress = size - progress; // Calculate the number of dash caracters to fill the empty progress side.
+
+	const progressText = `${'🟩'.repeat(Math.max(progress - 1, 0))}✅`; // Repeat is creating a string with progress * caracters in it
+	const emptyProgressText = '⚫'.repeat(emptyProgress); // Repeat is creating a string with empty progress * caracters in it
+	const percentageText = `${Math.round(percentage * 100)}%`; // Displaying the percentage of the bar
+
+	return `${progressText}${emptyProgressText} **${percentageText}**`;
 }
