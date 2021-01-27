@@ -17,7 +17,7 @@ async function register(bot: Client): Promise<void> {
 }
 
 async function handleCron(bot: Client): Promise<void> {
-	const users: Cursor<SageUser> = bot.mongo.collection(DB.USERS).find();
+	const users: Array<SageUser> = await bot.mongo.collection(DB.USERS).find().toArray();
 	let report = 'Email,Count\n';
 	users.forEach(user => {
 		report += `${user.email},${user.count}\n`;
