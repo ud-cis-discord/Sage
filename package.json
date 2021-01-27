@@ -27,6 +27,7 @@
 		"module-alias": "^2.2.2",
 		"moment": "^2.29.1",
 		"mongodb": "^3.6.3",
+		"node-cron": "^2.0.3",
 		"node-fetch": "^2.6.1",
 		"nodemailer": "^6.4.17",
 		"pretty-ms": "^7.0.1"
@@ -39,6 +40,7 @@
 	"devDependencies": {
 		"@types/mongodb": "^3.6.3",
 		"@types/node": "^14.14.20",
+		"@types/node-cron": "^2.0.3",
 		"@types/node-fetch": "^2.5.7",
 		"@types/nodemailer": "^6.4.0",
 		"@typescript-eslint/eslint-plugin": "^4.12.0",
