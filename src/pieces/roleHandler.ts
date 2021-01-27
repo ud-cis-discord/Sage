@@ -2,7 +2,7 @@ import { Client, GuildMember, PartialGuildMember, TextChannel } from 'discord.js
 import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
-import { DB, GUILDS, LOG } from '@root/config';
+import { DB, GUILDS, CHANNELS } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -36,7 +36,7 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('guildMemberAdd', member => {
 		memberAdd(member)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));

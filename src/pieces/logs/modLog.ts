@@ -1,6 +1,6 @@
 import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember, PartialGuildMember } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
-import { GUILDS, LOG, ROLES } from '@root/config';
+import { GUILDS, CHANNELS, ROLES } from '@root/config';
 
 async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
 	if (guild.id !== GUILDS.MAIN) return;
@@ -95,8 +95,8 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
-	const modLog = await bot.channels.fetch(LOG.MOD) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
+	const modLog = await bot.channels.fetch(CHANNELS.MOD_LOG) as TextChannel;
 
 	bot.on('guildBanAdd', (guild, target) => {
 		processBanAdd(guild, target, modLog)

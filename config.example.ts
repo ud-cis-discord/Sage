@@ -39,11 +39,12 @@ export const EMAIL = {
 	]
 };
 
-export const LOG = {			// Channel IDs for the various logs
-	ERROR: '',
-	SERVER: '',
-	MEMBER: '',
-	MOD: ''
+export const CHANNELS = {			// Channel IDs
+	ERROR_LOG: '',
+	SERVER_LOG: '',
+	MEMBER_LOG: '',
+	MOD_LOG: '',
+	SAGE: ''
 };
 
 export const MAINTAINERS = '';	// The current maintainers of this bot

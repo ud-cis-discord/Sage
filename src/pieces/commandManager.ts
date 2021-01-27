@@ -1,10 +1,10 @@
 import { Collection, Client, TextChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { getCommand, generateLogEmbed, readdirRecursive } from '@lib/utils';
-import { LOG, MAINTAINERS, PREFIX } from '@root/config';
+import { CHANNELS, MAINTAINERS, PREFIX } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.commands = new Collection();
 
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));

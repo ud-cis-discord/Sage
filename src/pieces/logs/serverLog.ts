@@ -15,7 +15,7 @@ import {
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { generateLogEmbed } from '@lib/utils';
-import { GUILDS, LOG } from '@root/config';
+import { GUILDS, CHANNELS } from '@root/config';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
@@ -413,8 +413,8 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
-	const serverLog = await bot.channels.fetch(LOG.SERVER) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
+	const serverLog = await bot.channels.fetch(CHANNELS.SERVER_LOG) as TextChannel;
 
 	bot.on('channelCreate', (channel: GuildChannel | DMChannel) => {
 		processChannelCreate(channel, serverLog)

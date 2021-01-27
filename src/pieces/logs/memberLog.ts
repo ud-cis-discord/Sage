@@ -1,7 +1,7 @@
 import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField, User, PartialUser } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { generateLogEmbed } from '@lib/utils';
-import { GUILDS, LOG } from '@root/config';
+import { GUILDS, CHANNELS } from '@root/config';
 
 async function processMemberAdd(member: GuildMember, channel: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -136,8 +136,8 @@ async function processUserUpdate(oldUser: User | PartialUser, newUser: User, cha
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
-	const memLog = await bot.channels.fetch(LOG.MEMBER) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
+	const memLog = await bot.channels.fetch(CHANNELS.MEMBER_LOG) as TextChannel;
 
 	bot.on('guildMemberAdd', member => {
 		processMemberAdd(member, memLog)

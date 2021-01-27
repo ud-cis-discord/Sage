@@ -1,7 +1,7 @@
 import { Client, Message, Guild, TextChannel } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
-import { DB, GUILDS, LOG, MAINTAINERS, PREFIX, ROLES } from '@root/config';
+import { DB, GUILDS, CHANNELS, MAINTAINERS, PREFIX, ROLES } from '@root/config';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
 	if (msg.channel.type !== 'dm' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
@@ -54,7 +54,7 @@ async function register(bot: Client): Promise<void> {
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
 	guild.members.fetch();
 
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 
 	bot.on('message', async msg => {
 		verify(msg, bot, guild)

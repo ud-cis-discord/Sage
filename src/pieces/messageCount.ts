@@ -1,7 +1,7 @@
 import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { DatabaseError } from '@lib/types/errors';
-import { LOG, PREFIX, DB, ROLES } from '@root/config';
+import { CHANNELS, PREFIX, DB, ROLES } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 const xpRatio = 1.25;
@@ -11,7 +11,7 @@ const maxGreen = '00ff00';
 const maxLevel = 20;
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(LOG.ERROR) as TextChannel;
+	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('message', async msg => countMessages(msg, errLog)
 		.catch(async error => errLog.send(await generateLogEmbed(error)))
 	);
@@ -104,7 +104,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setColor(createLevelHex(user.level));
 
 	// eslint-disable-next-line no-extra-parens
-	return (msg.guild.channels.cache.get(LOG.SAGE) as TextChannel).send(`${msg.member}, you have leveled up!`, embed);
+	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send(`${msg.member}, you have leveled up!`, embed);
 }
 
 function createLevelHex(level: number): string {
