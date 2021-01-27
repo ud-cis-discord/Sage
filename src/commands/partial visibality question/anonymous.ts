@@ -27,8 +27,8 @@ export async function run(msg: Message, [course, question]: [Course, string]): P
 		.setDescription(`[Click to jump](${messageLink})
 It is recommended you reply in public, but sudoreply can be used **in a staff channel** to reply in private if necessary.`);
 
-	const staffChannel = await msg.client.channels.fetch(course.channels.staff) as TextChannel;
-	await staffChannel.send(staffEmbed);
+	const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
+	await privateChannel.send(staffEmbed);
 
 	const entry: PVQuestion = {
 		owner: msg.author.id,
