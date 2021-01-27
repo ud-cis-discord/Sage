@@ -46,10 +46,14 @@ export function channelParser(msg: Message, input: string): TextChannel {
 
 	const gChannels: Collection<string, TextChannel> = msg.guild.channels.cache
 		.filter(channel => (channel.type === 'text' || channel.type === 'news')
-		&& channel.id === input)as Collection<string, TextChannel>;
+		&& (channel.id === input || channel.name === input))as Collection<string, TextChannel>;
 
 	if (!gChannels) {
 		throw 'No channel with that ID exists';
+	}
+
+	if (gChannels.size > 1) {
+		throw 'More than one channel with that name exists. Please specify a channel ID.';
 	}
 
 	return gChannels.first();

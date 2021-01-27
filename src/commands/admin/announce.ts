@@ -10,8 +10,9 @@ export async function permissions(msg: Message): Promise<boolean> {
 	return await botMasterPerms(msg);
 }
 
-export async function run(_msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
-	return channel.send(content);
+export async function run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
+	await channel.send(content);
+	return msg.channel.send(`Your announcement has been sent in ${channel}`);
 }
 
 export async function argParser(msg: Message, input: string): Promise<[TextChannel, string]> {
