@@ -26,14 +26,26 @@ async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
 
 	const channel = msg.channel as TextChannel;
 
-	const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+	let countInc = 0;
+	if (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]'))) {
+		countInc++;
+	}
+
+
+	bot.mongo.collection(DB.USERS).findOneAndUpdate(
+		{ discordId: msg.author.id },
+		{ $inc: { count: countInc, curExp: -1 } },
+		(err, value) => handleLevelUp(err, value as SageUser, msg)
+			.catch(async error => errLog.send(await generateLogEmbed(error))));
+}
+
+async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise<void> {
+	if (err) {
+		throw err;
+	}
 
 	if (!entry) {
 		throw new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`);
-	}
-
-	if (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]'))) {
-		entry.count++;
 	}
 
 	if (--entry.curExp <= 0) {
@@ -76,16 +88,9 @@ async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
 			msg.member.roles.remove(msg.member.roles.cache.find(r => r.name.startsWith('Level')), `${msg.author.username} leveled up.`);
 			msg.member.roles.add(addRole, `${msg.author.username} leveled up.`);
 		}
-	}
 
-	bot.mongo.collection(DB.USERS).updateOne(
-		{ discordId: msg.author.id },
-		{ $set: { ...entry } })
-		.then(async updated => {
-			if (updated.modifiedCount === 0) {
-				errLog.send(await generateLogEmbed(new DatabaseError(`Member ${msg.author.username} (${msg.author.id}) not in database`)));
-			}
-		});
+		msg.client.mongo.collection(DB.USERS).updateOne({ discordId: msg.author.id }, { $set: { ...entry } });
+	}
 }
 
 async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
