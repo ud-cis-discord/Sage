@@ -12,7 +12,7 @@ export async function run(msg: Message): Promise<Message> {
 
 	const fields: Array<EmbedField> = [];
 
-	if (currentStatus.components.every(component => !component.only_show_if_degraded)) {
+	if (currentStatus.components.every(component => component.status === 'operational')) {
 		fields.push({
 			name: 'All components operational',
 			value: 'No errors to report',
@@ -20,7 +20,7 @@ export async function run(msg: Message): Promise<Message> {
 		});
 	} else {
 		currentStatus.components.forEach(component => {
-			if (component.only_show_if_degraded) {
+			if (component.status !== 'operational') {
 				fields.push({
 					name: component.name,
 					value: component.status,
@@ -41,7 +41,7 @@ export async function run(msg: Message): Promise<Message> {
 	const embed = new MessageEmbed()
 		.setTitle(currentStatus.status.description)
 		.setDescription(`[Discord Status](${currentStatus.page.url})\n\n${currentStatus.incidents[0]
-			? `Current incidents:\n${currentStatus.incidents.join('\n')}`
+			? `Current incidents:\n${currentStatus.incidents.map(i => i.name).join('\n')}`
 			: 'There is no active incidents.'}`)
 		.addFields(fields)
 		.setThumbnail('https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png')
@@ -71,7 +71,7 @@ interface Status {
 }
 interface ComponentsEntity {
 	created_at: string;
-	description?: null;
+	description?: string|null;
 	id: string;
 	name: string;
 	page_id: string;
