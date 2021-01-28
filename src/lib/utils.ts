@@ -44,6 +44,8 @@ export function readdirRecursive(dir: string): string[] {
 }
 
 export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
+	console.error(error);
+
 	let errTitle = '';
 	let errMessage = '';
 	const fields: Array<EmbedField> = [];
@@ -63,9 +65,9 @@ export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
 	if (error.stack) {
 		fields.push({
 			name: 'Stack Trace',
-			value: error.stack.length < 1900
+			value: error.stack.length < 1000
 				? `\`\`\`js\n${error.stack}\`\`\``
-				: await sendToHastebin(error.stack, 'js'),
+				: `Full stack too big\n\`\`\`js\n${error.stack.slice(0, 950)}...\`\`\``,
 			inline: false
 		});
 	}
