@@ -1,5 +1,5 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
-import { BOT, DB } from '@root/config';
+import { BOT, DB, PREFIX } from '@root/config';
 import { MessageEmbed, Message, TextChannel } from 'discord.js';
 
 export const description = `Reply to a question you previously asked with ${BOT.NAME}.`;
@@ -16,6 +16,10 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 	const embed = new MessageEmbed()
 		.setAuthor(`${shownAuthor} responded to ${question.questionId}`, shownAvatar)
 		.setDescription(`${response}\n\n[Jump to question](${question.messageLink})`);
+
+	if (question.type === 'private') {
+		embed.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${question.questionId} <response>`);
+	}
 
 	return channel.send(embed)
 		.then(() => msg.channel.send('I\'ve forwarded your message along.'));
