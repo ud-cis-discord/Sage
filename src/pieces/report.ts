@@ -20,9 +20,15 @@ async function register(bot: Client): Promise<void> {
 
 async function handleCron(bot: Client): Promise<void> {
 	const users: Array<SageUser> = await bot.mongo.collection(DB.USERS).find().toArray();
-	let report = 'Email,Count\n';
+	const courses: Array<string> = (await bot.mongo.collection(DB.COURSES).find().toArray()).map(course => course.name);
+
+	let report = `Email,Count,${courses.join(',')}\n`;
 	users.forEach(user => {
-		report += `${user.email},${user.count}\n`;
+		report += `${user.email},${user.count}`;
+		courses.forEach(course => {
+			report += `,${user.courses.includes(course)}`;
+		});
+		report += '\n';
 	});
 
 	const mailer = nodemailer.createTransport({
