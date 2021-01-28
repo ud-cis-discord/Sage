@@ -89,6 +89,8 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 
 	let toSend = false;
 	const [logEntry] = (await newChannel.guild.fetchAuditLogs({ type: 'CHANNEL_UPDATE', limit: 1 })).entries.array();
+	if (!logEntry) return;
+
 	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setFooter(`Channel ID: ${newChannel.id}`)
@@ -231,6 +233,7 @@ async function processInviteCreate(invite: Invite, serverLog: TextChannel): Prom
 async function processInviteDelete(invite: Invite, serverLog: TextChannel): Promise<void> {
 	if (invite.guild.id !== GUILDS.MAIN) return;
 	const [logEntry] = (await invite.guild.fetchAuditLogs({ type: 'INVITE_DELETE', limit: 1 })).entries.array();
+	if (!logEntry) return;
 
 	if (logEntry.reason?.startsWith('[no log]')) return;
 	if (logEntry.changes.find(change => change.key === 'code').old !== invite.code) return;
