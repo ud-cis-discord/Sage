@@ -81,6 +81,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 	if (member.guild.id !== GUILDS.MAIN) return;
 
 	const [logEntry] = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries.array();
+	if (!logEntry) return;
 
 	if (!('id' in logEntry.target)
 		|| logEntry.target.id !== member.id
