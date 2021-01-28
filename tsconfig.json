@@ -22,6 +22,6 @@
     "exclude": [
         "**/node_modules",
 		"**/dist",
-		"config.example.js"
+		"config.example.ts"
     ]
 }
