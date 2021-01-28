@@ -35,7 +35,7 @@ async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
 	bot.mongo.collection(DB.USERS).findOneAndUpdate(
 		{ discordId: msg.author.id },
 		{ $inc: { count: countInc, curExp: -1 } },
-		(err, value) => handleLevelUp(err, value as SageUser, msg)
+		(err, { value }) => handleLevelUp(err, value as SageUser, msg)
 			.catch(async error => errLog.send(await generateLogEmbed(error))));
 }
 
