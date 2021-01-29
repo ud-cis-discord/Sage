@@ -17,6 +17,17 @@ export async function run(msg: Message, [course, question]: [Course, string]): P
 		.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
 		.setDescription(question)
 		.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${questionId} <response>`);
+	if (msg.attachments) {
+		let imageSet = false;
+		msg.attachments.forEach(attachment => {
+			if (!imageSet && attachment.height) {
+				embed.setImage(attachment.url);
+				imageSet = true;
+			} else {
+				embed.attachFiles([attachment]);
+			}
+		});
+	}
 
 	const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
 	const questionMessage = await privateChannel.send(embed);
