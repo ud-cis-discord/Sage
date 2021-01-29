@@ -12,6 +12,9 @@ export async function permissions(msg: Message): Promise<boolean> {
 
 export async function run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
 	await channel.send(content);
+	if (msg.attachments) {
+		msg.attachments.forEach(atch => channel.send(atch));
+	}
 	return msg.channel.send(`Your announcement has been sent in ${channel}`);
 }
 
