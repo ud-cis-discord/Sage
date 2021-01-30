@@ -43,7 +43,7 @@ export async function run(msg: Message, [course, assignment]: [string, string]):
 			break;
 		}
 	}
-	if (!failed) {
+	if (!failed && msg.channel.type !== 'dm') {
 		return msg.channel.send('I\'ve sent the list to your DMs.');
 	}
 }

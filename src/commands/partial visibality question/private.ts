@@ -17,6 +17,17 @@ export async function run(msg: Message, [course, question]: [Course, string]): P
 		.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
 		.setDescription(question)
 		.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${questionId} <response>`);
+	if (msg.attachments) {
+		let imageSet = false;
+		msg.attachments.forEach(attachment => {
+			if (!imageSet && attachment.height) {
+				embed.setImage(attachment.url);
+				imageSet = true;
+			} else {
+				embed.attachFiles([attachment]);
+			}
+		});
+	}
 
 	const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
 	const questionMessage = await privateChannel.send(embed);
@@ -53,8 +64,8 @@ export async function argParser(msg: Message, input: string): Promise<[Course, s
 	} else {
 		const inputtedCourse = courses.find(c => c.name === input.split(' ')[0]);
 		if (!inputtedCourse) {
-			throw `I wasn't able to determine your course biased off of your enrollment or your input. Please specify the corse at the beginning of your question.
-Available corses: \`${courses.map(c => c.name).join('`, `')}\``;
+			throw 'I wasn\'t able to determine your course biased off of your enrollment or your input. ' +
+			`Please specify the course at the beginning of your question.\nAvailable courses: \`${courses.map(c => c.name).join('`, `')}\``;
 		}
 		course = inputtedCourse;
 		question = input.slice(course.name.length).trim();
