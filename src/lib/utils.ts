@@ -1,19 +1,18 @@
-import { Client, Message, MessageEmbed, EmbedField } from 'discord.js';
-import fetch from 'node-fetch';
+import { Client, Message, MessageEmbed, MessageAttachment } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
+import moment from 'moment';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
 	return bot.commands.get(cmd) || bot.commands.find(command => command.aliases && command.aliases.includes(cmd));
 }
 
-export async function sendToHastebin(input: string, filetype = 'txt'): Promise<string> {
-	if (input.length < 1900) return input;
-
-	const res = await fetch('https://hastebin.com/documents', { method: 'POST', body: input }).then(r => r.json());
-	return `Result too long for Discord, uploaded to hastebin: <https://hastebin.com/${res.key}.${filetype}>`;
+export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
+	const time = moment().format('M-D-YY_HH-mm');
+	filename = `${filename}${timestamp ? `_${time}` : ''}` || time;
+	return new MessageAttachment(Buffer.from(input.trim()), `${filename}.${filetype}`);
 }
 
 export async function generateQuestionId(msg: Message, depth = 1): Promise<string> {
@@ -46,36 +45,28 @@ export function readdirRecursive(dir: string): string[] {
 export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
 	console.error(error);
 
-	let errTitle = '';
-	let errMessage = '';
-	const fields: Array<EmbedField> = [];
+	const embed = new MessageEmbed();
 
-	if (error.name) {
-		errTitle = error.name;
-	} else {
-		errTitle = error.toString();
-	}
+	embed.setTitle(error.name ? error.name : error.toString());
 
 	if (error.message) {
-		errMessage = error.message.length < 1900
-			? `\`\`\`\n${error.message}\`\`\``
-			: await sendToHastebin(error.message);
+		if (error.message.length < 1000) {
+			embed.setDescription(`\`\`\`\n${error.message}\`\`\``);
+		} else {
+			embed.setDescription(`Full error message too big\n\`\`\`js\n${error.message.slice(0, 950)}...\`\`\``);
+		}
 	}
 
 	if (error.stack) {
-		fields.push({
-			name: 'Stack Trace',
-			value: error.stack.length < 1000
-				? `\`\`\`js\n${error.stack}\`\`\``
-				: `Full stack too big\n\`\`\`js\n${error.stack.slice(0, 950)}...\`\`\``,
-			inline: false
-		});
+		if (error.stack.length < 1) {
+			embed.addField('Stack Trace', `\`\`\`js\n${error.stack}\`\`\``, false);
+		} else {
+			embed.addField('Stack Trace', 'Full stack too big, sent to file.', false);
+			embed.attachFiles([await sendToFile(error.stack, 'js', 'error', true)]);
+		}
 	}
+	embed.setTimestamp();
+	embed.setColor('RED');
 
-	return new MessageEmbed()
-		.setTitle(errTitle)
-		.setDescription(errMessage)
-		.addFields(fields)
-		.setTimestamp()
-		.setColor('RED');
+	return embed;
 }
