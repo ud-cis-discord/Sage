@@ -5,7 +5,7 @@ import { BOT, PREFIX } from '@root/config';
 export const description = `Provides info about all ${BOT.NAME} commands`;
 export const usage = '[command]';
 export const extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
-export const aliases = ['commands'];
+export const aliases = ['commands', 'man'];
 
 export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 	const { commands } = msg.client;
