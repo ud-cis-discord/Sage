@@ -9,8 +9,8 @@ import { CHANNELS, DB, EMAIL } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
-	// 0 * * * SAT
-	schedule('0 * * * SAT', () => {
+	// 0 0 * * SUN
+	schedule('0 0 * * SUN', () => {
 		handleCron(bot)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	}, {
