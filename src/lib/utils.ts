@@ -58,7 +58,7 @@ export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
 	}
 
 	if (error.stack) {
-		if (error.stack.length < 1) {
+		if (error.stack.length < 1000) {
 			embed.addField('Stack Trace', `\`\`\`js\n${error.stack}\`\`\``, false);
 		} else {
 			embed.addField('Stack Trace', 'Full stack too big, sent to file.', false);
