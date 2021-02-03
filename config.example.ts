@@ -44,7 +44,9 @@ export const CHANNELS = {			// Channel IDs
 	SERVER_LOG: '',
 	MEMBER_LOG: '',
 	MOD_LOG: '',
-	SAGE: ''
+	FEEDBACK: '',
+	SAGE: '',
+	ANNOUNCE: ''
 };
 
 export const MAINTAINERS = '';	// The current maintainers of this bot
