@@ -8,6 +8,7 @@ import { DB, EMAIL } from '@root/config';
 export const runInDM = false;
 export const description = 'Warns a user for breaking the rules and deletes the offending message.';
 export const extendedHelp = 'This command must be used when replying to a message.';
+export const usage = '[reason]';
 
 export function permissions(msg: Message): boolean {
 	return staffPerms(msg);
