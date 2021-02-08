@@ -1,7 +1,7 @@
 import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
 import { generateLogEmbed } from '@lib/utils';
 import { DatabaseError } from '@lib/types/errors';
-import { CHANNELS, PREFIX, DB, ROLES } from '@root/config';
+import { CHANNELS, PREFIX, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 const xpRatio = 1.25;
@@ -20,7 +20,12 @@ async function register(bot: Client): Promise<void> {
 async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
 	const bot = msg.client;
 
-	if (msg.channel.type !== 'text' || msg.content.toLowerCase().startsWith(PREFIX) || msg.author.bot) {
+	if (
+		msg.channel.type !== 'text'
+		|| msg.guild?.id !== GUILDS.MAIN
+		|| msg.content.toLowerCase().startsWith(PREFIX)
+		|| msg.author.bot
+	) {
 		return;
 	}
 
@@ -106,7 +111,9 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setTitle('<:stevepeace:746223639770431578> Level up!')
 		.setDescription(embedText)
 		.addField('XP to next level:', user.levelExp, true)
-		.setColor(createLevelHex(user.level));
+		.setColor(createLevelHex(user.level))
+		.setFooter(`You can turn the messages off by sending \`${PREFIX}lp\``)
+		.setTimestamp();
 
 	// eslint-disable-next-line no-extra-parens
 	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send(`${msg.member}, you have leveled up!`, embed);
