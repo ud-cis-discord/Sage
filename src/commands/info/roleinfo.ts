@@ -12,10 +12,10 @@ export function permissions(msg: Message): boolean {
 }
 
 export async function run(msg: Message, [role]: [Role]): Promise<Message> {
-	const memberlist = role.members.map(m => m.user.username).sort();
+	const memberList = role.members.map(m => m.user.username).sort();
 
-	const members = memberlist.join(', ').length > 1
-		? await sendToFile(memberlist.join('\n'), 'txt', 'MemberList', true) : memberlist.join(', ');
+	const members = memberList.join(', ').length > 1000
+		? await sendToFile(memberList.join('\n'), 'txt', 'MemberList', true) : memberList.join(', ');
 
 	const embed = new MessageEmbed()
 		.setColor(role.hexColor)
