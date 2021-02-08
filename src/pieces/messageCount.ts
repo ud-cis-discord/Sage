@@ -111,7 +111,9 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setTitle('<:stevepeace:746223639770431578> Level up!')
 		.setDescription(embedText)
 		.addField('XP to next level:', user.levelExp, true)
-		.setColor(createLevelHex(user.level));
+		.setColor(createLevelHex(user.level))
+		.setFooter(`You can turn the messages off by sending \`${PREFIX}lp\``)
+		.setTimestamp();
 
 	// eslint-disable-next-line no-extra-parens
 	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send(`${msg.member}, you have leveled up!`, embed);
