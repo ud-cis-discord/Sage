@@ -82,8 +82,6 @@ async function main() {
 
 		const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
 
-		console.log(`${email.padEnd(18)} | ${isStaff.toString().padEnd(5)} | ${hash}`);
-
 		const entry: SageUser = await db.findOne({ email: email, hash: hash });
 
 		const newUser: SageUser = {
@@ -117,13 +115,18 @@ async function main() {
 		newUser.roles.push(ROLES.LEVEL_ONE);
 
 		if (entry) {			// User already on-boarded
-			if (isStaff) {		// Make staff is not already
+			if (isStaff && entry.isVerified) {		// Make staff is not already
+				await db.updateOne(entry, { $set: { isStaff: true } });
+				console.log(`${email} was already in verified. Add staff roles manually. Discord ID ${entry.discordId}`);
+			} else if (isStaff && !entry.isVerified) {
 				await db.updateOne(entry, { $set: { ...newUser } });
 			}
 			continue;
 		}
 
 		await db.insertOne(newUser);
+
+		console.log(`${email.padEnd(18)} | ${isStaff.toString().padEnd(5)} | ${hash}`);
 
 		sendEmail(email, hash);
 		await sleep(1000);
