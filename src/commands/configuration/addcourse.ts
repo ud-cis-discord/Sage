@@ -77,7 +77,7 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 			staff: staffRole.id,
 			student: studentRole.id
 		},
-		assignments: []
+		assignments: ['hw1', 'hw2', 'hw3', 'hw4', 'hw5', 'lab1', 'lab2', 'lab3', 'lab4', 'lab5']
 	};
 	await msg.client.mongo.collection(DB.COURSES).insertOne(newCourse);
 	return (await response).edit(`Added course with ID ${course}`);
