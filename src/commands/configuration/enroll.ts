@@ -7,6 +7,7 @@ export const description = 'Enroll yourself in a course.';
 export const usage = '<course>';
 export const extendedHelp = 'If you use this command on a course you are already enrolled in, you will be unenrolled.';
 export const runInDM = false;
+export const aliases = ['unenroll'];
 
 export async function run(msg: Message, [desiredCourse]: [string]): Promise<Message> {
 	const courses: Array<Course> = await msg.client.mongo.collection(DB.COURSES).find().toArray();
