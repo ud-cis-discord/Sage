@@ -86,6 +86,8 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 
 async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newChannel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in newChannel) || !('guild' in oldChannel) || newChannel.guild.id !== GUILDS.MAIN) return;
+	const oldTextChannel = oldChannel as TextChannel;
+	const newTextChannel = newChannel as TextChannel;
 
 	let toSend = false;
 	const [logEntry] = (await newChannel.guild.fetchAuditLogs({ type: 'CHANNEL_UPDATE', limit: 1 })).entries.array();
@@ -110,6 +112,13 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 	if (!toSend && oldChannel.name !== newChannel.name) {
 		toSend = true;
 		embed.setTitle(`#${oldChannel.name} is now called #${newChannel.name}`);
+	}
+
+	if (!toSend && oldTextChannel.topic !== newTextChannel.topic) {
+		toSend = true;
+		embed.setTitle(`#${newChannel.name} had a topic change.`)
+			.addField('New topic', newTextChannel.topic ? newTextChannel.topic : 'NONE')
+			.addField('Old topic', oldTextChannel.topic ? oldTextChannel.topic : 'NONE');
 	}
 
 	if (!toSend && !oldChannel.permissionOverwrites.every((oldOverride, key) => {
