@@ -19,6 +19,7 @@ const MESSAGE = `<!DOCTYPE html>
 	<h1 style="color:#00539F">Welcome!</h1>
 	<p>You're getting this email because you're part of a class in the UD CIS Department that is using <span style="color:#738ADB">Discord</span> as its primary means of communication.</p>
 	<p>For further information about the UD CIS <span style="color:#738ADB">Discord</span>, see <a href="https://ud-cis-discord.github.io/">this page.</a></p>
+	<p><strong>If you don't have a <span style="color:#738ADB">Discord</span> account already, click <a href="https://discord.com/register">here</a> to sign up for one.</strong></p>
 	<p>
 		Click <a href="https://discord.gg/$invCode">here</a> for the verification site.
 	<p>Once you're on the guild, right click Sage's name on the right side of the screen and select 'Message'. 
