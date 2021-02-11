@@ -13,8 +13,8 @@ export async function run(msg: Message, [cmd]: [Role | 'list']): Promise<Message
 	const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
 
 	if (cmd === 'list') {
-		return msg.channel.send(`Here is the list of self-assignable roles: 
-\`${(await assignables.find().toArray()).map(a => msg.guild.roles.cache.get(a.id).name).join('`, `')}\``);
+		return msg.channel.send('Here is the list of self-assignable roles:\n' +
+			`\`${(await assignables.find().toArray()).map(a => msg.guild.roles.cache.get(a.id).name).sort().join('`, `')}\``);
 	} else {
 		const role: AssignableRole = { id: cmd.id };
 

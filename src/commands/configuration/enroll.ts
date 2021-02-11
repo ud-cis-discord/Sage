@@ -7,13 +7,14 @@ export const description = 'Enroll yourself in a course.';
 export const usage = '<course>';
 export const extendedHelp = 'If you use this command on a course you are already enrolled in, you will be unenrolled.';
 export const runInDM = false;
+export const aliases = ['unenroll'];
 
 export async function run(msg: Message, [desiredCourse]: [string]): Promise<Message> {
 	const courses: Array<Course> = await msg.client.mongo.collection(DB.COURSES).find().toArray();
 	const course = courses.find(c => c.name === desiredCourse);
 
 	if (!course) {
-		return msg.channel.send(`Could not find course: ${desiredCourse}.\nAvailable courses: \`${courses.map(c => c.name).join('`, `')}\``);
+		return msg.channel.send(`Could not find course: ${desiredCourse}.\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``);
 	}
 
 	const user: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.member.id });
@@ -32,7 +33,7 @@ export async function run(msg: Message, [desiredCourse]: [string]): Promise<Mess
 	return msg.channel.send(`You have been ${enroll ? 'enrolled in' : 'unenrolled from'} ${course.name}.`);
 }
 
-export async function argParser(_msg: Message, input: string): Promise<Array<string>> {
+export function argParser(_msg: Message, input: string): Array<string> {
 	if (input === '') throw `Usage: ${usage}`;
-	return [input];
+	return [input.toLowerCase()];
 }
