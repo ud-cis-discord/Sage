@@ -92,7 +92,7 @@ export async function argParser(msg: Message, input: string): Promise<Array<stri
 		throw `${input} has already been registered as a course.`;
 	}
 
-	return [input];
+	return [input.toLowerCase()];
 }
 
 async function createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {

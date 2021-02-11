@@ -33,7 +33,7 @@ export async function run(msg: Message, [desiredCourse]: [string]): Promise<Mess
 	return msg.channel.send(`You have been ${enroll ? 'enrolled in' : 'unenrolled from'} ${course.name}.`);
 }
 
-export async function argParser(_msg: Message, input: string): Promise<Array<string>> {
+export function argParser(_msg: Message, input: string): Array<string> {
 	if (input === '') throw `Usage: ${usage}`;
-	return [input];
+	return [input.toLowerCase()];
 }

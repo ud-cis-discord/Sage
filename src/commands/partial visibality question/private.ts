@@ -62,7 +62,7 @@ export async function argParser(msg: Message, input: string): Promise<[Course, s
 			question = input;
 		}
 	} else {
-		const inputtedCourse = courses.find(c => c.name === input.split(' ')[0]);
+		const inputtedCourse = courses.find(c => c.name === input.split(' ')[0].toLowerCase());
 		if (!inputtedCourse) {
 			throw 'I wasn\'t able to determine your course biased off of your enrollment or your input. ' +
 			`Please specify the course at the beginning of your question.\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;

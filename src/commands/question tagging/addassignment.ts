@@ -59,7 +59,7 @@ export async function argParser(msg: Message, input: string): Promise<[string, A
 	}
 
 	const assignments = input.split('|').map(assignment => assignment.trim());
-	const course = assignments.shift();
+	const course = assignments.shift().toLowerCase();
 
 	if (await msg.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) !== 1) {
 		throw `Could not find course: ${course}`;
