@@ -14,7 +14,7 @@ export async function run(msg: Message, [desiredCourse]: [string]): Promise<Mess
 	const course = courses.find(c => c.name === desiredCourse);
 
 	if (!course) {
-		return msg.channel.send(`Could not find course: ${desiredCourse}.\nAvailable courses: \`${courses.map(c => c.name).join('`, `')}\``);
+		return msg.channel.send(`Could not find course: ${desiredCourse}.\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``);
 	}
 
 	const user: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.member.id });
