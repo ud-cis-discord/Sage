@@ -6,10 +6,7 @@ export const extendedHelp = 'Exactly one file must be attached when running this
 export const usage = '[more information]';
 
 export async function run(msg: Message, [imgDesc]: [string]): Promise<Message> {
-	if (msg.attachments.size !== 1) return msg.channel.send(extendedHelp);
-
 	const [attachment] = msg.attachments.array();
-
 	if (!attachment.height) return msg.channel.send('The attachment must be an image file (jpg or png).');
 
 	const submissionChannel = await msg.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
@@ -22,4 +19,9 @@ export async function run(msg: Message, [imgDesc]: [string]): Promise<Message> {
 		.setColor('BLUE')
 		.setTimestamp())
 		.then(() => msg.channel.send('Thank you for your submission.'));
+}
+
+export function argParser(msg: Message, input: string): Array<string> {
+	if (msg.attachments.size !== 1) throw extendedHelp;
+	return [input];
 }
