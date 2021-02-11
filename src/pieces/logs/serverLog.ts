@@ -86,6 +86,8 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 
 async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newChannel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in newChannel) || !('guild' in oldChannel) || newChannel.guild.id !== GUILDS.MAIN) return;
+	const oldTextChannel = oldChannel as TextChannel;
+	const newTextChannel = newChannel as TextChannel;
 
 	let toSend = false;
 	const [logEntry] = (await newChannel.guild.fetchAuditLogs({ type: 'CHANNEL_UPDATE', limit: 1 })).entries.array();
@@ -112,12 +114,28 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 		embed.setTitle(`#${oldChannel.name} is now called #${newChannel.name}`);
 	}
 
-	if (!toSend && !oldChannel.permissionOverwrites.equals(newChannel.permissionOverwrites)) {
+	if (!toSend && oldTextChannel.topic !== newTextChannel.topic) {
+		toSend = true;
+		embed.setTitle(`#${newChannel.name} had a topic change.`)
+			.addField('New topic', newTextChannel.topic ? newTextChannel.topic : 'NONE')
+			.addField('Old topic', oldTextChannel.topic ? oldTextChannel.topic : 'NONE');
+	}
+
+	if (!toSend && !oldChannel.permissionOverwrites.every((oldOverride, key) => {
+		const newOverride = newChannel.permissionOverwrites.get(key);
+		return newOverride?.allow.equals(oldOverride.allow)
+			&& newOverride?.deny.equals(oldOverride.deny)
+			&& newOverride?.id === oldOverride.id
+			&& newOverride?.type === oldOverride.type
+			&& newOverride?.channel === oldOverride.channel;
+	})) {
 		toSend = true;
 		embed.setTitle(`#${newChannel.name} had a permission change`);
 		newChannel.permissionOverwrites.forEach(overwrite => {
 			const target = overwrite.type === 'role'
-				? newChannel.guild.roles.cache.get(overwrite.id).name
+				? newChannel.guild.roles.cache.get(overwrite.id).name.startsWith('@')
+					? newChannel.guild.roles.cache.get(overwrite.id).name
+					: `@${newChannel.guild.roles.cache.get(overwrite.id).name}`
 				: newChannel.guild.members.cache.get(overwrite.id).user.tag;
 			const allowed = overwrite.allow.bitfield !== 0
 				? Permissions.ALL === overwrite.allow.bitfield
