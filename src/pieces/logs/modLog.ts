@@ -59,6 +59,8 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 		return entry.target.id === member.id;
 	});
 
+	if (!logEntry) return;
+
 	let muted: 'muted' | 'unmuted' | null = null;
 
 	if (logEntry.changes.find(change => change.key === '$add')?.new[0]?.id === ROLES.MUTED) {
