@@ -11,17 +11,15 @@ export async function permissions(msg: Message): Promise<boolean> {
 }
 
 export async function run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
-	await channel.send(content);
-	if (msg.attachments) {
-		msg.attachments.forEach(atch => channel.send(atch));
-	}
+	await channel.send(content, { files: msg.attachments.map(attachment => attachment.attachment) });
+
 	return msg.channel.send(`Your announcement has been sent in ${channel}`);
 }
 
 export async function argParser(msg: Message, input: string): Promise<[TextChannel, string]> {
 	const args = input.trim().split('|').map(inp => inp.trim());
 
-	if (args.length > 2 || !args[0]) {
+	if (args.length > 2 || (!args[0] && msg.attachments.size === 0)) {
 		throw `Usage: ${usage}`;
 	}
 
