@@ -27,6 +27,9 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 	const studentRole = await msg.guild.roles.create({ data: { name: `CISC ${course}`, permissions: 0 }, reason });
 
 	const standardPerms: Array<OverwriteResolvable> = [{
+		id: ROLES.ADMIN,
+		allow: 'VIEW_CHANNEL'
+	}, {
 		id: staffRole.id,
 		allow: 'VIEW_CHANNEL'
 	}, {
@@ -39,7 +42,7 @@ export async function run(msg: Message, [course]: [string]): Promise<Message> {
 		id: ROLES.MUTED,
 		deny: 'SEND_MESSAGES'
 	}];
-	const staffPerms = [standardPerms[0], standardPerms[1]];
+	const staffPerms = [standardPerms[0], standardPerms[1], standardPerms[2]];
 
 	const categoryChannel = await msg.guild.channels.create(`CISC ${course}`, {
 		type: 'category',
