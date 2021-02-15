@@ -68,5 +68,7 @@ export async function argParser(msg: Message, input: string): Promise<[Course, s
 		question = input.slice(course.name.length).trim();
 	}
 
+	if (!question) throw 'Please provide a question.';
+
 	return [course, question];
 }
