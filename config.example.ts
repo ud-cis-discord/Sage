@@ -5,6 +5,8 @@ export const BOT = {
 };
 
 export const PREFIX = 's;';
+export const MAINTAINERS = '';	// The current maintainers of this bot
+export const SEMESTER_ID = '';	// The current semester ID. i.e. s21
 
 export const DB = {
 	CONNECTION: '', 			// Mongo connection string here
@@ -46,7 +48,6 @@ export const CHANNELS = {			// Channel IDs
 	MOD_LOG: '',
 	FEEDBACK: '',
 	SAGE: '',
-	ANNOUNCE: ''
+	ANNOUNCE: '',
+	ARCHIVE: ''
 };
-
-export const MAINTAINERS = '';	// The current maintainers of this bot
