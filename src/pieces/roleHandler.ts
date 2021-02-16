@@ -4,7 +4,7 @@ import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
 import { DB, GUILDS, CHANNELS } from '@root/config';
 
-async function memberAdd(member: GuildMember): Promise<void> {
+async function memberAdd(member: GuildMember, errLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
 	const entry: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
@@ -17,12 +17,13 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	}
 
 	entry.roles.forEach(role => {
-		member.roles.add(role, 'Automatically assigned by Role Handler on join.');
+		member.roles.add(role, 'Automatically assigned by Role Handler on join.')
+			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 }
 
 async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): Promise<void> {
-	if (newMember.roles.cache.size === oldMember.roles.cache.size) return;
+	if (newMember.roles.cache.size === oldMember.roles.cache.size || newMember.guild.id !== GUILDS.MAIN) return;
 
 	const updated = await newMember.client.mongo.collection(DB.USERS).updateOne({ discordId: newMember.id }, {
 		$set: {
@@ -38,7 +39,7 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('guildMemberAdd', member => {
-		memberAdd(member)
+		memberAdd(member, errLog)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
 	});
 	bot.on('guildMemberUpdate', async (oldMember, newMember) => {

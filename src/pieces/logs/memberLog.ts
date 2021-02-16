@@ -19,29 +19,62 @@ async function processMemberAdd(member: GuildMember, channel: TextChannel): Prom
 async function processMemberRemove(member: GuildMember | PartialGuildMember, channel: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
+	const fields: Array<EmbedField> = [];
+
+	if (member.user.createdAt) {
+		fields.push({
+			name: 'Account created',
+			value: `${member.user.createdAt.toLocaleString()}, ${prettyMilliseconds(Date.now() - member.user.createdTimestamp, { verbose: true })} ago`,
+			inline: false
+		});
+	} else {
+		fields.push({
+			name: 'Account created',
+			value: 'User not cached, timestamp unknown.',
+			inline: false
+		});
+	}
+
+	if (member.joinedAt) {
+		fields.push({
+			name: 'User joined',
+			value: `${member.joinedAt.toLocaleString()}, ${prettyMilliseconds(Date.now() - member.joinedTimestamp, { verbose: true })} ago`,
+			inline: false
+		});
+	} else {
+		fields.push({
+			name: 'User joined',
+			value: 'User not cached, timestamp unknown.',
+			inline: false
+		});
+	}
+
+	if (member.roles.cache) {
+		fields.push({
+			name: 'Roles',
+			value: member.roles.cache.size > 1
+				? member.roles.cache.filter(role => role.id !== GUILDS.MAIN).map(role => role.toString()).join(', ')
+				: 'None',
+			inline: false
+		});
+	} else {
+		fields.push({
+			name: 'Roles',
+			value: 'User not cached, timestamp unknown.',
+			inline: false
+		});
+	}
+
 	channel.send(new MessageEmbed()
 		.setTitle(`${member.user.tag} just left.`)
 		.setThumbnail(member.user.avatarURL({ dynamic: true }))
-		.addFields([
-			{
-				name: 'Account created',
-				value: `${member.user.createdAt.toLocaleString()}, ${prettyMilliseconds(Date.now() - member.user.createdTimestamp, { verbose: true })} ago`
-			}, {
-				name: 'User joined',
-				value: `${member.joinedAt.toLocaleString()}, ${prettyMilliseconds(Date.now() - member.joinedTimestamp, { verbose: true })} ago`
-			}, {
-				name: 'Roles',
-				value: member.roles.cache.size > 1
-					? member.roles.cache.filter(role => role.id !== GUILDS.MAIN).map(role => role.toString()).join(', ')
-					: 'None'
-			}
-		])
+		.addFields(fields)
 		.setColor('DARK_ORANGE')
 		.setFooter(`Discord ID: ${member.id}`)
 		.setTimestamp());
 }
 
-async function processMemberUpdate(oldMember:GuildMember | PartialGuildMember, newMember: GuildMember, channel: TextChannel): Promise<void> {
+async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember, channel: TextChannel): Promise<void> {
 	if (newMember.guild.id !== GUILDS.MAIN) return;
 	const embed = new MessageEmbed()
 		.setFooter(`Discord ID: ${newMember.id}`)
