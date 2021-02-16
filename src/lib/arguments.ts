@@ -8,7 +8,7 @@ export async function roleParser(msg: Message, input: string): Promise<Role> {
 		return role;
 	}
 
-	const roleList = msg.guild.roles.cache.filter(r => r.name === input);
+	const roleList = msg.guild.roles.cache.filter(r => r.name.toLowerCase() === input.toLowerCase());
 	if (roleList.size === 0) {
 		throw 'No role with that name or ID exists.';
 	}
