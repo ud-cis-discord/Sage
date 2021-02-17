@@ -10,7 +10,8 @@
 		"test": "eslint src --ext .ts",
 		"lint": "eslint src --ext .ts --fix",
 		"dev": "tsc-watch --onSuccess \"node dist/src/sage.js\"",
-		"onboard": "node dist/onboard/onboard.js"
+		"onboard": "node dist/onboard/onboard.js",
+		"nudge": "node dist/onboard/nudge.js"
 	},
 	"repository": {
 		"type": "git",
