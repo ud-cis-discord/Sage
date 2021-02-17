@@ -47,7 +47,7 @@ async function main() {
 
 		console.log(`Emailing: ${user.email}`);
 		await sendEmail(user);
-		await sleep(1000);
+		await sleep(1100);
 	}
 
 	client.close();
