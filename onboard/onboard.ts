@@ -130,7 +130,7 @@ async function main() {
 		console.log(`${email.padEnd(18)} | ${isStaff.toString().padEnd(5)} | ${hash}`);
 
 		sendEmail(email, hash);
-		await sleep(1000);
+		await sleep(1100);
 	}
 
 	client.close();
