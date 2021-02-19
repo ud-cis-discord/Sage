@@ -12,8 +12,10 @@ export function permissions(msg: Message): boolean {
 	return staffPerms(msg);
 }
 
-export function run(msg: Message, member: GuildMember): Promise<Message> {
-	const roles = member.roles.cache.map(role => role.name).sort().join(', ');
+export function run(msg: Message, [member]: [GuildMember]): Promise<Message> {
+	const roles = member.roles.cache.size > 1
+		? member.roles.cache.filter(r => r.id !== r.guild.id).sort().array().join(' ')
+		: 'none';
 
 	const accountCreated = `${member.user.createdAt.getMonth()}/${member.user.createdAt.getDate()}/${member.user.createdAt.getFullYear()} 
 	(${prettyMilliseconds(Date.now() - member.user.createdTimestamp)} ago)`;
@@ -36,9 +38,10 @@ export function run(msg: Message, member: GuildMember): Promise<Message> {
 	return msg.channel.send(embed);
 }
 
-export function argParser(msg: Message, input: string): Promise<GuildMember> {
+export async function argParser(msg: Message, input: string): Promise<Array<GuildMember>> {
 	if (!input) {
 		throw `Usage: ${usage}`;
 	}
-	return userParser(msg, input);
+
+	return [await userParser(msg, input)];
 }
