@@ -25,9 +25,11 @@ export async function userParser(msg: Message, input: string): Promise<GuildMemb
 
 	let retMembers = gMembers.filter(member => member.user.id === input);
 	if (retMembers.size !== 1) {
-		retMembers = gMembers.filter(member => member.user.username.toLowerCase() === input);
+		retMembers = gMembers.filter(member => member.user.tag.toLowerCase() === input);
 		if (retMembers.size !== 1) {
-			retMembers = gMembers.filter(member => member.nickname ? member.nickname.toLowerCase() === input : false);
+			retMembers = gMembers.filter(
+				member => member.user.username.toLowerCase() === input || member.nickname?.toLowerCase() === input
+			);
 		}
 	}
 
@@ -35,7 +37,7 @@ export async function userParser(msg: Message, input: string): Promise<GuildMemb
 		throw 'No member with that username, nickname, or ID exists.';
 	}
 	if (retMembers.size > 1) {
-		throw 'Multiple members with that username or nickname exist, try entering an ID to get a specific user';
+		throw `The query you entered matches \`${retMembers.map(member => member.user.tag).join('`, `')}\`. Try entering one of these tags to get a specific user.`;
 	}
 
 	return retMembers.array()[0];
