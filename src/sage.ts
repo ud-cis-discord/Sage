@@ -1,11 +1,11 @@
 import 'module-alias/register';
+import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { DB, BOT, PREFIX } from '@root/config';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('console-stamp')(console, {
+consoleStamp(console, {
 	pattern: 'dd/mm/yy hh:MM:ss.L tt',
 	label: false
 });
