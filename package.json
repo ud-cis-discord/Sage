@@ -24,6 +24,7 @@
 	},
 	"homepage": "https://github.com/ud-cis-discord/SageV2#readme",
 	"dependencies": {
+		"console-stamp": "^0.2.9",
 		"discord.js": "^12.5.1",
 		"module-alias": "^2.2.2",
 		"moment": "^2.29.1",
@@ -39,6 +40,7 @@
 		"@pieces": "dist/src/pieces"
 	},
 	"devDependencies": {
+		"@types/console-stamp": "^0.2.33",
 		"@types/mongodb": "^3.6.3",
 		"@types/node": "^14.14.20",
 		"@types/node-cron": "^2.0.3",
