@@ -51,3 +51,5 @@ export const CHANNELS = {			// Channel IDs
 	ANNOUNCE: '',
 	ARCHIVE: ''
 };
+
+export const BLACKLIST = [];

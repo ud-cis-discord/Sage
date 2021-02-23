@@ -4,7 +4,6 @@ import { staffPerms } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
 import { Message, GuildMember, MessageEmbed } from 'discord.js';
 import nodemailer from 'nodemailer';
-import { DatabaseError } from '@root/src/lib/types/errors';
 
 export const description = 'Looks up information about a given user';
 export const usage = '<user>';
@@ -18,7 +17,8 @@ export async function run(msg: Message, member: GuildMember): Promise<void> {
 	const entry: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: member.user.id });
 
 	if (!entry) {
-		throw new DatabaseError(`User ${member.user.username} (${member.user.id}) not in database`);
+		msg.channel.send(`User ${member.user.tag} has not verified.`);
+		return;
 	}
 
 	const embed = new MessageEmbed()

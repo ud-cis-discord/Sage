@@ -1,8 +1,14 @@
 import 'module-alias/register';
+import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { DB, BOT, PREFIX } from '@root/config';
+
+consoleStamp(console, {
+	pattern: 'dd/mm/yy hh:MM:ss.L tt',
+	label: false
+});
 
 const bot = new Client();
 
@@ -23,6 +29,9 @@ bot.once('ready', async () => {
 		console.log(`${name} piece loaded.`);
 	}
 
-	console.log(`${BOT.NAME} online\n${bot.ws.ping}ms WS ping\nLogged into ${bot.guilds.cache.size} guilds\nServing ${bot.users.cache.size} users`);
+	console.log(`${BOT.NAME} online`);
+	console.log(`${bot.ws.ping}ms WS ping`);
+	console.log(`Logged into ${bot.guilds.cache.size} guilds`);
+	console.log(`Serving ${bot.users.cache.size} users`);
 	bot.user.setActivity(`${PREFIX}help`, { type: 'PLAYING' });
 });
