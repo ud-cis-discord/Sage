@@ -126,7 +126,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 			inline: true
 		}];
 
-		if (logEntry.reason) {
+		if (logEntry?.reason) {
 			fields.push({
 				name: 'With reason',
 				value: logEntry.reason,
