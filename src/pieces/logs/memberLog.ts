@@ -120,11 +120,13 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 
 		const fields: Array<EmbedField> = [{
 			name: 'Moderator',
-			value: `${logEntry.executor.tag} (${logEntry.executor.id})`,
+			value: logEntry
+				? `${logEntry.executor.tag} (${logEntry.executor.id})`
+				: 'Moderator not found, check audit log manually if needed.',
 			inline: true
 		}];
 
-		if (logEntry.reason) {
+		if (logEntry?.reason) {
 			fields.push({
 				name: 'With reason',
 				value: logEntry.reason,
