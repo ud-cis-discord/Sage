@@ -6,6 +6,7 @@ export interface Command {
 	run(msg: Message, args?: Array<any>): any;
 	name: string;
 	category: string;
+	enabled: boolean;
 	aliases?: Array<string>;
 	description?: string;
 	usage?: string;
