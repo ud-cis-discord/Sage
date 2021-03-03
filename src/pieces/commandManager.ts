@@ -10,11 +10,13 @@ async function register(bot: Client): Promise<void> {
 	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		const command: Command = await import(`@root/../${file}`);
+		// const { enabled } = command;
 
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
 		command.name = name;
 		command.category = dirs[dirs.length - 2];
+		// command.enabled = !(enabled === false);
 
 		bot.commands.set(name, command);
 	}
@@ -31,7 +33,7 @@ async function register(bot: Client): Promise<void> {
 		const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
 
 		const command = getCommand(bot, commandName);
-		if (!command) return;
+		if (!command || command.enabled === false) return;
 
 		if (msg.channel.type === 'dm' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
 		if (msg.channel.type === 'text' && command.runInGuild === false) {

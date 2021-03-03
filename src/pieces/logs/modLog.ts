@@ -87,7 +87,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 
 	if (!('id' in logEntry.target)
 		|| logEntry.target.id !== member.id
-		|| (Date.now() - logEntry.createdTimestamp) > 10) return;
+		|| (Date.now() - logEntry.createdTimestamp) > 10e3) return;
 
 	modLog.send(new MessageEmbed()
 		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)

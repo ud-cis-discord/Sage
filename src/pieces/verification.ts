@@ -8,46 +8,58 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 
 	const givenHash = msg.content.trim();
 
-	if (await bot.mongo.collection(DB.USERS).countDocuments({ discordId: msg.author.id }) > 0) {
-		return msg.reply(`Your Discord account has already been verified. Contact ${MAINTAINERS} if you think this is an error.`);
-	}
-
 	const entry: SageUser = await bot.mongo.collection(DB.USERS).findOne({ hash: givenHash });
 
 	if (!entry) {
 		return msg.reply(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
 	}
 
-	if (entry.isVerified) return;
+	if (!entry.isVerified) {
+		entry.isVerified = true;
+		entry.discordId = msg.author.id;
+		entry.roles.push(ROLES.VERIFIED);
 
-	entry.isVerified = true;
-	entry.discordId = msg.author.id;
-	entry.roles.push(ROLES.VERIFIED);
-
-	const enrollStr = entry.courses.length > 0
-		? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or unenroll from your current course,` +
+		const enrollStr = entry.courses.length > 0
+			? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or unenroll from your current course,` +
 			` send \`${PREFIX}enroll <courseCode>\`.`
-		: '';
+			: '';
 
-	bot.mongo.collection(DB.USERS).updateOne(
-		{ hash: givenHash },
-		{ $set: { ...entry } })
-		.then(async () => {
-			const member = guild.members.cache.get(msg.author.id);
-			if (member) {
-				entry.roles.forEach(role => member.roles.add(role, `${member.user.username} (${member.id}) just verified.`));
-				return msg.reply(`I see you're already on the server. I've added your roles for this semester.\n${enrollStr}`);
-			}
+		bot.mongo.collection(DB.USERS).updateOne(
+			{ hash: givenHash },
+			{ $set: { ...entry } })
+			.then(async () => {
+				const member = guild.members.cache.get(msg.author.id);
+				if (member) {
+					entry.roles.forEach(role => member.roles.add(role, `${member.user.username} (${member.id}) just verified.`));
+					return msg.reply(`I see you're already on the server. I've added your roles for this semester.\n${enrollStr}`);
+				}
 
-			const invite = await guild.systemChannel.createInvite({
-				maxAge: 0,
-				maxUses: 1,
-				unique: true,
-				reason: `[no log] ${msg.author.username} (${msg.author.id}) verified.`
+				const invite = await guild.systemChannel.createInvite({
+					maxAge: 0,
+					maxUses: 1,
+					unique: true,
+					reason: `[no log] ${msg.author.username} (${msg.author.id}) verified.`
+				});
+
+				return msg.reply(`Thank you for verifying! You can now join the server.\n${invite.url}\n\n${enrollStr}`);
 			});
+	} else {
+		const member = guild.members.cache.get(msg.author.id);
+		if (member) {
+			return msg.reply('It would seem you are already verified and a member of the UD CIS Discord server. ' +
+				`Contact ${MAINTAINERS} if you think this is an error.`);
+		}
 
-			return msg.reply(`Thank you for verifying! You can now join the server.\n${invite.url}\n\n${enrollStr}`);
+		const invite = await guild.systemChannel.createInvite({
+			maxAge: 0,
+			maxUses: 1,
+			unique: true,
+			reason: `[no log] ${msg.author.username} (${msg.author.id}) re-verified.`
 		});
+
+		return msg.reply('Thank you for verifying! It looks like you were on the UD CIS Discord server in the past ' +
+			`so I'll add you old roles once you rejoin.\n${invite.url}`);
+	}
 }
 
 async function register(bot: Client): Promise<void> {
