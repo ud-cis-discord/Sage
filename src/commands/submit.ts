@@ -4,6 +4,7 @@ import { CHANNELS } from '@root/config';
 export const description = 'Submit a profile picture to the pfp contest.';
 export const extendedHelp = 'Exactly one file must be attached when running this command.';
 export const usage = '[more information]';
+export const enabled = false;
 
 export async function run(msg: Message, [imgDesc]: [string]): Promise<Message> {
 	const [attachment] = msg.attachments.array();
