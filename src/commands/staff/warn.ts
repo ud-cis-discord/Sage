@@ -28,7 +28,7 @@ export async function run(msg: Message, [target, reason]: [Message, string]): Pr
 					value: reason
 				}, {
 					name: 'Message content',
-					value: target.content
+					value: target.content || '*This message had no text content*'
 				}]);
 			staffChannel.send(embed);
 		}
