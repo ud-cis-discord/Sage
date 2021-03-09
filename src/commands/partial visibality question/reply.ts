@@ -19,6 +19,18 @@ export async function run(msg: Message, [question, response]: [PVQuestion, strin
 
 	if (question.type === 'private') {
 		embed.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${question.questionId} <response>`);
+
+		if (msg.attachments) {
+			let imageSet = false;
+			msg.attachments.forEach(attachment => {
+				if (!imageSet && attachment.height) {
+					embed.setImage(attachment.url);
+					imageSet = true;
+				} else {
+					embed.attachFiles([attachment]);
+				}
+			});
+		}
 	}
 
 	return channel.send(embed)
