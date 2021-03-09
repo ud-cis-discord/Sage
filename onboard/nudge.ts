@@ -42,12 +42,33 @@ async function main() {
 	const db = client.db(BOT.NAME).collection(DB.USERS);
 	const users: Array<DatabaseUser> = await db.find().toArray();
 
-	for (const user of users) {
-		if (user.isVerified) continue;
+	const args = process.argv.slice(2);
 
-		console.log(`Emailing: ${user.email}`);
-		await sendEmail(user);
-		await sleep(1100);
+	if (args.length > 0) {
+		for (const email of args) {
+			let user: DatabaseUser;
+			if (!(user = users.find(usr => usr.email === email))) { // user not in db
+				console.log(`${email} was not previously in the database. Run the onboard script with this email to onboard.`);
+				continue;
+			}
+
+			if (user.isVerified) { // user already verified
+				console.log(`${email} is already verified.`);
+				continue;
+			}
+
+			console.log(`Emailing: ${user.email}`); // do the thing
+			await sendEmail(user);
+			await sleep(1100);
+		}
+	} else {
+		for (const user of users) {
+			if (user.isVerified) continue;
+
+			console.log(`Emailing: ${user.email}`);
+			await sendEmail(user);
+			await sleep(1100);
+		}
 	}
 
 	client.close();
