@@ -30,3 +30,4 @@ export function argParser(msg: Message, input: string): [string, string] {
 
 	return [upperType, content];
 }
+
