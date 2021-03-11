@@ -16,7 +16,7 @@ pipeline {
 		}
 		stage('deploy') {
 			steps {
-				sh 'pm2 restart dist/src/sage.js -e ~/sage-err'
+				sh 'pm2 restart dist/src/sage.js -e /tmp/sage/sage-err'
 			}
 		}
     }
