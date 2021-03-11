@@ -3,6 +3,7 @@ pipeline {
     stages {
         stage('build') {
             steps {
+				sh 'export JENKINS_NODE_COOKIE=dontKillMe'
 				sh 'npm run clean'
                 sh 'npm i'
 				sh 'npm run build'
