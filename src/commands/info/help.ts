@@ -41,6 +41,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 			.setThumbnail(msg.client.user.avatarURL())
 			.setTimestamp(Date.now())
 			.setColor('RANDOM');
+		console.log('a help command was just run');
 		return msg.channel.send(embed);
 	} else {
 		let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command.\n`;
