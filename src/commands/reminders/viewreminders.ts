@@ -17,7 +17,7 @@ export async function run(msg: Message) : Promise<void> {
 				.setTitle('Pending reminders')
 				.setColor('DARK_AQUA'));
 		}
-		const hidden = reminder.mode === 'private';
+		const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
 		embeds[Math.floor(i / 25)].addField(
 			`${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
 			hidden ? 'Some time in the future.' : reminderTime(reminder));
