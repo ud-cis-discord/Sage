@@ -3,7 +3,6 @@ pipeline {
     stages {
         stage('build') {
             steps {
-				sh 'cd /home/jlyon/documents/SageV2/SageV2'
 				sh 'npm run clean'
                 sh 'npm i'
 				sh 'npm run build'
@@ -16,7 +15,7 @@ pipeline {
 		}
 		stage('deploy') {
 			steps {
-				sh 'git pull'
+				sh 'pm2 restart sage'
 			}
 		}
     }
