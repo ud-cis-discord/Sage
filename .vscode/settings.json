@@ -21,9 +21,12 @@
 		"discstatus",
 		"removec",
 		"shortlink",
+		"showremind",
+		"showreminders",
 		"sreply",
 		"sudoreply",
 		"tagq",
-		"udel"
+		"udel",
+		"viewremind"
 	]
 }

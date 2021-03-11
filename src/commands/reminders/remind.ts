@@ -1,17 +1,17 @@
-import { BOT } from '@root/config';
+import { BOT, DB } from '@root/config';
 import { Message } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
+import { reminderTime } from '@lib/utils';
 
 export const description = `Have ${BOT.NAME} give you a reminder.`;
 export const usage = '<reminder> | <duration> | [repeat]';
 export const extendedHelp = 'Reminders can be set to repeat daily or weekly.';
 
 export function run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
-	return msg.channel.send(`Content: ${reminder.content}
-timestamp: ${reminder.expires},
-repeat: ${reminder.repeat}
-mode: ${reminder.mode}`);
+	msg.client.mongo.collection(DB.REMINDERS).insertOne(reminder);
+
+	return msg.channel.send(`I'll remind you about that at ${reminderTime(reminder)}.`);
 }
 
 export function argParser(msg: Message, input: string): [Reminder] {
