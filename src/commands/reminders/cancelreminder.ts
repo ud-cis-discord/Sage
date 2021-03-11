@@ -8,7 +8,7 @@ export function run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
 	msg.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
 
 	const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
-	return msg.channel.send(`Deleted **${hidden ? 'Private reminder.' : reminder.content}**`);
+	return msg.channel.send(`Canceled reminder: **${hidden ? 'Private reminder.' : reminder.content}**`);
 }
 
 export async function argParser(msg: Message, input: string): Promise<Array<Reminder>> {

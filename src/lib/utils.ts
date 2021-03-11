@@ -79,7 +79,7 @@ export function reminderTime({ expires: date, repeat }: Reminder): string {
 	const hour = date.getHours() % 12 === 0 ? 12 : date.getHours() % 12;
 	const mins = date.getMinutes();
 	const amPm = date.getHours() < 12 ? 'AM' : 'PM';
-	prettyDateTime += `${hour}:${mins} ${amPm} `;
+	prettyDateTime += `${hour}:${mins.toString().padStart(2, '0')} ${amPm} `;
 
 	if (repeat === 'daily') {
 		prettyDateTime += 'every day';
