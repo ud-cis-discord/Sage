@@ -3,6 +3,8 @@ import { Reminder } from '@lib/types/Reminder';
 import { Message, MessageEmbed } from 'discord.js';
 import { reminderTime } from '@lib/utils';
 
+export const description = 'See your upcoming reminders.';
+export const extendedHelp = 'Don\'t worry, private reminders will be hidden if you use this command publicly.';
 export const aliases = ['showremind', 'showreminders', 'sr', 'viewremind', 'vr'];
 
 export async function run(msg: Message) : Promise<void> {
