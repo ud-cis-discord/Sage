@@ -9,6 +9,10 @@ export async function run(msg: Message) : Promise<void> {
 	const reminders: Array<Reminder> = await msg.client.mongo.collection(DB.REMINDERS).find({ owner: msg.author.id }).toArray();
 	reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());
 
+	if (reminders.length < 1) {
+		msg.channel.send('You don\'t have any pending reminders!');
+	}
+
 	const embeds: Array<MessageEmbed> = [];
 
 	reminders.forEach((reminder, i) => {
