@@ -15,7 +15,7 @@ pipeline {
 		}
 		stage('deploy') {
 			steps {
-				sh 'pm2 restart sage'
+				sh 'pm2 start dist/src/sage.js'
 			}
 		}
     }
