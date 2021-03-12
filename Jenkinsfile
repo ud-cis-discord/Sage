@@ -22,8 +22,7 @@ pipeline {
 					if(env.BRANCH_NAME == 'jenkinsTest') {
 						sh 'echo "rebuilding and deploying in prod directory..."'
 						sh 'export JENKINS_NODE_COOKIE=dontKillMe'
-						sh 'export PM2_HOME=/srv/pm2daemon'
-						sh 'cd /home/jlyon/documents/SageV2/SageV2 && git pull && npm run clean && npm i && npm run build && pm2 restart sage'
+						sh 'cd /home/jlyon/documents/SageV2/SageV2 && git pull && npm run clean && npm i && npm run build && pm2 PM2_HOME=/srv/pm2daemon restart sage'
 					} else {
 						echo 'build done, branch OK'
 					}
