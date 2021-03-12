@@ -19,7 +19,7 @@ pipeline {
 		stage('deploy') {
 			steps {
 				script {
-					dir(env.SAGE_DIR) {
+					dir('/home/jlyon/documents/SageV2/SageV2') {
 						if(env.BRANCH_NAME == 'jenkinsTest') {
 							sh 'echo "rebuilding and deploying in prod directory..."'
 							sh 'git pull'
