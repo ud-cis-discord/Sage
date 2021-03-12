@@ -18,18 +18,17 @@ pipeline {
 		}
 		stage('deploy') {
 			steps {
-				ws(env.SAGE_DIR) {
-					script {
-						if(env.BRANCH_NAME == 'jenkinsTest') {
-							echo "rebuilding and deploying in prod directory..."
-							git pull
-							npm run clean
-							npm i 
-							npm run build
-							npm run restart
-						} else {
-							echo 'build done, branch OK'
-						}
+				script {
+					if(env.BRANCH_NAME == 'jenkinsTest') {
+						echo "rebuilding and deploying in prod directory..."
+						cd ${SAGE_DIR}
+						git pull
+						npm run clean
+						npm i 
+						npm run build
+						npm run restart
+					} else {
+						echo 'build done, branch OK'
 					}
 				}
 			}
