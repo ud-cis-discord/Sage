@@ -1,5 +1,8 @@
 pipeline {
     agent any
+	configFileProvider(
+        [configFile(fileId: 'ef5f2732-c4ab-4214-a92f-0e5c144b3bdc', variable: 'CONFIG')]) {
+    }
 	stages {
 		stage('build') {
 			steps {
