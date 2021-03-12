@@ -20,7 +20,7 @@ pipeline {
 			steps {
 				ws(env.SAGE_DIR) {
 					script {
-						if(env.BRANCH_NAME == 'main') {
+						if(env.BRANCH_NAME == 'jenkinsTest') {
 							echo "rebuilding and deploying in prod directory..."
 							git pull
 							npm run clean
