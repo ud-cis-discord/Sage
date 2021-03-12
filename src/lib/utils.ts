@@ -3,6 +3,7 @@ import { Command } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
 import moment from 'moment';
+import { Reminder } from '@lib/types/Reminder';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -69,4 +70,31 @@ export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
 	embed.setColor('RED');
 
 	return embed;
+}
+
+export function reminderTime({ expires: date, repeat }: Reminder): string {
+	const now = new Date();
+	let prettyDateTime = '';
+
+	const hour = date.getHours() % 12 === 0 ? 12 : date.getHours() % 12;
+	const mins = date.getMinutes();
+	const amPm = date.getHours() < 12 ? 'AM' : 'PM';
+	prettyDateTime += `${hour}:${mins.toString().padStart(2, '0')} ${amPm} `;
+
+	if (repeat === 'daily') {
+		prettyDateTime += 'every day';
+		return prettyDateTime;
+	}
+
+	if (!(now.getDate() === date.getDate() && now.getMonth() === date.getMonth() && now.getFullYear() === date.getFullYear())) {
+		prettyDateTime += `on ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+	} else {
+		prettyDateTime += 'Today';
+	}
+
+	if (repeat === 'weekly') {
+		prettyDateTime += ' and every week';
+	}
+
+	return prettyDateTime;
 }
