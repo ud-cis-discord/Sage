@@ -19,17 +19,16 @@ pipeline {
 		stage('deploy') {
 			steps {
 				script {
-					dir('/home/jlyon/documents/SageV2/SageV2') {
-						if(env.BRANCH_NAME == 'jenkinsTest') {
-							sh 'echo "rebuilding and deploying in prod directory..."'
-							sh 'git pull'
-							sh 'npm run clean'
-							sh 'npm i' 
-							sh 'npm run build'
-							sh 'npm run restart'
-						} else {
-							echo 'build done, branch OK'
-						}
+					if(env.BRANCH_NAME == 'jenkinsTest') {
+						sh 'echo "rebuilding and deploying in prod directory..."'
+						sh 'cd /home/jlyon/documents/SageV2/SageV2'
+						sh 'git pull'
+						sh 'npm run clean'
+						sh 'npm i' 
+						sh 'npm run build'
+						sh 'npm run restart'
+					} else {
+						echo 'build done, branch OK'
 					}
 				}
 			}
