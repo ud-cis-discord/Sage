@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "pm2 start dist/src/sage.js",
 		"build": "tsc -p .",
-		"restart": "pm2 restart sage",
+		"restart": "pm2 restart default",
 		"stop": "pm2 stop dist/src/sage.js",
 		"clean": "rm -rf dist",
 		"test": "eslint src --ext .ts",
