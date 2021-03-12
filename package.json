@@ -4,10 +4,10 @@
 	"description": "A purpose build Discord bot to manage the UD CIS Discord server.",
 	"main": "dist/src/sage.js",
 	"scripts": {
-		"start": "pm2 start dist/src/sage.js",
+		"start": "pm2 start",
 		"build": "tsc -p .",
-		"restart": "pm2 restart default",
-		"stop": "pm2 stop dist/src/sage.js",
+		"restart": "pm2 restart sage",
+		"stop": "pm2 stop sage",
 		"clean": "rm -rf dist",
 		"test": "eslint src --ext .ts",
 		"lint": "eslint src --ext .ts --fix",
