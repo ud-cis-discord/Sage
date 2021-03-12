@@ -20,13 +20,13 @@ pipeline {
 			steps {
 				script {
 					if(env.BRANCH_NAME == 'jenkinsTest') {
-						echo "rebuilding and deploying in prod directory..."
-						cd ${SAGE_DIR}
-						git pull
-						npm run clean
-						npm i 
-						npm run build
-						npm run restart
+						sh 'echo "rebuilding and deploying in prod directory..."'
+						sh 'cd ${SAGE_DIR}'
+						sh 'git pull'
+						sh 'npm run clean'
+						sh 'npm i' 
+						sh 'npm run build'
+						sh 'npm run restart'
 					} else {
 						echo 'build done, branch OK'
 					}
