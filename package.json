@@ -1,6 +1,6 @@
 {
 	"name": "sage",
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "A purpose build Discord bot to manage the UD CIS Discord server.",
 	"main": "dist/src/sage.js",
 	"scripts": {
