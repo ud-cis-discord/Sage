@@ -5,7 +5,7 @@ pipeline {
 		PM2_HOME='/srv/pm2daemon'
     }
 	stages {
-		/*stage('build') {
+		stage('build') {
 			steps {
 				sh 'export JENKINS_NODE_COOKIE=dontKillMe'
 				sh 'echo "running build in temp workspace"'
@@ -20,7 +20,7 @@ pipeline {
 				sh 'echo "testing in temp workspace..."'
 				sh 'npm run test'
 			}
-		}*/
+		}
 		stage('deploy') {
 			steps {
 				script {
