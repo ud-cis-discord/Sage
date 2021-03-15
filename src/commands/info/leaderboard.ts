@@ -8,8 +8,6 @@ export const runInDM = false;
 export const aliases = ['rank', 'leader'];
 
 export async function run(msg: Message, [page]: [number]): Promise<Message> {
-	msg.guild.members.fetch();
-
 	// eslint-disable-next-line no-extra-parens
 	const users: Array<SageUser> = (await msg.client.mongo.collection('users').find().toArray() as Array<SageUser>)
 		.sort((ua, ub) => ua.level - ub.level !== 0 ? ua.level > ub.level ? -1 : 1 : ua.curExp < ub.curExp ? -1 : 1); // filter on level first, then remaining xp
@@ -19,6 +17,7 @@ export async function run(msg: Message, [page]: [number]): Promise<Message> {
 	const end = page * 10 > users.length ? undefined : page * 10;
 
 	const displUsers = users.slice(start, end);
+	msg.guild.members.fetch({ user: displUsers.map(usr => usr.discordId) });
 
 	const dbAuthor = users.find(user => msg.author.id === user.discordId);
 
