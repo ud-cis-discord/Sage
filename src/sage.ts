@@ -19,7 +19,7 @@ MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) =
 bot.login(BOT.TOKEN);
 
 bot.once('ready', async () => {
-    const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
+	const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
 	for (const file of pieceFiles) {
 		const piece = await import(file);
 		const dirs = file.split('/');
