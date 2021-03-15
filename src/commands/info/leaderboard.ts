@@ -17,14 +17,16 @@ export async function run(msg: Message, [page]: [number]): Promise<Message> {
 	const end = page * 10 > users.length ? undefined : page * 10;
 
 	const displUsers = users.slice(start, end);
-	msg.guild.members.fetch({ user: displUsers.map(usr => usr.discordId) });
 
 	const dbAuthor = users.find(user => msg.author.id === user.discordId);
+	const allIds = displUsers.map(usr => usr.discordId);
+	allIds.push(dbAuthor.discordId);
+	const discordUsers = await msg.guild.members.fetch({ user: allIds });
 
 	let content = '';
 	displUsers.forEach(user => {
 		const rank = displUsers.indexOf(user) + 1 + ((page - 1) * 10);
-		const name = msg.guild.members.cache.get(user.discordId).displayName;
+		const name = discordUsers.get(user.discordId).displayName;
 		const { level } = user;
 		const exp = user.levelExp - user.curExp;
 		content += `**${rank}:** ${user === dbAuthor ? `**${name}**` : name} - Level ${level}, ${exp} exp\n`;
@@ -42,13 +44,13 @@ export async function run(msg: Message, [page]: [number]): Promise<Message> {
 	const embed = new MessageEmbed()
 		.setTitle('UD CIS Discord Leaderboard')
 		.setFooter(`Showing page ${page} (${start + 1} - ${end || users.length})`)
-		.setColor(msg.guild.members.cache.get(displUsers[0].discordId).displayHexColor)
+		.setColor(discordUsers.get(displUsers[0].discordId).displayHexColor)
 		.setDescription(content);
 
 	return msg.channel.send(embed);
 }
 
-export function argParser(msg: Message, input: string): Array<number | null> {
+export function argParser(_msg: Message, input: string): Array<number | null> {
 	const page = parseInt(input) || 1;
 
 	if (page < 1) throw 'Enter a number greater than 1';
