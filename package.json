@@ -1,11 +1,13 @@
 {
 	"name": "sage",
-	"version": "2.0.6",
+	"version": "2.0.7",
 	"description": "A purpose build Discord bot to manage the UD CIS Discord server.",
 	"main": "dist/src/sage.js",
 	"scripts": {
-		"start": "node dist/src/sage.js",
+		"start": "pm2 start",
 		"build": "tsc -p .",
+		"restart": "pm2 restart sage",
+		"stop": "pm2 stop sage",
 		"clean": "rm -rf dist",
 		"test": "eslint src --ext .ts",
 		"lint": "eslint src --ext .ts --fix",

@@ -2,7 +2,7 @@ import { EmbedField, Message, MessageEmbed } from 'discord.js';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 
-export const description = `Provides info about all ${BOT.NAME} commands`;
+export const description = `Provides info about all of ${BOT.NAME}'s commands`;
 export const usage = '[command]';
 export const extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
 export const aliases = ['commands', 'man', 'h'];
@@ -41,6 +41,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 			.setThumbnail(msg.client.user.avatarURL())
 			.setTimestamp(Date.now())
 			.setColor('RANDOM');
+		console.log('a help command was just run');
 		return msg.channel.send(embed);
 	} else {
 		let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command.\n`;
