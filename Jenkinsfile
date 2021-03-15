@@ -9,7 +9,7 @@ pipeline {
 			steps {
 				sh 'export JENKINS_NODE_COOKIE=dontKillMe'
 				sh 'echo "running build in temp workspace"'
-				configFileProvider([configFile(fileId: 'ef5f2732-c4ab-4214-a92f-0e5c144b3bdc', targetLocation: 'config.ts')]) {}
+				configFileProvider([configFile(fileId: '4753db6f-0fa5-4575-b85e-a61a62bbfc81', targetLocation: 'config.ts')]) {}
 				sh 'npm run clean'
 				sh 'npm i'
 				sh 'npm run build'
@@ -27,7 +27,7 @@ pipeline {
 					if(env.BRANCH_NAME == 'jenkinsTest') {
 						sh 'echo "rebuilding and deploying in prod directory..."'
 						sh 'whoami'
-						sh 'cd /home/jlyon/documents/SageV2/SageV2 && git pull && npm run clean && npm i && npm run build && pm2 restart sage'
+						sh 'cd /home/pi/SageV2 && git pull && npm run clean && npm i && npm run build && systemctl restart sage'
 					} else {
 						echo 'build done, branch OK'
 					}
