@@ -27,7 +27,7 @@ pipeline {
 					if(env.BRANCH_NAME == 'jenkinsTest') {
 						sh 'echo "rebuilding and deploying in prod directory..."'
 						sh 'whoami'
-						sh 'cd /home/pi/SageV2 && git pull && npm run clean && npm i && npm run build && systemctl restart sage'
+						sh 'cd /home/pi/SageV2 && git pull && npm run clean && npm i && npm run build && sudo systemctl restart sage'
 					} else {
 						echo 'build done, branch OK'
 					}
