@@ -7,9 +7,9 @@ async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.commands = new Collection();
 
-	const commandFiles = readdirRecursive('./dist/src/commands').filter(file => file.endsWith('.js'));
+	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		const command: Command = await import(`@root/../${file}`);
+		const command: Command = await import(file);
 		// const { enabled } = command;
 
 		const dirs = file.split('/');
