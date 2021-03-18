@@ -14,7 +14,8 @@ export const DB = {
 	PVQ: 'pvQuestions',
 	QTAGS: 'questionTags',
 	ASSIGNABLE: 'assignable',
-	COURSES: 'courses'
+	COURSES: 'courses',
+	REMINDERS: 'reminders'
 };
 
 export const FIRST_LEVEL = 10;
