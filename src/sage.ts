@@ -19,9 +19,9 @@ MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) =
 bot.login(BOT.TOKEN);
 
 bot.once('ready', async () => {
-	const pieceFiles = readdirRecursive('./dist/src/pieces');
+	const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
 	for (const file of pieceFiles) {
-		const piece = await import(`@root/../${file}`);
+		const piece = await import(file);
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
 		if (typeof piece.default !== 'function') throw `Invalid piece: ${name}`;

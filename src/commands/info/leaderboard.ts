@@ -8,8 +8,6 @@ export const runInDM = false;
 export const aliases = ['rank', 'leader'];
 
 export async function run(msg: Message, [page]: [number]): Promise<Message> {
-	msg.guild.members.fetch();
-
 	// eslint-disable-next-line no-extra-parens
 	const users: Array<SageUser> = (await msg.client.mongo.collection('users').find().toArray() as Array<SageUser>)
 		.sort((ua, ub) => ua.level - ub.level !== 0 ? ua.level > ub.level ? -1 : 1 : ua.curExp < ub.curExp ? -1 : 1); // filter on level first, then remaining xp
@@ -21,11 +19,14 @@ export async function run(msg: Message, [page]: [number]): Promise<Message> {
 	const displUsers = users.slice(start, end);
 
 	const dbAuthor = users.find(user => msg.author.id === user.discordId);
+	const allIds = displUsers.map(usr => usr.discordId);
+	allIds.push(dbAuthor.discordId);
+	const discordUsers = await msg.guild.members.fetch({ user: allIds });
 
 	let content = '';
 	displUsers.forEach(user => {
 		const rank = displUsers.indexOf(user) + 1 + ((page - 1) * 10);
-		const name = msg.guild.members.cache.get(user.discordId).displayName;
+		const name = discordUsers.get(user.discordId).displayName;
 		const { level } = user;
 		const exp = user.levelExp - user.curExp;
 		content += `**${rank}:** ${user === dbAuthor ? `**${name}**` : name} - Level ${level}, ${exp} exp\n`;
@@ -43,13 +44,13 @@ export async function run(msg: Message, [page]: [number]): Promise<Message> {
 	const embed = new MessageEmbed()
 		.setTitle('UD CIS Discord Leaderboard')
 		.setFooter(`Showing page ${page} (${start + 1} - ${end || users.length})`)
-		.setColor(msg.guild.members.cache.get(displUsers[0].discordId).displayHexColor)
+		.setColor(discordUsers.get(displUsers[0].discordId).displayHexColor)
 		.setDescription(content);
 
 	return msg.channel.send(embed);
 }
 
-export function argParser(msg: Message, input: string): Array<number | null> {
+export function argParser(_msg: Message, input: string): Array<number | null> {
 	const page = parseInt(input) || 1;
 
 	if (page < 1) throw 'Enter a number greater than 1';
