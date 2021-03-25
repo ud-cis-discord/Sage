@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 export const enum Leaderboard {
 	width = 750,
 	margin = 5,
