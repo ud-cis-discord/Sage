@@ -10,7 +10,7 @@ consoleStamp(console, {
 	label: false
 });
 
-const bot = new Client();
+const bot = new Client({ fetchAllMembers: true });
 
 MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) => {
 	bot.mongo = client.db(BOT.NAME);
