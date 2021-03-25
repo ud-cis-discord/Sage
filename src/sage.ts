@@ -4,6 +4,7 @@ import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { DB, BOT, PREFIX } from '@root/config';
+import { registerFont } from 'canvas';
 
 consoleStamp(console, {
 	pattern: 'dd/mm/yy hh:MM:ss.L tt',
@@ -28,6 +29,8 @@ bot.once('ready', async () => {
 		piece.default(bot);
 		console.log(`${name} piece loaded.`);
 	}
+
+	registerFont(`${__dirname}/../../assets/Roboto-Regular.ttf`, { family: 'Roboto' });
 
 	console.log(`${BOT.NAME} online`);
 	console.log(`${bot.ws.ping}ms WS ping`);

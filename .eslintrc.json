@@ -90,7 +90,7 @@
         "eol-last": "error",
         "func-names": "error",
         "func-style": ["error", "declaration", { "allowArrowFunctions": true }],
-        "id-length": ["error", { "exceptions": ["i", "j", "a", "b", "e", "r", "m", "c"] }],
+        "id-length": ["error", { "exceptions": ["i", "j", "a", "b", "e", "r", "m", "c", "x", "y"] }],
         "indent": [0, 4, { "SwitchCase": 1 }],
         "key-spacing": "error",
         "keyword-spacing": ["error", {
