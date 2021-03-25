@@ -67,7 +67,7 @@ export async function run(msg: Message, [page]: [number]): Promise<Message> {
 		ctx.fillText(discUser.displayName, cursor.x, cursor.y, 325);
 		cursor.x = 450;
 
-		ctx.fillStyle = discUser.displayHexColor;
+		ctx.fillStyle = discUser.displayHexColor !== '#000000' ? discUser.displayHexColor : Leaderboard.textColor;
 		ctx.fillText(`Level ${level}`, cursor.x, cursor.y);
 		cursor.x += 150;
 
