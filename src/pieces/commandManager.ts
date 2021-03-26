@@ -67,12 +67,11 @@ async function runCommand(msg: Message, errLog: TextChannel) {
 		args = [unparsedArgs];
 	}
 
-	try {
-		await command.run(msg, args);
-	} catch (e) {
-		msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-		errLog.send(await generateLogEmbed(e));
-	}
+	command.run(msg, args)
+		.catch(async (e: Error) => {
+			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
+			errLog.send(await generateLogEmbed(e));
+		});
 }
 
 export default register;
