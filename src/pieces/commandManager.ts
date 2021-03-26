@@ -5,6 +5,27 @@ import { CHANNELS, MAINTAINERS, PREFIX } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
+
+	try {
+		await loadCommands(bot);
+	} catch (e) {
+		errLog.send(await generateLogEmbed(e));
+	}
+
+	bot.on('message', msg => {
+		runCommand(msg, errLog)
+			.catch(async e => errLog.send(await generateLogEmbed(e)));
+	});
+
+	bot.on('messageUpdate', (oldMsg, msg) => {
+		if (oldMsg.content !== msg.content && '_edits' in msg) {
+			runCommand(msg, errLog)
+				.catch(async e => errLog.send(await generateLogEmbed(e)));
+		}
+	});
+}
+
+async function loadCommands(bot: Client) {
 	bot.commands = new Collection();
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
@@ -19,17 +40,7 @@ async function register(bot: Client): Promise<void> {
 		bot.commands.set(name, command);
 	}
 
-	bot.on('message', msg => {
-		runCommand(msg, errLog)
-			.catch(async e => errLog.send(await generateLogEmbed(e)));
-	});
-
-	bot.on('messageUpdate', (oldMsg, msg) => {
-		if (oldMsg.content !== msg.content && '_edits' in msg) {
-			runCommand(msg, errLog)
-				.catch(async e => errLog.send(await generateLogEmbed(e)));
-		}
-	});
+	console.log(`${bot.commands.size} commands loaded.`);
 }
 
 async function runCommand(msg: Message, errLog: TextChannel) {
