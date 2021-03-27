@@ -79,7 +79,7 @@ async function runCommand(msg: Message, errLog: TextChannel) {
 	}
 
 	command.run(msg, args)
-		.catch(async (e: Error) => {
+		?.catch(async (e: Error) => {
 			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
 			errLog.send(await generateLogEmbed(e));
 		});
