@@ -16,7 +16,7 @@ export async function run(msg: Message, [title, project, labels, milestone]: [st
 		owner: 'ud-cis-discord',
 		repo: project,
 		title: title,
-		milestone: milestone !== '' ? milestone : undefined,
+		milestone: milestone || undefined,
 		labels: labels
 	}).catch(response => {
 		console.log(response);
@@ -45,7 +45,7 @@ export async function argParser(_msg: Message, input: string): Promise<Array<str
 
 	console.log(splitArgs);
 
-	let project = 'SageV2';
+	let project = 'bot';
 	let labels = [];
 	let milestone = '';
 
