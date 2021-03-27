@@ -17,13 +17,14 @@ export async function run(msg: Message, [channel, content]: [TextChannel, string
 }
 
 export async function argParser(msg: Message, input: string): Promise<[TextChannel, string]> {
-	const args = input.trim().split('|').map(inp => inp.trim());
+	const args = input.trim().split('|');
 
-	if (args.length > 2 || (!args[0] && msg.attachments.size === 0)) {
+	if (!args[0] && msg.attachments.size === 0) {
 		throw `Usage: ${usage}`;
 	}
 
-	const [channel, content] = args.length === 1 ? [null, args[0]] : args;
+	const channel = args.length > 1 ? args.shift() : null;
+	const content = args.join('|');
 
 	const retChannel = channel
 		? channelParser(msg, channel) : msg.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS) as TextChannel;
