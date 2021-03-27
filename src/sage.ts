@@ -11,7 +11,11 @@ consoleStamp(console, {
 	label: false
 });
 
-const bot = new Client({ fetchAllMembers: true });
+const bot = new Client({
+	fetchAllMembers: true,
+	disableMentions: 'everyone',
+	allowedMentions: { parse: ['users'] }
+});
 
 MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) => {
 	bot.mongo = client.db(BOT.NAME);
