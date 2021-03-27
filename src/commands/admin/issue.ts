@@ -5,10 +5,10 @@ import { Message } from 'discord.js';
 
 export const usage = '<title>|[options]';
 export const extendedHelp = `You must pass in an issue title. Flags can be any of:
---labels=[comma, separated, list]\n--milestone=[milestone]\n--project=[project (defaults to SageV2)]]`;
+--labels=[comma, separated, list]\n--milestone=[milestone number]\n--project=[project (defaults to SageV2)]]`;
 
 export async function permissions(msg: Message): Promise<boolean> {
-	return await adminPerms(msg);
+	return adminPerms(msg);
 }
 
 export async function run(msg: Message, [title, project, labels, milestone]: [string, string, string[], string]): Promise<Message | void> {
@@ -23,7 +23,7 @@ export async function run(msg: Message, [title, project, labels, milestone]: [st
 		let errormsg = '';
 		const { errors } = response as RequestError;
 		errors.forEach(error => {
-			errormsg += `Value "${error.message}" ${error.code} for field ${error.field}.\n`;
+			errormsg += `Value ${error.code} for field ${error.field}.\n`;
 		});
 		msg.channel.send(`Issue creation failed. (HTTP Error ${response.status})
 \`\`\`diff
@@ -37,7 +37,7 @@ export async function run(msg: Message, [title, project, labels, milestone]: [st
 	}
 }
 
-export async function argParser(msg: Message, input: string): Promise<Array<string | string[]>> {
+export async function argParser(_msg: Message, input: string): Promise<Array<string | string[]>> {
 	const [title, ...args] = input.split('--');
 	if (!title) throw `Usage: ${usage}`;
 
@@ -46,21 +46,21 @@ export async function argParser(msg: Message, input: string): Promise<Array<stri
 	console.log(splitArgs);
 
 
-	let project = 'bot';
+	let project = 'SageV2';
 	let labels = [];
 	let milestone = '';
 
 	if (splitArgs.find(str => str.includes('project'))) {
-		[, project] = splitArgs.find(str => str.includes('project')).split('=');
+		[, project] = splitArgs.find(str => str.includes('project=')).split('=');
 	}
 
 	if (splitArgs.find(str => str.includes('labels'))) {
-		labels = splitArgs.find(str => str.includes('labels'))
+		labels = splitArgs.find(str => str.includes('labels='))
 			.split('=').slice(1).join().split(',').map(label => label.trim());
 	}
 
 	if (splitArgs.find(str => str.includes('milestone'))) {
-		[, milestone] = splitArgs.find(str => str.includes('milestone')).split('=');
+		[, milestone] = splitArgs.find(str => str.includes('milestone=')).split('=');
 	}
 	return [title, project, labels, milestone];
 }
