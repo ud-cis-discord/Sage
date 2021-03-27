@@ -9,6 +9,7 @@ export const aliases = ['commands', 'man', 'h'];
 
 export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 	const { commands } = msg.client;
+	const website = 'https://ud-cis-discord.github.io/pages/commands';
 	if (cmd) {
 		const command = getCommand(msg.client, cmd);
 		if (!command) return msg.channel.send(`**${cmd}** is not a valid command.`);
@@ -33,6 +34,11 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 				inline: false
 			});
 		}
+		fields.push({
+			name: 'More commands',
+			value: `[Visit our website!](${website})`,
+			inline: false
+		});
 
 		const embed = new MessageEmbed()
 			.setTitle(command.name)
@@ -41,9 +47,10 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 			.setThumbnail(msg.client.user.avatarURL())
 			.setTimestamp(Date.now())
 			.setColor('RANDOM');
+
 		return msg.channel.send(embed);
 	} else {
-		let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command.\n`;
+		let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command, or you can visit our website here:\n`;// <${website}>\n`;
 		const categories: Array<string> = [];
 		commands.forEach(command => {
 			if (!categories.includes(command.category)) categories.push(command.category);
