@@ -42,6 +42,8 @@ export const EMAIL = {
 	]
 };
 
+export const GITHUB_TOKEN = '';
+
 export const CHANNELS = {			// Channel IDs
 	ERROR_LOG: '',
 	SERVER_LOG: '',

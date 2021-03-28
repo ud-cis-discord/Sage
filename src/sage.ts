@@ -3,7 +3,9 @@ import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
-import { DB, BOT, PREFIX } from '@root/config';
+import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
+import { Octokit } from '@octokit/rest';
+import { version as sageVersion } from '@root/package.json';
 import { registerFont } from 'canvas';
 
 consoleStamp(console, {
@@ -18,6 +20,11 @@ MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) =
 });
 
 bot.login(BOT.TOKEN);
+
+bot.octokit = new Octokit({
+	auth: GITHUB_TOKEN,
+	userAgent: `Sage v${sageVersion}`
+});
 
 bot.once('ready', async () => {
 	const pieceFiles = readdirRecursive(`${__dirname}/pieces`);

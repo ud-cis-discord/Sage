@@ -24,6 +24,7 @@
 	},
 	"homepage": "https://github.com/ud-cis-discord/SageV2#readme",
 	"dependencies": {
+		"@octokit/rest": "^18.3.5",
 		"canvas": "^2.7.0",
 		"console-stamp": "^0.2.9",
 		"discord.js": "^12.5.1",
