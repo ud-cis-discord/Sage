@@ -4,7 +4,7 @@ pipeline {
 	environment {
         JENKINS_NODE_COOKIE='dontKillMe'
 		DISCORD_WEBHOOK=credentials('3fbb794c-1c40-4471-9eee-d147d4506046')
-		MAIN_BRANCH='jenkinsDeploy'
+		MAIN_BRANCH='main'
     }
 	stages {
 		stage('Test Build') {
