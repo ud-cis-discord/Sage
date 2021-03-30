@@ -11,7 +11,11 @@ export async function permissions(msg: Message): Promise<boolean> {
 }
 
 export async function run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
-	await channel.send(content, { files: msg.attachments.map(attachment => attachment.attachment) });
+	await channel.send(content, {
+		files: msg.attachments.map(attachment => attachment.attachment),
+		disableMentions: 'none',
+		allowedMentions: { parse: ['everyone', 'roles'] }
+	});
 
 	return msg.channel.send(`Your announcement has been sent in ${channel}`);
 }
