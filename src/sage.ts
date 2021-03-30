@@ -3,20 +3,32 @@ import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
 import { Client } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
-import { DB, BOT, PREFIX } from '@root/config';
+import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
+import { Octokit } from '@octokit/rest';
+import { version as sageVersion } from '@root/package.json';
+import { registerFont } from 'canvas';
 
 consoleStamp(console, {
 	pattern: 'dd/mm/yy hh:MM:ss.L tt',
 	label: false
 });
 
-const bot = new Client({ fetchAllMembers: true });
+const bot = new Client({
+	fetchAllMembers: true,
+	disableMentions: 'everyone',
+	allowedMentions: { parse: ['users'] }
+});
 
 MongoClient.connect(DB.CONNECTION, { useUnifiedTopology: true }).then((client) => {
 	bot.mongo = client.db(BOT.NAME);
 });
 
 bot.login(BOT.TOKEN);
+
+bot.octokit = new Octokit({
+	auth: GITHUB_TOKEN,
+	userAgent: `Sage v${sageVersion}`
+});
 
 bot.once('ready', async () => {
 	const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
@@ -28,6 +40,8 @@ bot.once('ready', async () => {
 		piece.default(bot);
 		console.log(`${name} piece loaded.`);
 	}
+
+	registerFont(`${__dirname}/../../assets/Roboto-Regular.ttf`, { family: 'Roboto' });
 
 	console.log(`${BOT.NAME} online`);
 	console.log(`${bot.ws.ping}ms WS ping`);
