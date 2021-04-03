@@ -9,12 +9,10 @@ import { CHANNELS, DB, EMAIL } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
-	// 0 0 * * SUN
+	// 0 0 * * SUN :: 0 minutes, 0 hours, any day of month, any month, on Sundays (AKA midnight between Sat & Sun)
 	schedule('0 0 * * SUN', () => {
 		handleCron(bot)
 			.catch(async error => errLog.send(await generateLogEmbed(error)));
-	}, {
-		timezone: 'America/New_York'
 	});
 }
 
