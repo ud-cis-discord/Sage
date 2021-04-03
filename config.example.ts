@@ -15,7 +15,8 @@ export const DB = {
 	QTAGS: 'questionTags',
 	ASSIGNABLE: 'assignable',
 	COURSES: 'courses',
-	REMINDERS: 'reminders'
+	REMINDERS: 'reminders',
+	CLIENT_DATA: 'clientData'
 };
 
 export const FIRST_LEVEL = 10;
