@@ -65,8 +65,7 @@ async function runCommand(msg: Message, errLog: TextChannel) {
 
 	if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let args: Array<any>;
+	let args: Array<unknown>;
 	if (command.argParser) {
 		try {
 			args = await command.argParser(msg, unparsedArgs);
