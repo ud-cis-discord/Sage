@@ -1,7 +1,8 @@
 import { Collection, Client, Message, TextChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { getCommand, generateLogEmbed, readdirRecursive } from '@lib/utils';
-import { CHANNELS, MAINTAINERS, PREFIX } from '@root/config';
+import { CHANNELS, DB, MAINTAINERS, PREFIX } from '@root/config';
+import { SageData } from '../lib/types/SageData';
 
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
@@ -27,6 +28,8 @@ async function register(bot: Client): Promise<void> {
 
 async function loadCommands(bot: Client) {
 	bot.commands = new Collection();
+	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
+	const oldCommandSettings = sageData?.commandSettings || [];
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
@@ -37,7 +40,23 @@ async function loadCommands(bot: Client) {
 		command.name = name;
 		command.category = dirs[dirs.length - 2];
 
+		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
+		let enable: boolean;
+		if (oldSettings) {
+			enable = oldSettings.enabled;
+		} else {
+			enable = command.enabled !== false;
+			oldCommandSettings.push({ name: command.name, enabled: enable });
+		}
+		command.enabled = enable;
+
 		bot.commands.set(name, command);
+
+		bot.mongo.collection(DB.CLIENT_DATA).updateOne(
+			{ _id: bot.user.id },
+			{ $set: { commandSettings: oldCommandSettings } },
+			{ upsert: true }
+		);
 	}
 
 	console.log(`${bot.commands.size} commands loaded.`);

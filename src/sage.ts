@@ -50,10 +50,10 @@ async function main() {
 		console.log(`Logged into ${bot.guilds.cache.size} guilds`);
 		console.log(`Serving ${bot.users.cache.size} users`);
 
-		const startup: SageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id });
+		const status = (await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData)?.status;
 
-		const activity = startup?.status?.name || `${PREFIX}help`;
-		const type = startup?.status?.type || 'PLAYING';
+		const activity = status?.name || `${PREFIX}help`;
+		const type = status?.type || 'PLAYING';
 		bot.user.setActivity(`${activity} (v${sageVersion})`, { type });
 		setTimeout(() => bot.user.setActivity(activity, { type }), 30e3);
 	});
