@@ -51,7 +51,7 @@ export const CHANNELS = {			// Channel IDs
 	MOD_LOG: '',
 	FEEDBACK: '',
 	SAGE: '',
-	ANNOUNCE: '',
+	ANNOUNCEMENTS: '',
 	ARCHIVE: ''
 };
 
