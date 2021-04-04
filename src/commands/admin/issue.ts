@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import { adminPerms } from '@lib/permissions';
 import { RequestError } from '@octokit/types';
+import { BOT } from '@root/config';
 import { Message } from 'discord.js';
 
 export const usage = '<title>|[options]';
@@ -17,7 +18,8 @@ export async function run(msg: Message, [title, project, labels, milestone]: [st
 		repo: project,
 		title: title,
 		milestone: milestone || undefined,
-		labels: labels
+		labels: labels,
+		body: `<sub>Created by ${msg.member.displayName} via ${BOT.NAME}</sub>`
 	}).catch(response => {
 		console.log(response);
 		let errormsg = '';
@@ -42,8 +44,6 @@ export async function argParser(_msg: Message, input: string): Promise<Array<str
 	if (!title) throw `Usage: ${usage}`;
 
 	const splitArgs = args.map(arg => arg.trim());
-
-	console.log(splitArgs);
 
 	let project = 'SageV2';
 	let labels = [];
