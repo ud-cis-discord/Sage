@@ -50,7 +50,7 @@ export function run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 
 		return msg.channel.send(embed);
 	} else {
-		let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command, or you can visit our website here:\n`;// <${website}>\n`;
+		let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command, or you can visit our website here:\n<${website}>\n`;
 		const categories: Array<string> = [];
 		commands.forEach(command => {
 			if (!categories.includes(command.category)) categories.push(command.category);
