@@ -4,13 +4,14 @@ pipeline {
 	environment {
         JENKINS_NODE_COOKIE='dontKillMe'
 		DISCORD_WEBHOOK=credentials('3fbb794c-1c40-4471-9eee-d147d4506046')
+		MAIN_BRANCH='main'
     }
 	stages {
 		stage('Test Build') {
 			steps {
 				catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
 					sh 'echo "running build in temp workspace"'
-					configFileProvider([configFile(fileId: '512614b8-8b30-448f-80f5-dd2ef3d0d24d', targetLocation: 'config.ts')]) {}
+					sh 'mv config.example.ts config.ts'
 					sh 'npm run clean'
 					sh 'npm i'
 					sh 'npm run build'
@@ -62,9 +63,9 @@ pipeline {
 			steps {
 				catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
 					script {
-						if(env.BRANCH_NAME == 'main') {
+						if(env.BRANCH_NAME == env.MAIN_BRANCH) {
 							sh 'echo "rebuilding and deploying in prod directory..."'
-							sh 'cd /usr/local/sage/SageV2 && git pull && npm run clean && npm i && npm run build'
+							sh 'cd /usr/local/sage/SageV2 && git pull && npm run clean && npm i && npm run build && sudo /bin/systemctl restart sage'
 						} else {
 							echo 'build done, branch OK'
 						}
@@ -73,7 +74,7 @@ pipeline {
 				}
 				script { 
 					def discord_desc = "Deploy " + currentBuild.currentResult + " on branch [" + env.BRANCH_NAME + "](https://github.com/ud-cis-discord/SageV2/commit/" + env.GIT_COMMIT + ")"
-					if(stage_results == false && env.BRANCH_NAME == 'main') {
+					if(stage_results == false && env.BRANCH_NAME == env.MAIN_BRANCH) {
 						discord_desc = "URGENT!! -- " + discord_desc
 					}
 					discordSend(
