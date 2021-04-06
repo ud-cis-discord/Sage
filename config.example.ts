@@ -4,10 +4,6 @@ export const BOT = {
 	NAME: 'Sage'				// Bot Name
 };
 
-export const PREFIX = 's;';
-export const MAINTAINERS = '';	// The current maintainers of this bot
-export const SEMESTER_ID = '';	// The current semester ID. i.e. s21
-
 export const DB = {
 	CONNECTION: '', 			// Mongo connection string here
 	USERS: 'users',
@@ -18,8 +14,6 @@ export const DB = {
 	REMINDERS: 'reminders',
 	CLIENT_DATA: 'clientData'
 };
-
-export const FIRST_LEVEL = 10;
 
 export const GUILDS = {			// Guild IDs for each guild
 	MAIN: '',
@@ -43,8 +37,6 @@ export const EMAIL = {
 	]
 };
 
-export const GITHUB_TOKEN = '';
-
 export const CHANNELS = {			// Channel IDs
 	ERROR_LOG: '',
 	SERVER_LOG: '',
@@ -52,8 +44,13 @@ export const CHANNELS = {			// Channel IDs
 	MOD_LOG: '',
 	FEEDBACK: '',
 	SAGE: '',
-	ANNOUNCE: '',
+	ANNOUNCEMENTS: '',
 	ARCHIVE: ''
 };
 
+export const FIRST_LEVEL = 10;
+export const GITHUB_TOKEN = '';
+export const PREFIX = 's;';
+export const MAINTAINERS = '';	// The current maintainers of this bot
+export const SEMESTER_ID = '';	// The current semester ID. i.e. s21
 export const BLACKLIST = [];
