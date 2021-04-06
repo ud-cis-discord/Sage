@@ -11,7 +11,7 @@ export async function permissions(msg: Message): Promise<boolean> {
 	return await botMasterPerms(msg);
 }
 
-export async function run(msg: Message, [command, unparsedArgs]: [Command, string]): Promise<Message> {
+export async function run(msg: Message, [command, unparsedArgs]: [Command, string]): Promise<unknown> {
 	let args: Array<unknown>;
 	if (command.argParser) {
 		try {

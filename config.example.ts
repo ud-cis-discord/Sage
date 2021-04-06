@@ -11,7 +11,8 @@ export const DB = {
 	QTAGS: 'questionTags',
 	ASSIGNABLE: 'assignable',
 	COURSES: 'courses',
-	REMINDERS: 'reminders'
+	REMINDERS: 'reminders',
+	CLIENT_DATA: 'clientData'
 };
 
 export const GUILDS = {			// Guild IDs for each guild
