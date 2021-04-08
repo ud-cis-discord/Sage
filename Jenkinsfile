@@ -11,7 +11,7 @@ pipeline {
 			steps {
 				catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
 					sh 'echo "running build in temp workspace"'
-					configFileProvider([configFile(fileId: '512614b8-8b30-448f-80f5-dd2ef3d0d24d', targetLocation: 'config.ts')]) {}
+					sh 'mv config.example.ts config.ts'
 					sh 'npm run clean'
 					sh 'npm i'
 					sh 'npm run build'
