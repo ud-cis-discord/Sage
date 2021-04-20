@@ -98,7 +98,7 @@ pipeline {
 					script {
 						if(env.BRANCH_NAME == 'docAutomation') {
 							sh 'echo "automatically updating the documentation website"'
-							sh 'cd ' + env.SAGE_DIR + ' && npm i && npm run build && npm run autodoc'
+							sh 'cd ' + env.SAGE_DIR + ' && git pull && npm i && npm run build && npm run autodoc'
 						}
 						stage_results = true
 					}
