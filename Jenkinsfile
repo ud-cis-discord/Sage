@@ -5,7 +5,7 @@ pipeline {
 	environment {
 		DISCORD_WEBHOOK=credentials('3fbb794c-1c40-4471-9eee-d147d4506046')
 		MAIN_BRANCH='main'
-		SAGE_DIR='/var/lib/jenkins/testsage/SageV2'
+		SAGE_DIR='/usr/local/sage/SageV2'
         JENKINS_NODE_COOKIE='dontKillMe'
     }
 	stages {
@@ -67,7 +67,7 @@ pipeline {
 					script {
 						if(env.BRANCH_NAME == env.MAIN_BRANCH) {
 							sh 'echo "rebuilding and deploying in prod directory..."'
-							sh 'cd /usr/local/sage/SageV2 && git pull && npm run clean && npm i && npm run build && sudo /bin/systemctl restart sage'
+							sh 'cd ' + env.SAGE_DIR + ' && git pull && npm run clean && npm i && npm run build && sudo /bin/systemctl restart sage'
 						} else {
 							echo 'build done, branch OK'
 						}
@@ -97,9 +97,9 @@ pipeline {
 			steps {
 				catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
 					script {
-						if(env.BRANCH_NAME == 'docAutomation') {
+						if(env.BRANCH_NAME == env.MAIN_BRANCH) {
 							sh 'echo "automatically updating the documentation website"'
-							sh 'cd ' + env.SAGE_DIR + ' && git pull && npm i && npm run build && npm run autodoc'
+							sh 'cd ' + env.SAGE_DIR + ' && npm run autodoc'
 						}
 						stage_results = true
 					}
