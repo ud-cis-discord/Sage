@@ -1,5 +1,5 @@
 #!/bin/bash
-DOC_DIR="ud-cis-discord.github.io/pages"
+DOC_DIR="ud-cis-discord.github.io"
 if [[ ! -d ../ud-cis-discord.github.io ]]
 then
 	echo "docs repo doesn't exist where expected, exiting"
@@ -13,7 +13,7 @@ then
 fi
 
 mv ./Commands.md ../$DOC_DIR/pages/Commands.md
-mv ./'Staff Commands.md' ../$DOC_DIR/'Staff Commands.md'
+mv ./'Staff Commands.md' ../$DOC_DIR/pages/'Staff Commands.md'
 cd ../$DOC_DIR
 git commit -a -m 'jenkins pipeline automatic docs update'
 git push
