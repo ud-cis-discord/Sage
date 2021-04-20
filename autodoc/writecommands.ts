@@ -47,6 +47,10 @@ async function main() {
 		command.name = name;
 		command.category = dirs[dirs.length - 2] === 'commands' ? 'general' : dirs[dirs.length - 2];
 
+		if (command.category === 'admin') {
+			continue;
+		}
+
 		if (!categories.has(command.category)) {
 			const catWords = command.category.split(' ');
 			const formattedCat = catWords.map(word => word[0].toUpperCase() + word.substring(1)).join(' ');
@@ -57,7 +61,7 @@ async function main() {
 
 		newCatText += command.description ? `\n- Description: ${command.description}` : ``;
 		newCatText += command.usage ? `\n- Usage: \`s;help ${command.usage}\`` : ``;
-		newCatText += command.aliases ? `\n- Aliases: \`${command.aliases.map(alias => `"${alias}"`).join(', ')}\`` : ``;
+		newCatText += command.aliases ? `\n- Aliases: ${command.aliases.map(alias => `\`${alias}\``).join(', ')}` : ``;
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
 		categories.set(command.category, newCatText);
 	}

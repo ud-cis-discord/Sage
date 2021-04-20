@@ -12,7 +12,7 @@
 		"dev": "tsc-watch --onSuccess \"node dist/src/sage.js\"",
 		"onboard": "node dist/onboard/onboard.js",
 		"nudge": "node dist/onboard/nudge.js",
-		"autodoc": "node dist/autodoc/writecommands.js"
+		"autodoc": "node dist/autodoc/writecommands.js && autodoc/movemd.sh"
 	},
 	"repository": {
 		"type": "git",
