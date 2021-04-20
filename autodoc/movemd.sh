@@ -12,5 +12,5 @@ then
 	exit 1
 fi
 
-mv ./Commands.md ../ud-cis-discord.github.io/Commands.md
-mv ./'Staff Commands.md' ../ud-cis-discord.github.io/'Staff Commands.md'
+mv ./Commands.md ../ud-cis-discord.github.io/pages/Commands.md
+mv ./'Staff Commands.md' ../ud-cis-discord.github.io/pages/'Staff Commands.md'

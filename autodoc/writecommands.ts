@@ -63,7 +63,7 @@ async function main() {
 		let newCatText = `${categories.get(command.category)}\n\n**${command.name}**\n`;
 
 		newCatText += command.description ? `\n- Description: ${command.description}\n` : ``;
-		newCatText += command.usage ? `\n- Usage: \`s;help ${command.usage}\`\n` : ``;
+		newCatText += `\n- Usage: \`s;${command.name} ${command.usage ? `${command.usage}\`\n` : `\`\n`}`;
 		newCatText += command.aliases ? `\n- Aliases: ${command.aliases.map(alias => `\`${alias}\`\n`).join(', ')}` : ``;
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
 		categories.set(command.category, newCatText);
