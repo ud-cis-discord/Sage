@@ -50,19 +50,19 @@ async function main() {
 		if (!categories.has(command.category)) {
 			const catWords = command.category.split(' ');
 			const formattedCat = catWords.map(word => word[0].toUpperCase() + word.substring(1)).join(' ');
-			categories.set(command.category, `###${formattedCat} Commands`);
+			categories.set(command.category, `### ${formattedCat} Commands`);
 		}
 
 		let newCatText = `${categories.get(command.category)}\n\n**${command.name}**\n`;
 
-		newCatText += command.description ? `\n\t- Description: ${command.description}` : ``;
-		newCatText += command.usage ? `\n\t- Usage: \`s;help ${command.usage}\`` : ``;
-		newCatText += command.aliases ? `\n\t- Aliases: \`${command.aliases.map(alias => `"${alias}"`).join(', ')}\`` : ``;
-		newCatText += command.extendedHelp ? `\n\t- More info: ${command.extendedHelp}` : ``;
+		newCatText += command.description ? `\n- Description: ${command.description}` : ``;
+		newCatText += command.usage ? `\n- Usage: \`s;help ${command.usage}\`` : ``;
+		newCatText += command.aliases ? `\n- Aliases: \`${command.aliases.map(alias => `"${alias}"`).join(', ')}\`` : ``;
+		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
 		categories.set(command.category, newCatText);
 	}
 
-	categories.forEach((key, value) => {
+	categories.forEach((_value, key) => {
 		cmdMd += key === 'staff' ? `` : categories.get(key);
 	});
 
