@@ -1,4 +1,5 @@
 def boolean stage_results = false
+
 pipeline {
     agent any
 	environment {
