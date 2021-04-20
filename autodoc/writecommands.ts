@@ -17,6 +17,9 @@ Here is a list of all of the commands available for Sage, with the format \`s;co
 Note, \`[argument]\` denotes an optional argument while \`<argument>\` denotes a required argument. Brackets should be omitted when running commands.
 `;
 
+const staffInfo = `### Staff Commands
+All of the staff-only commands can be found on [this page](https://ud-cis-discord.github.io/staff_pages/staff%20commands).`;
+
 let staffCmdMd = `---
 waltz:
   title: Staff Commands
@@ -59,18 +62,26 @@ async function main() {
 
 		let newCatText = `${categories.get(command.category)}\n\n**${command.name}**\n`;
 
-		newCatText += command.description ? `\n- Description: ${command.description}` : ``;
-		newCatText += command.usage ? `\n- Usage: \`s;help ${command.usage}\`` : ``;
-		newCatText += command.aliases ? `\n- Aliases: ${command.aliases.map(alias => `\`${alias}\``).join(', ')}` : ``;
+		newCatText += command.description ? `\n- Description: ${command.description}\n` : ``;
+		newCatText += command.usage ? `\n- Usage: \`s;help ${command.usage}\`\n` : ``;
+		newCatText += command.aliases ? `\n- Aliases: ${command.aliases.map(alias => `\`${alias}\`\n`).join(', ')}` : ``;
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
 		categories.set(command.category, newCatText);
+	}
+
+	if (categories.get('question tagging')) {
+		const qtLink = `\nMore info related to the question tagging system can also be found on [this page](https://ud-cis-discord.github.io/pages/Question%20Tagging).\n`;
+		categories.set('question tagging', qtLink);
 	}
 
 	categories.forEach((_value, key) => {
 		cmdMd += key === 'staff' ? `` : categories.get(key);
 	});
 
+	cmdMd += staffInfo;
+
 	staffCmdMd += categories.get('staff');
+	staffCmdMd += '\n[29]: https://ud-cis-discord.github.io/pages/commands (Commands)';
 
 	fs.writeFileSync(`${__dirname}/../../Commands.md`, cmdMd);
 
