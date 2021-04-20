@@ -45,7 +45,7 @@ export async function argParser(_msg: Message, input: string): Promise<Array<str
 
 	const splitArgs = args.map(arg => arg.trim());
 
-	let project = 'bot';
+	let project = 'SageV2';
 	let labels = [];
 	let milestone = '';
 
