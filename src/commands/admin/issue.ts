@@ -50,16 +50,19 @@ export async function argParser(_msg: Message, input: string): Promise<Array<str
 	let milestone = '';
 
 	if (splitArgs.find(str => str.includes('project'))) {
-		[, project] = splitArgs.find(str => str.includes('project=')).split('=');
+		[, project] = splitArgs.find(str => str.includes('project')).split('=');
+		if (!project) throw `Invalid format for project, more help:\n${extendedHelp}`;
 	}
 
 	if (splitArgs.find(str => str.includes('labels'))) {
-		labels = splitArgs.find(str => str.includes('labels='))
+		labels = splitArgs.find(str => str.includes('labels'))
 			.split('=').slice(1).join().split(',').map(label => label.trim());
+		if (!labels) throw `Invalid format for labels, more help:\n${extendedHelp}`;
 	}
 
 	if (splitArgs.find(str => str.includes('milestone'))) {
-		[, milestone] = splitArgs.find(str => str.includes('milestone=')).split('=');
+		[, milestone] = splitArgs.find(str => str.includes('milestone')).split('=');
+		if (!milestone) throw `Invalid format for milestone name, more help:\n${extendedHelp}`;
 	}
 	return [title, project, labels, milestone];
 }
