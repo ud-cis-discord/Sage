@@ -70,7 +70,8 @@ async function main() {
 	}
 
 	if (categories.get('question tagging')) {
-		const qtLink = `\nMore info related to the question tagging system can also be found on [this page](https://ud-cis-discord.github.io/pages/Question%20Tagging).\n`;
+		const qtLink = `${categories.get('question tagging')}
+More info related to the question tagging system can also be found on [this page](https://ud-cis-discord.github.io/pages/Question%20Tagging).\n`;
 		categories.set('question tagging', qtLink);
 	}
 
