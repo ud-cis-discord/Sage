@@ -50,6 +50,7 @@ async function main() {
 		console.log(`Logged into ${bot.guilds.cache.size} guilds`);
 		console.log(`Serving ${bot.users.cache.size} users`);
 
+		// eslint-disable-next-line no-extra-parens
 		const status = (await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData)?.status;
 
 		const activity = status?.name || `${PREFIX}help`;

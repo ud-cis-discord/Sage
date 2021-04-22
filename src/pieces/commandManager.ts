@@ -1,27 +1,26 @@
-import { Collection, Client, Message, TextChannel } from 'discord.js';
+import { Collection, Client, Message } from 'discord.js';
+import { getCommand, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
-import { getCommand, generateLogEmbed, readdirRecursive } from '@lib/utils';
-import { CHANNELS, DB, MAINTAINERS, PREFIX } from '@root/config';
-import { SageData } from '../lib/types/SageData';
+import { SageData } from '@lib/types/SageData';
+import { CommandError } from '@lib/types/errors';
+import { DB, MAINTAINERS, PREFIX } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
-
 	try {
 		await loadCommands(bot);
-	} catch (e) {
-		errLog.send(await generateLogEmbed(e));
+	} catch (error) {
+		bot.emit('error', error);
 	}
 
 	bot.on('message', msg => {
-		runCommand(msg, errLog)
-			.catch(async e => errLog.send(await generateLogEmbed(e)));
+		runCommand(msg)
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('messageUpdate', (oldMsg, msg) => {
 		if (oldMsg.content !== msg.content && '_edits' in msg) {
-			runCommand(msg, errLog)
-				.catch(async e => errLog.send(await generateLogEmbed(e)));
+			runCommand(msg)
+				.catch(async error => bot.emit('error', error));
 		}
 	});
 }
@@ -62,7 +61,7 @@ async function loadCommands(bot: Client) {
 	console.log(`${bot.commands.size} commands loaded.`);
 }
 
-async function runCommand(msg: Message, errLog: TextChannel) {
+async function runCommand(msg: Message) {
 	if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'dm') || msg.author.bot) return;
 
 	let commandName: string;
@@ -98,13 +97,13 @@ async function runCommand(msg: Message, errLog: TextChannel) {
 
 	try {
 		command.run(msg, args)
-			?.catch(async (e: Error) => {
+			?.catch(async (error: Error) => {
 				msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-				errLog.send(await generateLogEmbed(e));
+				msg.client.emit('error', new CommandError(error, msg));
 			});
 	} catch (error) {
 		msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-		errLog.send(await generateLogEmbed(error));
+		msg.client.emit('error', new CommandError(error, msg));
 	}
 }
 

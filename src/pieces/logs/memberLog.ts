@@ -1,6 +1,5 @@
 import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField, User, PartialUser } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
-import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, CHANNELS } from '@root/config';
 
 async function processMemberAdd(member: GuildMember, channel: TextChannel): Promise<void> {
@@ -171,27 +170,26 @@ async function processUserUpdate(oldUser: User | PartialUser, newUser: User, cha
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	const memLog = await bot.channels.fetch(CHANNELS.MEMBER_LOG) as TextChannel;
 
 	bot.on('guildMemberAdd', member => {
 		processMemberAdd(member, memLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('guildMemberRemove', member => {
 		processMemberRemove(member, memLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('guildMemberUpdate', (oldMember, newMember) => {
 		processMemberUpdate(oldMember, newMember, memLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('userUpdate', (oldUser, newUser) => {
 		processUserUpdate(oldUser, newUser, memLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 }
 

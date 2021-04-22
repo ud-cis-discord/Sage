@@ -1,5 +1,4 @@
 import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember, PartialGuildMember } from 'discord.js';
-import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, CHANNELS, ROLES } from '@root/config';
 
 async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
@@ -98,27 +97,26 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	const modLog = await bot.channels.fetch(CHANNELS.MOD_LOG) as TextChannel;
 
 	bot.on('guildBanAdd', (guild, target) => {
 		processBanAdd(guild, target, modLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('guildBanRemove', (guild, target) => {
 		processBanRemove(guild, target, modLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('guildMemberUpdate', (oldMember, newMember) => {
 		processMemberUpdate(oldMember, newMember, modLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('guildMemberRemove', member => {
 		processMemberRemove(member, modLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 }
 
