@@ -1,18 +1,16 @@
-import { Client, TextChannel } from 'discord.js';
+import { Client } from 'discord.js';
 import { schedule } from 'node-cron';
 import nodemailer from 'nodemailer';
 import moment from 'moment';
-import { generateLogEmbed } from '@lib/utils';
 import { SageUser } from '@lib/types/SageUser';
-import { CHANNELS, DB, EMAIL } from '@root/config';
+import { DB, EMAIL } from '@root/config';
 
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	// 0 0 * * SUN :: 0 minutes, 0 hours, any day of month, any month, on Sundays (AKA midnight between Sat & Sun)
 	schedule('0 0 * * SUN', () => {
 		handleCron(bot)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 }
 

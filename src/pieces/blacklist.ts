@@ -1,16 +1,13 @@
-import { BLACKLIST, CHANNELS } from '@root/config';
-import { TextChannel, Client, Message } from 'discord.js';
-import { generateLogEmbed } from '@lib/utils';
+import { BLACKLIST } from '@root/config';
+import { Client, Message } from 'discord.js';
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
-
 	bot.on('message', async (msg) => filterMessages(msg)
-		.catch(async error => errLog.send(await generateLogEmbed(error)))
+		.catch(async error => bot.emit('error', error))
 	);
 }
 
-async function filterMessages(msg: Message): Promise<Message|void> {
+async function filterMessages(msg: Message): Promise<Message | void> {
 	if (await filter(msg.content, BLACKLIST)) {
 		msg.delete({ reason: `${msg.member} used a bad word.` });
 
@@ -20,7 +17,7 @@ async function filterMessages(msg: Message): Promise<Message|void> {
 	return;
 }
 
-function filter(string: string, list: string[]): Promise <boolean> {
+function filter(string: string, list: string[]): Promise<boolean> {
 	return new Promise((resolve, reject) => {
 		if (typeof string !== 'string') reject('"String" param is not a string.');
 		string = string.replace(/[.,/#!$%^&*;:{}=\-_`~()@+=?"\u206a]/g, '');
