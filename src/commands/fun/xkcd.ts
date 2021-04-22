@@ -4,8 +4,7 @@ import fetch from 'node-fetch';
 
 export const description = 'Find a comic from xkcd.';
 export const usage = '[latest | comicNumber]';
-export const extendedHelp = 'If given no paramaters, sends a random comic. You can also specify a comic by its number or get the latest comic with `latest`.';
-export const aliases = ['x'];
+export const extendedHelp = 'If given no parameters, sends a random comic. You can also specify a comic by its number or get the latest comic with `latest`.';
 
 export async function run(msg: Message, [comicId]: [number | 'latest' | 'random']): Promise<Message> {
 	const latest: XkcdComic = await await fetch('http://xkcd.com/info.0.json').then(r => r.json());
@@ -43,17 +42,21 @@ export function argParser(_msg: Message, input: string): Array<string | number> 
 }
 
 function createComicEmbed(comic: XkcdComic): MessageEmbed {
-	const comicDdescription = (comic.transcript || comic.alt)
+	let comicDescription = (comic.alt || comic.transcript)
 		.replace(/{{/g, '{')
 		.replace(/}}/g, '}')
 		.replace(/\[\[/g, '[')
 		.replace(/]]/g, ']')
 		.replace(/<</g, '<')
 		.replace(/>>/g, '>');
+	if (comicDescription.length > 2048) {
+		comicDescription = `${comicDescription.slice(0, 2000)}...`;
+	}
+
 	return new MessageEmbed()
 		.setColor('GREYPLE')
 		.setDescription(`[View on xkcd.com](https://xkcd.com/${comic.num}/)`)
-		.setFooter(comicDdescription)
+		.setFooter(comicDescription)
 		.setImage(comic.img)
 		.setTimestamp()
 		.setTitle(`${comic.safe_title} (#${comic.num}, ${moment(new Date(Number(comic.year), Number(comic.month) - 1, Number(comic.day))).format('YYYY MMMM Do')})`);
