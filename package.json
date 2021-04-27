@@ -23,7 +23,7 @@
 	"bugs": {
 		"url": "https://github.com/ud-cis-discord/SageV2/issues"
 	},
-	"homepage": "https://github.com/ud-cis-discord/SageV2#readme",
+	"homepage": "https://github.com/ud-cis-discord/SageV2",
 	"dependencies": {
 		"@octokit/rest": "^18.3.5",
 		"canvas": "^2.7.0",
