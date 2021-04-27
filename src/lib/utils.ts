@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, MessageAttachment } from 'discord.js';
+import { Client, Message, MessageAttachment } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
@@ -43,34 +43,6 @@ export function readdirRecursive(dir: string): string[] {
 	return results;
 }
 
-export async function generateLogEmbed(error: Error): Promise<MessageEmbed> {
-	console.error(error);
-
-	const embed = new MessageEmbed();
-
-	embed.setTitle(error.name ? error.name : error.toString());
-
-	if (error.message) {
-		if (error.message.length < 1000) {
-			embed.setDescription(`\`\`\`\n${error.message}\`\`\``);
-		} else {
-			embed.setDescription(`Full error message too big\n\`\`\`js\n${error.message.slice(0, 950)}...\`\`\``);
-		}
-	}
-
-	if (error.stack) {
-		if (error.stack.length < 1000) {
-			embed.addField('Stack Trace', `\`\`\`js\n${error.stack}\`\`\``, false);
-		} else {
-			embed.addField('Stack Trace', 'Full stack too big, sent to file.', false);
-			embed.attachFiles([await sendToFile(error.stack, 'js', 'error', true)]);
-		}
-	}
-	embed.setTimestamp();
-	embed.setColor('RED');
-
-	return embed;
-}
 
 export function reminderTime({ expires: date, repeat }: Reminder): string {
 	const now = new Date();

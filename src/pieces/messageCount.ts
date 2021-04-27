@@ -1,5 +1,4 @@
 import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
-import { generateLogEmbed } from '@lib/utils';
 import { DatabaseError } from '@lib/types/errors';
 import { CHANNELS, PREFIX, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
@@ -11,13 +10,12 @@ const maxGreen = '00ff00';
 const maxLevel = 20;
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
-	bot.on('message', async msg => countMessages(msg, errLog)
-		.catch(async error => errLog.send(await generateLogEmbed(error)))
+	bot.on('message', async msg => countMessages(msg)
+		.catch(async error => bot.emit('error', error))
 	);
 }
 
-async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
+async function countMessages(msg: Message): Promise<void> {
 	const bot = msg.client;
 
 	if (
@@ -41,7 +39,8 @@ async function countMessages(msg: Message, errLog: TextChannel): Promise<void> {
 		{ discordId: msg.author.id },
 		{ $inc: { count: countInc, curExp: -1 } },
 		(err, { value }) => handleLevelUp(err, value as SageUser, msg)
-			.catch(async error => errLog.send(await generateLogEmbed(error))));
+			.catch(async error => bot.emit('error', error))
+	);
 }
 
 async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise<void> {

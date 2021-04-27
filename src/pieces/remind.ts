@@ -1,14 +1,12 @@
 import { CHANNELS, DB } from '@root/config';
 import { Client, TextChannel } from 'discord.js';
 import { schedule } from 'node-cron';
-import { generateLogEmbed } from '@lib/utils';
 import { Reminder } from '@lib/types/Reminder';
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	schedule('* * * * *', () => {
 		handleCron(bot)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 }
 

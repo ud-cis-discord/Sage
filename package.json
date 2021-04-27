@@ -1,6 +1,6 @@
 {
 	"name": "sage",
-	"version": "2.2.5",
+	"version": "2.2.6",
 	"description": "A purpose build Discord bot to manage the UD CIS Discord server.",
 	"main": "dist/src/sage.js",
 	"scripts": {
@@ -23,7 +23,7 @@
 	"bugs": {
 		"url": "https://github.com/ud-cis-discord/SageV2/issues"
 	},
-	"homepage": "https://github.com/ud-cis-discord/SageV2#readme",
+	"homepage": "https://github.com/ud-cis-discord/SageV2",
 	"dependencies": {
 		"@octokit/rest": "^18.3.5",
 		"canvas": "^2.7.0",

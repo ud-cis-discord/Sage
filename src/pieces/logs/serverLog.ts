@@ -14,7 +14,6 @@ import {
 	Role
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
-import { generateLogEmbed } from '@lib/utils';
 import { GUILDS, CHANNELS } from '@root/config';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
@@ -434,72 +433,71 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 }
 
 async function register(bot: Client): Promise<void> {
-	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	const serverLog = await bot.channels.fetch(CHANNELS.SERVER_LOG) as TextChannel;
 
 	bot.on('channelCreate', (channel: GuildChannel | DMChannel) => {
 		processChannelCreate(channel, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('channelDelete', (channel: GuildChannel | DMChannel) => {
 		processChannelDelete(channel, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('channelUpdate', (oldChannel: GuildChannel | DMChannel, newChannel: GuildChannel | DMChannel) => {
 		processChannelUpdate(oldChannel, newChannel, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('emojiCreate', emote => {
 		processEmojiCreate(emote, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('emojiDelete', emote => {
 		processEmojiDelete(emote, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('emojiUpdate', (oldEmote, newEmote) => {
 		processEmojiUpdate(oldEmote, newEmote, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('inviteCreate', invite => {
 		processInviteCreate(invite, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('inviteDelete', invite => {
 		processInviteDelete(invite, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('messageDelete', message => {
 		processMessageDelete(message, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('messageDeleteBulk', messages => {
 		processBulkDelete(messages.array().reverse(), serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('roleCreate', role => {
 		processRoleCreate(role, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('roleDelete', role => {
 		processRoleDelete(role, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('roleUpdate', (oldRole, newRole) => {
 		processRoleUpdate(oldRole, newRole, serverLog)
-			.catch(async error => errLog.send(await generateLogEmbed(error)));
+			.catch(async error => bot.emit('error', error));
 	});
 }
 
