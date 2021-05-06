@@ -10,8 +10,7 @@ import { registerFont } from 'canvas';
 import { SageData } from '@lib/types/SageData';
 
 consoleStamp(console, {
-	pattern: 'dd/mm/yy hh:MM:ss.L tt',
-	label: false
+	format: ':date(dd/mm/yy hh:MM:ss.L tt)'
 });
 
 async function main() {
