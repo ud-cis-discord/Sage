@@ -27,7 +27,7 @@
 	"dependencies": {
 		"@octokit/rest": "^18.3.5",
 		"canvas": "^2.7.0",
-		"console-stamp": "^0.2.9",
+		"console-stamp": "^3.0.2",
 		"discord.js": "^12.5.1",
 		"module-alias": "^2.2.2",
 		"moment": "^2.29.1",
