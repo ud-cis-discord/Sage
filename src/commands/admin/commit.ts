@@ -23,7 +23,7 @@ export function run(msg: Message): Promise<Message> {
 
 
 function getGitInfo(commitNumber = 0): Array<string> {
-	const info = execSync(`git log --max-count=1 --skip=${commitNumber} --no-merges --format="%H%n%an%n%s%n%ci"` +
+	const info = execSync(`cd ${__dirname} && git log --max-count=1 --skip=${commitNumber} --no-merges --format="%H%n%an%n%s%n%ci"` +
 		' && git branch --show-current').toString().split('\n');
 
 	if (info[2].toLowerCase() === 'version bump') {
