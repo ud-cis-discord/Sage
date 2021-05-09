@@ -14,7 +14,7 @@ export default class extends Command {
 	}
 
 	async run(msg: Message, [query]: [string]): Promise<Message> {
-		const formatted = query.replace(new RegExp(' ', 'g'), '+');
+		const formatted = query.replace(new RegExp(' ', 'g'), '+').replace('%', '%25');
 		const link = `https://letmegooglethat.com/?q=${formatted}`;
 		const embed = new MessageEmbed({
 			description: `[Let me Google that for you!](${link})`,
