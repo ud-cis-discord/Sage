@@ -109,14 +109,15 @@ pipeline {
 					if(stage_results == false && env.BRANCH_NAME == env.MAIN_BRANCH) {
 						discord_desc = "URGENT!! -- " + discord_desc
 					}
-					discordSend(
+					if(env.BRANCH_NAME == env.MAIN_BRANCH) {
+						discordSend(
 						description: discord_desc, 
 						footer: env.BUILD_TAG,
 						link: env.BUILD_URL, 
 						result: currentBuild.currentResult, 
 						title: JOB_NAME + " -- Documentation Update", 
 						webhookURL: env.DISCORD_WEBHOOK
-					)
+					)}
 					if (stage_results == false) {
 						sh 'exit 1'
 					}
