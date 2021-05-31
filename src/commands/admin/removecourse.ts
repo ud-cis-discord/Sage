@@ -33,13 +33,12 @@ export async function run(msg: Message, [course]: [Course]): Promise<Message> {
 		.then(async () => {
 			const loadingMsg = await msg.channel.send('<a:loading:755121200929439745> working...');
 
-			category.children.forEach(channel => {
-				channel.setParent(CHANNELS.ARCHIVE, { reason }).then(c => {
-					c.lockPermissions();
-					c.setName(`${SEMESTER_ID}_${channel.name}`, reason);
-				});
-			});
-			category.delete(reason);
+			for (const channel of category.children.array()) {
+				await channel.setParent(CHANNELS.ARCHIVE, { reason });
+				await channel.lockPermissions();
+				await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
+			}
+			await category.delete(reason);
 
 			await msg.guild.members.fetch();
 			const staffRole = await msg.guild.roles.fetch(course.roles.staff);
