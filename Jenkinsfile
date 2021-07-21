@@ -15,6 +15,7 @@ pipeline {
 					sh 'echo "running build in temp workspace"'
 					sh 'mv config.example.ts config.ts'
 					sh 'npm run clean'
+					sh 'npm cache clean --force'
 					sh 'rm -rf node_modules'
 					sh 'npm i'
 					sh 'npm run build'
