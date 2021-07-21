@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 
 
 export abstract class Command {
+
 	// members
 	name: string;
 	category: string;
@@ -17,4 +18,5 @@ export abstract class Command {
 	abstract run(msg: Message, args?: Array<unknown>): Promise<unknown>;
 	permissions?(msg: Message): boolean;
 	argParser?(msg: Message, input: string): Array<unknown>;
+
 }

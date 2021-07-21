@@ -1,8 +1,9 @@
 import { Message } from 'discord.js';
 import { BOT, MAINTAINERS, PREFIX } from '@root/config';
-import { Command } from '@lib/types/Command'
+import { Command } from '@lib/types/Command';
 
 export default class extends Command {
+
 	description = `Provides information about ${BOT.NAME}.`;
 
 	async run(msg: Message): Promise<Message> {
@@ -21,4 +22,5 @@ export default class extends Command {
 	If you're interested in how ${BOT.NAME} works, you can check the code out at <https://github.com/ud-cis-discord/SageV2>.`;
 		return msg.channel.send(info);
 	}
+
 }

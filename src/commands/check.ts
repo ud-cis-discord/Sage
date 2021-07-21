@@ -1,9 +1,10 @@
 import { Message, MessageEmbed } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
-import { Command } from '@lib/types/Command'
+import { Command } from '@lib/types/Command';
 
 export default class extends Command {
+
 	description = `Displays the users current message count. 
 	If the word 'here' is used as an argument, the message count will be 
 	sent in the same channel that the command was used in (rather than the user's dms).`;
@@ -45,4 +46,5 @@ export default class extends Command {
 
 		return `${progressText}${emptyProgressText} **${percentageText}**`;
 	}
+
 }

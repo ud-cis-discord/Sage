@@ -4,12 +4,13 @@ import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
+
 	description = `Provides info about all ${BOT.NAME} commands`;
 	usage = '[command]';
 	extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
 	aliases = ['commands', 'man', 'h'];
 
-	 run(msg: Message, [cmd]: [string]): Promise<Message | void> {
+	run(msg: Message, [cmd]: [string]): Promise<Message | void> {
 		const { commands } = msg.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
 		if (cmd) {
@@ -77,4 +78,5 @@ export default class extends Command {
 				.catch(() => msg.channel.send('I couldnt send you a DM. Please enable DMs and try again'));
 		}
 	}
+
 }

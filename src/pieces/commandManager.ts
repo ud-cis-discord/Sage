@@ -36,12 +36,13 @@ async function loadCommands(bot: Client) {
 
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
-		
+
 		if (!(typeof commandModule.default === 'function')) {
 			console.log(`Invalid command ${name}`);
 			continue;
 		}
 
+		// eslint-disable-next-line new-cap
 		const command: Command = new commandModule.default;
 
 		command.name = name;
