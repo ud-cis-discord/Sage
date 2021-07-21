@@ -2,54 +2,59 @@
 import { Message, MessageEmbed, EmbedField } from 'discord.js';
 import fetch from 'node-fetch';
 import moment from 'moment';
+import { Command } from '@lib/types/Command';
 
-export const aliases = ['ds', 'discstatus', 'discordstats'];
-export const description = 'Check Discord\'s current status.';
+export default class extends Command {
 
-export async function run(msg: Message): Promise<Message> {
-	const url = 'https://srhpyqt94yxb.statuspage.io/api/v2/summary.json';
-	const currentStatus = await fetch(url, { method: 'Get' }).then(r => r.json()) as DiscordStatus;
+	aliases = ['ds', 'discstatus', 'discordstats'];
+	description = 'Check Discord\'s current status.';
 
-	const fields: Array<EmbedField> = [];
+	async run(msg: Message): Promise<Message> {
+		const url = 'https://srhpyqt94yxb.statuspage.io/api/v2/summary.json';
+		const currentStatus = await fetch(url, { method: 'Get' }).then(r => r.json()) as DiscordStatus;
 
-	if (currentStatus.components.every(component => component.status === 'operational')) {
-		fields.push({
-			name: 'All components operational',
-			value: 'No errors to report',
-			inline: false
-		});
-	} else {
-		currentStatus.components.forEach(component => {
-			if (component.status !== 'operational') {
-				fields.push({
-					name: component.name,
-					value: component.status,
-					inline: true
-				});
-			}
-		});
+		const fields: Array<EmbedField> = [];
+
+		if (currentStatus.components.every(component => component.status === 'operational')) {
+			fields.push({
+				name: 'All components operational',
+				value: 'No errors to report',
+				inline: false
+			});
+		} else {
+			currentStatus.components.forEach(component => {
+				if (component.status !== 'operational') {
+					fields.push({
+						name: component.name,
+						value: component.status,
+						inline: true
+					});
+				}
+			});
+		}
+
+		if (currentStatus.scheduled_maintenances.length > 0) {
+			fields.push({
+				name: 'Scheduled Maintenance',
+				value: currentStatus.scheduled_maintenances.map(maintenance => `${maintenance.name} | Impact: ${maintenance.impact}`).join('\n'),
+				inline: false
+			});
+		}
+
+		const embed = new MessageEmbed()
+			.setTitle(currentStatus.status.description)
+			.setDescription(`[Discord Status](${currentStatus.page.url})\n\n${currentStatus.incidents[0]
+				? `Current incidents:\n${currentStatus.incidents.map(i => i.name).join('\n')}`
+				: 'There are no active incidents.'}`)
+			.addFields(fields)
+			.setThumbnail('https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png')
+			.setTimestamp()
+			.setFooter(`Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}`)
+			.setColor('BLURPLE');
+
+		return msg.channel.send(embed);
 	}
 
-	if (currentStatus.scheduled_maintenances.length > 0) {
-		fields.push({
-			name: 'Scheduled Maintenance',
-			value: currentStatus.scheduled_maintenances.map(maintenance => `${maintenance.name} | Impact: ${maintenance.impact}`).join('\n'),
-			inline: false
-		});
-	}
-
-	const embed = new MessageEmbed()
-		.setTitle(currentStatus.status.description)
-		.setDescription(`[Discord Status](${currentStatus.page.url})\n\n${currentStatus.incidents[0]
-			? `Current incidents:\n${currentStatus.incidents.map(i => i.name).join('\n')}`
-			: 'There is no active incidents.'}`)
-		.addFields(fields)
-		.setThumbnail('https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png')
-		.setTimestamp()
-		.setFooter(`Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}`)
-		.setColor('BLURPLE');
-
-	return msg.channel.send(embed);
 }
 
 interface DiscordStatus {

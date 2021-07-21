@@ -37,6 +37,7 @@ async function loadCommands(bot: Client) {
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
 
+		// semi type-guard, typeof returns function for classes
 		if (!(typeof commandModule.default === 'function')) {
 			console.log(`Invalid command ${name}`);
 			continue;
