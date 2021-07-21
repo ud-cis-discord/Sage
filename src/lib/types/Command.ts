@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
 
 
-export interface Command {
-	run(msg: Message, args?: Array<unknown>): Promise<unknown>;
+export abstract class Command {
+	// members
 	name: string;
 	category: string;
 	enabled: boolean;
@@ -12,6 +12,9 @@ export interface Command {
 	extendedHelp?: string;
 	runInDM?: boolean;
 	runInGuild?:boolean;
+
+	// functions
+	abstract run(msg: Message, args?: Array<unknown>): Promise<unknown>;
 	permissions?(msg: Message): boolean;
 	argParser?(msg: Message, input: string): Array<unknown>;
 }
