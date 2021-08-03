@@ -1,19 +1,24 @@
 import { Message } from 'discord.js';
 import { botMasterPerms } from '@lib/permissions';
+import { Command } from '@lib/types/Command';
 
-export const aliases = ['ls', 'listcmd'];
-export const description = 'Show all commands, including disable commands.';
+export default class extends Command {
 
-export async function permissions(msg: Message): Promise<boolean> {
-	return await botMasterPerms(msg);
-}
+	aliases = ['ls', 'listcmd'];
+	description = 'Show all commands, including disable commands.';
 
-export function run(msg: Message): Promise<Message> {
-	let commands = '+ Enabled\n- Disabled\n';
+	async permissions(msg: Message): Promise<boolean> {
+		return await botMasterPerms(msg);
+	}
 
-	msg.client.commands.forEach(command => {
-		commands += `\n${command.enabled === false ? '-' : '+'} ${command.name}`;
-	});
+	run(msg: Message): Promise<Message> {
+		let commands = '+ Enabled\n- Disabled\n';
 
-	return msg.channel.send(commands, { code: 'diff' });
+		msg.client.commands.forEach(command => {
+			commands += `\n${command.enabled === false ? '-' : '+'} ${command.name}`;
+		});
+
+		return msg.channel.send(commands, { code: 'diff' });
+	}
+
 }

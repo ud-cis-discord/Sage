@@ -16,9 +16,7 @@ export abstract class Command {
 
 	// functions
 	abstract run(msg: Message, args?: Array<unknown>): Promise<unknown>;
-	permissions?(msg: Message): Promise<boolean>;
+	permissions?(msg: Message): Promise<boolean> | boolean;
 	argParser?(msg: Message, input: string): Promise<Array<unknown>> | Array<unknown>;
-
-	// mutators
 
 }

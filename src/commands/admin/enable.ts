@@ -1,38 +1,42 @@
 import { Message } from 'discord.js';
 import { botMasterPerms } from '@lib/permissions';
-import { Command } from '@lib/types/Command';
 import { getCommand } from '@lib/utils';
 import { DB } from '@root/config';
 import { SageData } from '@lib/types/SageData';
+import { Command } from '@lib/types/Command';
 
-export const description = 'Enable a command.';
-export const usage = '<command>';
+export default class extends Command {
 
-export async function permissions(msg: Message): Promise<boolean> {
-	return await botMasterPerms(msg);
-}
+	description = 'Enable a command.';
+	usage = '<command>';
 
-export async function run(msg: Message, [command]: [Command]): Promise<Message> {
-	if (command.enabled) return msg.channel.send(`${command.name} is already enabled.`);
+	async permissions(msg: Message): Promise<boolean> {
+		return await botMasterPerms(msg);
+	}
 
-	command.enabled = true;
-	msg.client.commands.set(command.name, command);
+	async run(msg: Message, [command]: [Command]): Promise<Message> {
+		if (command.enabled) return msg.channel.send(`${command.name} is already enabled.`);
 
-	const { commandSettings } = await msg.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: msg.client.user.id }) as SageData;
-	commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: true };
-	msg.client.mongo.collection(DB.CLIENT_DATA).updateOne(
-		{ _id: msg.client.user.id },
-		{ $set: { commandSettings } },
-		{ upsert: true }
-	);
+		command.enabled = true;
+		msg.client.commands.set(command.name, command);
 
-	return msg.channel.send(`+>>> ${command.name} Enabled`, { code: 'diff' });
-}
+		const { commandSettings } = await msg.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: msg.client.user.id }) as SageData;
+		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: true };
+		msg.client.mongo.collection(DB.CLIENT_DATA).updateOne(
+			{ _id: msg.client.user.id },
+			{ $set: { commandSettings } },
+			{ upsert: true }
+		);
 
-export function argParser(msg: Message, input: string): Array<Command> {
-	const command = getCommand(msg.client, input);
+		return msg.channel.send(`+>>> ${command.name} Enabled`, { code: 'diff' });
+	}
 
-	if (!command) throw `I couldn't find a command called \`${input}\``;
+	argParser(msg: Message, input: string): Array<Command> {
+		const command = getCommand(msg.client, input);
 
-	return [command];
+		if (!command) throw `I couldn't find a command called \`${input}\``;
+
+		return [command];
+	}
+
 }

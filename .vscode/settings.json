@@ -19,6 +19,7 @@
 		"deletecourse",
 		"discordstats",
 		"discstatus",
+		"errormsg",
 		"removec",
 		"removereminder",
 		"shortlink",
