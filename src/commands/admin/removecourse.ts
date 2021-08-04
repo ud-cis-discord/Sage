@@ -1,7 +1,7 @@
 import { adminPerms } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
-import { Command } from '@root/src/lib/types/Command';
+import { Command } from '@lib/types/Command';
 import { CategoryChannel, Message } from 'discord.js';
 
 export default class extends Command {
