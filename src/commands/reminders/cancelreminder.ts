@@ -1,29 +1,34 @@
 import { Reminder } from '@lib/types/Reminder';
 import { DB } from '@root/config';
 import { Message } from 'discord.js';
+import { Command } from '@lib/types/Command';
 
-export const description = 'Cancel any pending reminders you may have.';
-export const usage = '<reminder number>';
-export const extendedHelp = 'You can only cancel one reminder at a time';
-export const aliases = ['cr', 'removereminder'];
+export default class extends Command {
 
-export function run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
-	msg.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
+	description = 'Cancel any pending reminders you may have.';
+	usage = '<reminder number>';
+	extendedHelp = 'You can only cancel one reminder at a time';
+	aliases = ['cr', 'removereminder'];
 
-	const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
-	return msg.channel.send(`Canceled reminder: **${hidden ? 'Private reminder.' : reminder.content}**`);
-}
+	run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
+		msg.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
 
-export async function argParser(msg: Message, input: string): Promise<Array<Reminder>> {
-	const remindNum = parseInt(input) - 1;
+		const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
+		return msg.channel.send(`Canceled reminder: **${hidden ? 'Private reminder.' : reminder.content}**`);
+	}
 
-	if (isNaN(remindNum)) throw 'Please provide a valid number.';
+	async argParser(msg: Message, input: string): Promise<Array<Reminder>> {
+		const remindNum = parseInt(input) - 1;
 
-	const reminders: Array<Reminder> = await msg.client.mongo.collection(DB.REMINDERS).find({ owner: msg.author.id }).toArray();
-	reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());
-	const reminder = reminders[remindNum];
+		if (isNaN(remindNum)) throw 'Please provide a valid number.';
 
-	if (!reminder) throw `I couldn't find reminder **${input}**. Use the \`viewremind\` command to see your current reminders.`;
+		const reminders: Array<Reminder> = await msg.client.mongo.collection(DB.REMINDERS).find({ owner: msg.author.id }).toArray();
+		reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());
+		const reminder = reminders[remindNum];
 
-	return [reminder];
+		if (!reminder) throw `I couldn't find reminder **${input}**. Use the \`viewremind\` command to see your current reminders.`;
+
+		return [reminder];
+	}
+
 }

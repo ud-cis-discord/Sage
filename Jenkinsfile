@@ -12,9 +12,12 @@ pipeline {
 		stage('Test Build') {
 			steps {
 				catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+					sh 'find /tmp -user jenkins -print0 | xargs -0 rm -rf'
 					sh 'echo "running build in temp workspace"'
 					sh 'mv config.example.ts config.ts'
 					sh 'npm run clean'
+					sh 'npm cache clean --force'
+					sh 'rm -rf node_modules'
 					sh 'npm i'
 					sh 'npm run build'
 					script{ stage_results = true }

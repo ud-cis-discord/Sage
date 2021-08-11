@@ -1,8 +1,5 @@
 import { Message } from 'discord.js';
-
-export const description = 'Ask the 8ball a question and you shall get an answer.';
-export const extendedHelp = 'This command requires you to put a question mark at the end of your question.';
-export const usage = '[question]';
+import { Command } from '@lib/types/Command';
 
 const MAGIC8BALL_RESPONSES = [
 	'As I see it, yes.',
@@ -27,11 +24,20 @@ const MAGIC8BALL_RESPONSES = [
 	'You may rely on it.'
 ];
 
-export function run(msg: Message, question: string[]): Promise<Message> {
-	if (question.length !== 0 && question[question.length - 1].endsWith('?')) {
-		return msg.channel.send(MAGIC8BALL_RESPONSES[
-			Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]);
-	} else {
-		return msg.channel.send('The 8ball only responds to questions smh');
+export default class extends Command {
+
+	description = 'Ask the 8ball a question and you shall get an answer.';
+	extendedHelp = 'This command requires you to put a question mark at the end of your question.';
+	usage = '[question]';
+
+
+	run(msg: Message, question: string[]): Promise<Message> {
+		if (question.length !== 0 && question[question.length - 1].endsWith('?')) {
+			return msg.channel.send(MAGIC8BALL_RESPONSES[
+				Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]);
+		} else {
+			return msg.channel.send('The 8ball only responds to questions smh');
+		}
 	}
+
 }

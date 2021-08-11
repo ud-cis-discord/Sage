@@ -32,10 +32,20 @@ async function loadCommands(bot: Client) {
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		const command: Command = await import(file);
+		const commandModule = await import(file);
 
 		const dirs = file.split('/');
 		const name = dirs[dirs.length - 1].split('.')[0];
+
+		// semi type-guard, typeof returns function for classes
+		if (!(typeof commandModule.default === 'function')) {
+			console.log(`Invalid command ${name}`);
+			continue;
+		}
+
+		// eslint-disable-next-line new-cap
+		const command: Command = new commandModule.default;
+
 		command.name = name;
 		command.category = dirs[dirs.length - 2];
 

@@ -1,11 +1,16 @@
 import { Message } from 'discord.js';
+import { Command } from '@lib/types/Command';
 
-export const description = 'Press F to pay respects';
-export const aliases = ['respect'];
+export default class extends Command {
 
-export function run(msg: Message): Promise<Message> {
-	return msg.channel.send({ files: [{
-		attachment: `${__dirname}../../../../../assets/images/f.png`,
-		name: 'pay_respects.png'
-	}] });
+	description = 'Press F to pay respects';
+	aliases = ['respect'];
+
+	run(msg: Message): Promise<Message> {
+		return msg.channel.send({ files: [{
+			attachment: `${__dirname}../../../../../assets/images/f.png`,
+			name: 'pay_respects.png'
+		}] });
+	}
+
 }

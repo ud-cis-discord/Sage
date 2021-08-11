@@ -3,40 +3,46 @@ import { Message } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
 import { reminderTime } from '@lib/utils';
+import { Command } from '@lib/types/Command';
 
-export const description = `Have ${BOT.NAME} give you a reminder.`;
-export const usage = '<reminder> | <duration> | [repeat]';
-export const extendedHelp = 'Reminders can be set to repeat daily or weekly.';
+export default class extends Command {
 
-export function run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
-	msg.client.mongo.collection(DB.REMINDERS).insertOne(reminder);
 
-	return msg.channel.send(`I'll remind you about that at ${reminderTime(reminder)}.`);
-}
+	description = `Have ${BOT.NAME} give you a reminder.`;
+	usage = '<reminder> | <duration> | [repeat]';
+	extendedHelp = 'Reminders can be set to repeat daily or weekly.';
 
-export function argParser(msg: Message, input: string): [Reminder] {
-	const [content, rawDuration, rawRepeat] = input.split('|').map(part => part.trim());
-	const weekWords = ['w', 'week', 'weekly'];
-	const dayWords = ['d', 'day', 'daily'];
+	run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
+		msg.client.mongo.collection(DB.REMINDERS).insertOne(reminder);
 
-	const duration = parse(rawDuration);
-	if (!duration) throw `**${rawDuration}** is not a valid duration.`;
+		return msg.channel.send(`I'll remind you about that at ${reminderTime(reminder)}.`);
+	}
 
-	const repeat = rawRepeat
-		? weekWords.includes(rawRepeat.toLowerCase())
-			? 'weekly'
-			: dayWords.includes(rawRepeat.toLowerCase())
-				? 'daily'
-				: 'error'
-		: null;
+	argParser(msg: Message, input: string): [Reminder] {
+		const [content, rawDuration, rawRepeat] = input.split('|').map(part => part.trim());
+		const weekWords = ['w', 'week', 'weekly'];
+		const dayWords = ['d', 'day', 'daily'];
 
-	if (repeat === 'error') throw `**${rawRepeat}** is not a valid repeat value.`;
+		const duration = parse(rawDuration);
+		if (!duration) throw `**${rawDuration}** is not a valid duration.`;
 
-	return [{
-		owner: msg.author.id,
-		content,
-		mode: msg.channel.type === 'dm' ? 'private' : 'public',
-		expires: new Date(duration + Date.now()),
-		repeat
-	}];
+		const repeat = rawRepeat
+			? weekWords.includes(rawRepeat.toLowerCase())
+				? 'weekly'
+				: dayWords.includes(rawRepeat.toLowerCase())
+					? 'daily'
+					: 'error'
+			: null;
+
+		if (repeat === 'error') throw `**${rawRepeat}** is not a valid repeat value.`;
+
+		return [{
+			owner: msg.author.id,
+			content,
+			mode: msg.channel.type === 'dm' ? 'private' : 'public',
+			expires: new Date(duration + Date.now()),
+			repeat
+		}];
+	}
+
 }
