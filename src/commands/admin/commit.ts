@@ -16,12 +16,14 @@ export default class extends Command {
 	run(msg: Message): Promise<Message> {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
-		return msg.channel.send(new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setAuthor(author)
 			.setTitle(message)
 			.setDescription(`Commit [${hash.slice(0, 8)}](${github}/commit/${hash}) on ${branch}`)
 			.setColor('#fbb848')
-			.setTimestamp(new Date(timestamp)));
+			.setTimestamp(new Date(timestamp));
+
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 

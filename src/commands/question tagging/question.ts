@@ -37,7 +37,7 @@ export default class extends Command {
 
 		let failed = false;
 		for (const embed of embeds) {
-			await msg.author.send(embed)
+			await msg.author.send({ embeds: [embed] })
 				.catch(async () => {
 					await msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again');
 					failed = true;

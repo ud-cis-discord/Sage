@@ -23,7 +23,7 @@ export default class extends Command {
 			.setDescription(response)
 			.setFooter(`To respond do \n${PREFIX}reply ${question.questionId} <response>`);
 
-		return asker.send(embed)
+		return asker.send({ embeds: [embed] })
 			.then(() => msg.channel.send(`I've sent your response to ${asker.username}.`))
 			.catch(() => msg.channel.send(`I couldn't send your response. ${asker.username} may have DMs disabled.`));
 	}

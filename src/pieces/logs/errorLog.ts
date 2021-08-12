@@ -6,7 +6,7 @@ import { CHANNELS } from '@root/config';
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('error', async error => {
-		errLog.send(await generateLogEmbed(error));
+		errLog.send({ embeds: [await generateLogEmbed(error)] });
 	});
 }
 

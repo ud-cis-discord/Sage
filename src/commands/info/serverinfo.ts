@@ -26,7 +26,7 @@ export default class extends Command {
 			.setColor('DARK_VIVID_PINK')
 			.setTimestamp();
 
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 }

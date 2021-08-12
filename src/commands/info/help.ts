@@ -51,7 +51,7 @@ export default class extends Command {
 				.setTimestamp(Date.now())
 				.setColor('RANDOM');
 
-			return msg.channel.send(embed);
+			return msg.channel.send({ embeds: [embed] });
 		} else {
 			let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command, or you can visit our website here:\n<${website}>\n`;
 			const categories: Array<string> = [];

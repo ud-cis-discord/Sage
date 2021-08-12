@@ -33,7 +33,7 @@ export default class extends Command {
 		}
 
 		const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
-		const questionMessage = await privateChannel.send(embed);
+		const questionMessage = await privateChannel.send({ embeds: [embed] });
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
 		const entry: PVQuestion = {

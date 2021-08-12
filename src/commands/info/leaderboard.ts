@@ -91,7 +91,7 @@ export default class extends Command {
 			.attachFiles([{ name: 'leaderboard.png', attachment: canvas.toBuffer() }])
 			.setImage('attachment://leaderboard.png');
 
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 	argParser(_msg: Message, input: string): Array<number | null> {
 		return [parseInt(input) > 1 ? parseInt(input) : 1];

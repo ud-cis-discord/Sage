@@ -50,14 +50,15 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 		});
 	});
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Created new ${channel.type} channel, #${channel.name}`)
 		.setDescription(`${channel.name} is in the ${channel.parent ? channel.parent.name : 'none'} category.`)
 		.addFields(fields)
 		.setFooter(`Channel ID: ${channel.id}`)
 		.setColor('PURPLE')
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
@@ -74,13 +75,14 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 		});
 	}
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted ${channel.type} channel, #${channel.name}`)
 		.addFields(fields)
 		.setFooter(`Channel ID: ${channel.id}`)
 		.setColor('PURPLE')
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newChannel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
@@ -155,7 +157,7 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 
 	if (toSend) {
 		embed.addFields(fields);
-		serverLog.send(embed);
+		serverLog.send({ embeds: [embed] });
 	}
 }
 
@@ -163,38 +165,41 @@ async function processEmojiCreate(emote: GuildEmoji, serverLog: TextChannel): Pr
 	if (emote.guild.id !== GUILDS.MAIN) return;
 	const [logEntry] = (await emote.guild.fetchAuditLogs({ type: 'EMOJI_CREATE', limit: 1 })).entries.array();
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${emote.name} <:${emote.name}:${emote.id}> emote created`)
 		.setImage(emote.url)
 		.setColor('DARK_VIVID_PINK')
 		.setFooter(`Emote ID: ${emote.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processEmojiDelete(emote: GuildEmoji, serverLog: TextChannel): Promise<void> {
 	if (emote.guild.id !== GUILDS.MAIN) return;
 	const [logEntry] = (await emote.guild.fetchAuditLogs({ type: 'EMOJI_DELETE', limit: 1 })).entries.array();
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${emote.name} emote deleted`)
 		.setImage(emote.url)
 		.setColor('DARK_VIVID_PINK')
 		.setFooter(`Emote ID: ${emote.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processEmojiUpdate(oldEmote: GuildEmoji, newEmote: GuildEmoji, serverLog: TextChannel): Promise<void> {
 	if (newEmote.guild.id !== GUILDS.MAIN || newEmote.name === oldEmote.name) return;
 	const [logEntry] = (await newEmote.guild.fetchAuditLogs({ type: 'EMOJI_UPDATE', limit: 1 })).entries.array();
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`<:${newEmote.name}:${newEmote.id}> ${oldEmote.name} is now called ${newEmote.name}`)
 		.setColor('DARK_VIVID_PINK')
 		.setFooter(`Emote ID: ${newEmote.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processInviteCreate(invite: Invite, serverLog: TextChannel): Promise<void> {
@@ -238,13 +243,14 @@ async function processInviteCreate(invite: Invite, serverLog: TextChannel): Prom
 		inline: true
 	});
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`New invite created`)
 		.setDescription(invite.temporary ? 'This invite has temporary on.' : '')
 		.addFields(fields)
 		.setColor('GREEN')
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processInviteDelete(invite: Invite, serverLog: TextChannel): Promise<void> {
@@ -255,11 +261,12 @@ async function processInviteDelete(invite: Invite, serverLog: TextChannel): Prom
 	if (logEntry.reason?.startsWith('[no log]')) return;
 	if (logEntry.changes.find(change => change.key === 'code').old !== invite.code) return;
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Invite to ${invite.channel.name} deleted`)
 		.setColor('GREEN')
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processMessageDelete(msg: Message | PartialMessage, serverLog: TextChannel): Promise<void> {
@@ -297,7 +304,7 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 			.attachFiles([file]);
 	}
 
-	serverLog.send(embed);
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processBulkDelete(messages: Array<Message | PartialMessage>, serverLog: TextChannel): Promise<void> {
@@ -329,14 +336,15 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 		}
 	});
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
 		.setDescription(logEntry.reason ? `**Reason**\n${logEntry.reason}` : '')
 		.attachFiles([new MessageAttachment(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), 'Messages.txt')])
 		.setColor('ORANGE')
 		.setFooter(`Deleter ID: ${logEntry.executor.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<void> {
@@ -364,13 +372,14 @@ async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<vo
 		inline: false
 	});
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(`${logEntry.executor.tag}`, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Created new role @${role.name}`)
 		.addFields(fields)
 		.setFooter(`Role ID: ${role.id}`)
 		.setColor('DARK_BLUE')
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<void> {
@@ -388,13 +397,14 @@ async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<vo
 		});
 	}
 
-	serverLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted role @${role.name}`)
 		.addFields(fields)
 		.setFooter(`Role ID: ${role.id}`)
 		.setColor('DARK_BLUE')
-		.setTimestamp());
+		.setTimestamp();
+	serverLog.send({ embeds: [embed] });
 }
 
 async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextChannel): Promise<void> {
@@ -428,7 +438,7 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 	}
 
 	if (toSend) {
-		serverLog.send(embed);
+		serverLog.send({ embeds: [embed] });
 	}
 }
 

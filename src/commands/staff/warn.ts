@@ -33,7 +33,7 @@ export default class extends Command {
 						name: 'Message content',
 						value: target.content || '*This message had no text content*'
 					}]);
-				staffChannel.send(embed);
+				staffChannel.send({ embeds: [embed] });
 			}
 		}
 

@@ -31,8 +31,8 @@ export default class extends Command {
 				`${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
 				hidden ? 'Some time in the future.' : reminderTime(reminder));
 		});
-
-		embeds.forEach(embed => msg.channel.send(embed));
+		// TODO: possibly send as a list of 10 embeds at a time
+		embeds.forEach(embed => msg.channel.send({ embeds: [embed] }));
 	}
 
 }

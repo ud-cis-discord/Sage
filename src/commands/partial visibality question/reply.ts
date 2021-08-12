@@ -36,7 +36,7 @@ export default class extends Command {
 			}
 		}
 
-		return channel.send(embed)
+		return channel.send({ embeds: [embed] })
 			.then(() => msg.channel.send('I\'ve forwarded your message along.'));
 	}
 

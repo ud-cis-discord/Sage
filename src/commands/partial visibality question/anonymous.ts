@@ -22,7 +22,7 @@ export default class extends Command {
 			.setDescription(question);
 
 		const generalChannel = await msg.client.channels.fetch(course.channels.general) as TextChannel;
-		const questionMessage = await generalChannel.send(studentEmbed);
+		const questionMessage = await generalChannel.send({ embeds: [studentEmbed] });
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
 		const staffEmbed = new MessageEmbed()
@@ -31,7 +31,7 @@ export default class extends Command {
 	It is recommended you reply in public, but sudoreply can be used **in a staff channel** to reply in private if necessary.`);
 
 		const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
-		await privateChannel.send(staffEmbed);
+		await privateChannel.send({ embeds: [staffEmbed] });
 
 		const entry: PVQuestion = {
 			owner: msg.author.id,

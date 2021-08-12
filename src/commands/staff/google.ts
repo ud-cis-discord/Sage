@@ -18,7 +18,7 @@ export default class extends Command {
 			description: `[Let me Google that for you!](${link})`,
 			color: 'LUMINOUS_VIVID_PINK'
 		});
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 }

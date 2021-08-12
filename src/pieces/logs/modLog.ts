@@ -16,13 +16,14 @@ async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): P
 		});
 	}
 
-	modLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${target.tag} was banned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
 		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${target.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	modLog.send({ embeds: [embed] });
 }
 
 async function processBanRemove(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
@@ -40,13 +41,14 @@ async function processBanRemove(guild: Guild, target: User, modLog: TextChannel)
 		});
 	}
 
-	modLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${target.tag} was unbanned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
 		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${target.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	modLog.send({ embeds: [embed] });
 }
 
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, member: GuildMember, modLog: TextChannel): Promise<void> {
@@ -69,12 +71,13 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 	}
 
 	if (muted !== null) {
-		modLog.send(new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle(`${member.user.tag} ${muted} by ${logEntry.executor.tag}`)
 			.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 			.setColor('DARK_RED')
 			.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
-			.setTimestamp());
+			.setTimestamp();
+		modLog.send({ embeds: [embed] });
 	}
 }
 
@@ -88,12 +91,13 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 		|| logEntry.target.id !== member.id
 		|| (Date.now() - logEntry.createdTimestamp) > 10e3) return;
 
-	modLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
 		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 		.setColor('YELLOW')
 		.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	modLog.send({ embeds: [embed] });
 }
 
 async function register(bot: Client): Promise<void> {

@@ -31,7 +31,7 @@ export default class extends Command {
 		} else {
 			embed.addField('Members', role.members.size < 1 ? 'None' : members, true);
 		}
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 	async argParser(msg: Message, input: string): Promise<Array<Role>> {

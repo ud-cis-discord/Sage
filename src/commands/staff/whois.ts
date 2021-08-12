@@ -38,7 +38,7 @@ export default class extends Command {
 				{ name: 'Roles', value: roles, inline: true }
 			]);
 
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 	async argParser(msg: Message, input: string): Promise<Array<GuildMember>> {

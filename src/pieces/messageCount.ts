@@ -115,7 +115,10 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setTimestamp();
 
 	// eslint-disable-next-line no-extra-parens
-	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send(`${msg.member}, you have leveled up!`, embed);
+	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send({
+		content: `${msg.member}, you have leveled up!`,
+		embeds: [embed]
+	});
 }
 
 function createLevelHex(level: number): string {

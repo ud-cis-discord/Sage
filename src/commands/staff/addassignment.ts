@@ -53,7 +53,7 @@ export default class extends Command {
 			.addFields(fields)
 			.setColor('GOLD');
 
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 	async argParser(msg: Message, input: string): Promise<[string, Array<string>]> {

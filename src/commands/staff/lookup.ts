@@ -49,7 +49,7 @@ export default class extends Command {
 			return;
 		}
 
-		msg.author.send(embed).then(() => msg.channel.send('I\'ve sent the requested info to your DMs'))
+		msg.author.send({ embeds: [embed] }).then(() => msg.channel.send('I\'ve sent the requested info to your DMs'))
 			.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again'));
 		return;
 	}
