@@ -1,4 +1,4 @@
-import { Client, TextChannel, MessageEmbed } from 'discord.js';
+import { Client, TextChannel, MessageEmbed, MessageAttachment } from 'discord.js';
 import { sendToFile } from '@lib/utils';
 import { CommandError } from '@lib/types/errors';
 import { CHANNELS } from '@root/config';
@@ -6,16 +6,19 @@ import { CHANNELS } from '@root/config';
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('error', async error => {
-		errLog.send({ embeds: [await generateLogEmbed(error)] });
+		const { embed, attachments } = await generateLogEmbed(error);
+		errLog.send({ embeds: [embed], files: attachments });
 	});
 }
 
 export default register;
 
-async function generateLogEmbed(error: CommandError): Promise<MessageEmbed> {
+async function generateLogEmbed(error: CommandError): Promise<LogEmbed> {
 	console.error(error);
 
+	let retEmbed: LogEmbed;
 	const embed = new MessageEmbed();
+	const attachments: MessageAttachment[] = [];
 
 	embed.setTitle(error.name ? error.name : error.toString());
 
@@ -32,7 +35,7 @@ async function generateLogEmbed(error: CommandError): Promise<MessageEmbed> {
 			embed.addField('Stack Trace', `\`\`\`js\n${error.stack}\`\`\``, false);
 		} else {
 			embed.addField('Stack Trace', 'Full stack too big, sent to file.', false);
-			embed.attachFiles([await sendToFile(error.stack, 'js', 'error', true)]);
+			attachments.push(await sendToFile(error.stack, 'js', 'error', true));
 		}
 	}
 	embed.setTimestamp();
@@ -45,5 +48,12 @@ async function generateLogEmbed(error: CommandError): Promise<MessageEmbed> {
 		embed.addField('Original message', `[Check for flies](${error.msgLink})`);
 	}
 
-	return embed;
+	retEmbed.attachments = attachments;
+	retEmbed.embed = embed;
+	return retEmbed;
+}
+
+interface LogEmbed {
+	embed: MessageEmbed,
+	attachments: MessageAttachment[]
 }

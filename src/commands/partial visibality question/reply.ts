@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { MessageEmbed, Message, TextChannel } from 'discord.js';
+import { MessageEmbed, Message, TextChannel, MessageAttachment } from 'discord.js';
 
 export const description = `Reply to a question you previously asked with ${BOT.NAME}.`;
 export const usage = '<questionID> <response>';
@@ -20,6 +20,8 @@ export default class extends Command {
 			.setAuthor(`${shownAuthor} responded to ${question.questionId}`, shownAvatar)
 			.setDescription(`${response}\n\n[Jump to question](${question.messageLink})`);
 
+		const attachments: MessageAttachment[] = [];
+
 		if (question.type === 'private') {
 			embed.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${question.questionId} <response>`);
 
@@ -30,13 +32,13 @@ export default class extends Command {
 						embed.setImage(attachment.url);
 						imageSet = true;
 					} else {
-						embed.attachFiles([attachment]);
+						attachments.push(attachment);
 					}
 				});
 			}
 		}
 
-		return channel.send({ embeds: [embed] })
+		return channel.send({ embeds: [embed], files: attachments })
 			.then(() => msg.channel.send('I\'ve forwarded your message along.'));
 	}
 

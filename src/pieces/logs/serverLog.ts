@@ -279,6 +279,8 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 		.setColor('ORANGE')
 		.setTimestamp();
 
+	const attachments: MessageAttachment[] = [];
+
 	if (msg.attachments.size > 0) {
 		embed.addField('Attachments', `\`${msg.attachments.map(attachment => attachment.name).join('`, `')}\``);
 	}
@@ -298,13 +300,12 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 			buffer += `Message ${idx + 1}\n${edit.content}\n\n`;
 		});
 
-		const file = new MessageAttachment(Buffer.from(buffer.trim()), 'Message.txt');
+		attachments.push(new MessageAttachment(Buffer.from(buffer.trim()), 'Message.txt'));
 
-		embed.setDescription('Too much data to display, sent as a file.')
-			.attachFiles([file]);
+		embed.setDescription('Too much data to display, sent as a file.');
 	}
 
-	serverLog.send({ embeds: [embed] });
+	serverLog.send({ embeds: [embed], files: attachments });
 }
 
 async function processBulkDelete(messages: Array<Message | PartialMessage>, serverLog: TextChannel): Promise<void> {
@@ -340,11 +341,14 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
 		.setDescription(logEntry.reason ? `**Reason**\n${logEntry.reason}` : '')
-		.attachFiles([new MessageAttachment(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), 'Messages.txt')])
 		.setColor('ORANGE')
 		.setFooter(`Deleter ID: ${logEntry.executor.id}`)
 		.setTimestamp();
-	serverLog.send({ embeds: [embed] });
+
+	serverLog.send({
+		embeds: [embed],
+		files: [new MessageAttachment(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), 'Messages.txt')]
+	});
 }
 
 async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<void> {
