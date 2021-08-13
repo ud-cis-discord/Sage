@@ -296,20 +296,11 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 		embed.addField('Attachments', `\`${msg.attachments.map(attachment => attachment.name).join('`, `')}\``);
 	}
 
-	const edits = msg.edits.reverse();
-
-	if (edits.length < 24 && edits.every(m => m.content.length < 1000) && edits.map(m => m.content).join().length < 5500) {
-		embed.setDescription(edits.pop().content);
-		edits.forEach((edit, idx) => {
-			embed.addField(`Message ${idx + 1}`, edit.content);
-		});
+	if (msg.content.length < 1000) {
+		embed.setDescription(msg.content);
 	} else {
 		let buffer = 'Last displayed content:\n';
-		buffer += `${edits.pop().content}\n\n`;
-
-		edits.forEach((edit, idx) => {
-			buffer += `Message ${idx + 1}\n${edit.content}\n\n`;
-		});
+		buffer += `${msg.content}\n\n`;
 
 		attachments.push(new MessageAttachment(Buffer.from(buffer.trim()), 'Message.txt'));
 
@@ -338,12 +329,7 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 				buffer += `Attachments: ${msg.attachments.map(attachment => attachment.name).join(', ')}\n`;
 			}
 
-			const edits = msg.edits.reverse();
-			buffer += `Last displayed content of message ${msgIdx}:\n${edits.pop().content}\n\n`;
-
-			edits.forEach((edit, editIdx) => {
-				buffer += `Message ${msgIdx}, edit ${editIdx}\n${edit.content}\n\n`;
-			});
+			buffer += `Last displayed content of message ${msgIdx}:\n${msg.content}\n\n`;
 
 			buffer = buffer.trim() + spacer;
 		}
