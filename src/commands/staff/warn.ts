@@ -18,8 +18,8 @@ export default class extends Command {
 	}
 
 	async run(msg: Message, [target, reason]: [Message, string]): Promise<Message> {
-		if ('parentID' in msg.channel) {
-			const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentID });
+		if ('parentId' in msg.channel) {
+			const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentId });
 
 			if (course) {
 				const staffChannel = msg.guild.channels.cache.get(course.channels.staff) as TextChannel;

@@ -1,7 +1,8 @@
-import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember, PartialGuildMember } from 'discord.js';
+import { Client, TextChannel, EmbedField, MessageEmbed, GuildMember, PartialGuildMember, GuildBan } from 'discord.js';
 import { GUILDS, CHANNELS, ROLES } from '@root/config';
 
-async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
+async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> {
+	const { guild, user } = ban;
 	if (guild.id !== GUILDS.MAIN) return;
 
 	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD', limit: 1 })).entries;
@@ -19,16 +20,17 @@ async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): P
 
 	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
-		.setTitle(`${target.tag} was banned.`)
+		.setTitle(`${user.tag} was banned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
-		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${target.id}`)
+		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}`)
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
 }
 
-async function processBanRemove(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
-	if (guild.id !== GUILDS.MAIN) return;
+async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<void> {
+	const { guild, user } = ban;
+	if (ban.guild.id !== GUILDS.MAIN) return;
 
 	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_REMOVE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
@@ -45,10 +47,10 @@ async function processBanRemove(guild: Guild, target: User, modLog: TextChannel)
 
 	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
-		.setTitle(`${target.tag} was unbanned.`)
+		.setTitle(`${user.tag} was unbanned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
-		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${target.id}`)
+		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}`)
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
 }
@@ -106,14 +108,14 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 async function register(bot: Client): Promise<void> {
 	const modLog = await bot.channels.fetch(CHANNELS.MOD_LOG) as TextChannel;
 
-	bot.on('guildBanAdd', (guild, target) => {
-		processBanAdd(guild, target, modLog)
-			.catch(async error => bot.emit('error', error));
+	bot.on('guildBanAdd', ban => {
+		processBanAdd(ban, modLog).catch(async error => bot.emit('error', error));
+		return;
 	});
 
-	bot.on('guildBanRemove', (guild, target) => {
-		processBanRemove(guild, target, modLog)
-			.catch(async error => bot.emit('error', error));
+	bot.on('guildBanRemove', ban => {
+		processBanRemove(ban, modLog).catch(async error => bot.emit('error', error));
+		return;
 	});
 
 	bot.on('guildMemberUpdate', (oldMember, newMember) => {

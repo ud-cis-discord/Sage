@@ -10,9 +10,9 @@ const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
 
 async function register(bot: Client): Promise<void> {
-	bot.on('messageCreate', async msg => countMessages(msg)
-		.catch(async error => bot.emit('error', error))
-	);
+	bot.on('messageCreate', async msg => {
+		countMessages(msg).catch(async error => bot.emit('error', error));
+	});
 }
 
 async function countMessages(msg: Message): Promise<void> {
