@@ -21,11 +21,11 @@ export default class extends Command {
 		const reason = `Creating new course ${course} as requested by ${msg.author.username} (${msg.author.id}).`;
 		const staffRole = await msg.guild.roles.create({
 			name: `${course} Staff`,
-			permissions: 0,
+			permissions: BigInt(0),
 			mentionable: true,
 			reason: reason
 		});
-		const studentRole = await msg.guild.roles.create({ name: `CISC ${course}`, permissions: 0, reason: reason });
+		const studentRole = await msg.guild.roles.create({ name: `CISC ${course}`, permissions: BigInt(0), reason: reason });
 
 		const standardPerms: Array<OverwriteResolvable> = [{
 			id: ROLES.ADMIN,
@@ -101,7 +101,7 @@ export default class extends Command {
 
 	async createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {
 		return guild.channels.create(name, {
-			type: 'text',
+			type: 'GUILD_TEXT',
 			parent,
 			permissionOverwrites,
 			reason

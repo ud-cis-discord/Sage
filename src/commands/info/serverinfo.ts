@@ -13,13 +13,13 @@ export default class extends Command {
 
 		const embed = new MessageEmbed()
 			.addFields([
-				{ name: 'Total Members', value: msg.guild.memberCount, inline: true },
-				{ name: 'Humans', value: msg.guild.members.cache.filter(m => !m.user.bot).size, inline: true },
-				{ name: 'Bots', value: msg.guild.members.cache.filter(m => m.user.bot).size, inline: true },
-				{ name: 'Text Channels', value: msg.guild.channels.cache.filter(c => c.type === 'text').size, inline: true },
-				{ name: 'Voice Channels', value: msg.guild.channels.cache.filter(c => c.type === 'voice').size, inline: true },
-				{ name: 'Roles', value: msg.guild.roles.cache.size, inline: true },
-				{ name: 'Emojis', value: msg.guild.emojis.cache.size, inline: true },
+				{ name: 'Total Members', value: msg.guild.memberCount.toString(), inline: true },
+				{ name: 'Humans', value: msg.guild.members.cache.filter(m => !m.user.bot).size.toString(), inline: true },
+				{ name: 'Bots', value: msg.guild.members.cache.filter(m => m.user.bot).size.toString(), inline: true },
+				{ name: 'Text Channels', value: msg.guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').size.toString(), inline: true },
+				{ name: 'Voice Channels', value: msg.guild.channels.cache.filter(c => c.type === 'GUILD_VOICE').size.toString(), inline: true },
+				{ name: 'Roles', value: msg.guild.roles.cache.size.toString(), inline: true },
+				{ name: 'Emojis', value: msg.guild.emojis.cache.size.toString(), inline: true },
 				{ name: 'Members with Roles', value: `${membersWithRoles} (${percentage}%)`, inline: true }
 			])
 			.setAuthor(msg.guild.name, msg.guild.iconURL())

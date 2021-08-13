@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Formatters, Message } from 'discord.js';
 import { botMasterPerms } from '@lib/permissions';
 import { getCommand } from '@lib/utils';
 import { DB } from '@root/config';
@@ -28,7 +28,7 @@ export default class extends Command {
 			{ upsert: true }
 		);
 
-		return msg.channel.send(`+>>> ${command.name} Enabled`, { code: 'diff' });
+		return msg.channel.send(Formatters.codeBlock('diff', `+>>> ${command.name} Enabled`,));
 	}
 
 	argParser(msg: Message, input: string): Array<Command> {

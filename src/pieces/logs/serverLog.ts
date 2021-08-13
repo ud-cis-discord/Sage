@@ -32,16 +32,16 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 		});
 	}
 
-	channel.permissionOverwrites.forEach(overwrite => {
+	channel.permissionOverwrites.cache.forEach(overwrite => {
 		const target = overwrite.type === 'role'
 			? channel.guild.roles.cache.get(overwrite.id).name
 			: channel.guild.members.cache.get(overwrite.id).user.tag;
-		const allowed = overwrite.allow.bitfield !== 0
+		const allowed = overwrite.allow.bitfield !== BigInt(0)
 			? Permissions.ALL === overwrite.allow.bitfield
 				? '`ALL`'
 				: `\`${overwrite.allow.toArray().join('`, `')}\``
 			: '`NONE`';
-		const denied = overwrite.deny.bitfield !== 0
+		const denied = overwrite.deny.bitfield !== BigInt(0)
 			? `\`${overwrite.deny.toArray().join('`, `')}\``
 			: '`NONE`';
 
@@ -126,8 +126,8 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 			.addField('Old topic', oldTextChannel.topic ? oldTextChannel.topic : 'NONE');
 	}
 
-	if (!toSend && !oldChannel.permissionOverwrites.every((oldOverride, key) => {
-		const newOverride = newChannel.permissionOverwrites.get(key);
+	if (!toSend && !oldChannel.permissionOverwrites.cache.every((oldOverride, key) => {
+		const newOverride = newChannel.permissionOverwrites.cache.get(key);
 		return newOverride?.allow.equals(oldOverride.allow)
 			&& newOverride?.deny.equals(oldOverride.deny)
 			&& newOverride?.id === oldOverride.id
@@ -136,18 +136,18 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 	})) {
 		toSend = true;
 		embed.setTitle(`#${newChannel.name} had a permission change`);
-		newChannel.permissionOverwrites.forEach(overwrite => {
+		newChannel.permissionOverwrites.cache.forEach(overwrite => {
 			const target = overwrite.type === 'role'
 				? newChannel.guild.roles.cache.get(overwrite.id).name.startsWith('@')
 					? newChannel.guild.roles.cache.get(overwrite.id).name
 					: `@${newChannel.guild.roles.cache.get(overwrite.id).name}`
 				: newChannel.guild.members.cache.get(overwrite.id).user.tag;
-			const allowed = overwrite.allow.bitfield !== 0
+			const allowed = overwrite.allow.bitfield !== BigInt(0)
 				? Permissions.ALL === overwrite.allow.bitfield
 					? '`ALL`'
 					: `\`${overwrite.allow.toArray().join('`, `')}\``
 				: '`NONE`';
-			const denied = overwrite.deny.bitfield !== 0
+			const denied = overwrite.deny.bitfield !== BigInt(0)
 				? `\`${overwrite.deny.toArray().join('`, `')}\``
 				: '`NONE`';
 
@@ -381,7 +381,7 @@ async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<vo
 
 	fields.push({
 		name: 'Permissions',
-		value: role.permissions.bitfield !== 0
+		value: role.permissions.bitfield !== BigInt(0)
 			? Permissions.ALL === role.permissions.bitfield
 				? '`ALL`'
 				: `\`${role.permissions.toArray().join('`, `')}\``
@@ -448,7 +448,7 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 		toSend = true;
 		embed.addField(
 			'Permissions',
-			newRole.permissions.bitfield !== 0
+			newRole.permissions.bitfield !== BigInt(0)
 				? Permissions.ALL === newRole.permissions.bitfield
 					? '`ALL`'
 					: `\`${newRole.permissions.toArray().join('`, `')}\``

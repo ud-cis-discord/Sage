@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Formatters, Message } from 'discord.js';
 import { botMasterPerms } from '@lib/permissions';
 import { getCommand } from '@lib/utils';
 import { SageData } from '@lib/types/SageData';
@@ -32,7 +32,7 @@ export default class extends Command {
 			{ upsert: true }
 		);
 
-		return msg.channel.send(`->>> ${command.name} Disabled`, { code: 'diff' });
+		return msg.channel.send(Formatters.codeBlock('diff', `->>> ${command.name} Disabled`));
 	}
 
 	argParser(msg: Message, input: string): Array<Command> {

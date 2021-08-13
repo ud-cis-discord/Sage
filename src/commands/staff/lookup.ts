@@ -36,7 +36,7 @@ export default class extends Command {
 				},
 				{
 					name: 'Messages: ',
-					value: entry.count,
+					value: entry.count.toString(),
 					inline: true
 				}
 			]);

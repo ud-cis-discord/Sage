@@ -63,9 +63,9 @@ async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise
 			&& entry.level <= maxLevel) { // make a new level role if it doesn't exist
 			addRole = await msg.guild.roles.create({
 				name: `Level ${entry.level}`,
-				color: createLevelHex(entry.level),
+				color: createLevelRgb(entry.level),
 				position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
-				permissions: 0,
+				permissions: BigInt(0),
 				reason: `${msg.author.username} is the first to get to Level ${entry.level}`
 			});
 		}
@@ -81,7 +81,7 @@ async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise
 				name: `Power User`,
 				color: maxGreen,
 				position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
-				permissions: 0,
+				permissions: BigInt(0),
 				reason: `${msg.author.username} is the first to become a power user!`
 			});
 		}

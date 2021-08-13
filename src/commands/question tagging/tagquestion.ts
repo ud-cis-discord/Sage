@@ -47,7 +47,7 @@ export default class extends Command {
 		const assignment = input.trim();
 
 		if (!('parentID' in msg.channel)) throw 'This command is only available in Text channels.';
-		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentId });
+		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentID });
 
 		if (!course) throw 'This command must be run in a class specific channel';
 

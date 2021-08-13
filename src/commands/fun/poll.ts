@@ -33,10 +33,10 @@ export default class extends Command {
 
 		emotes.forEach(emote => pollMsg.react(emote));
 
-		return pollMsg.awaitReactions(
-			(reaction: MessageReaction) => emotes.includes(reaction.emoji.name),
-			{ time: timespan }
-		).then(reactions => {
+		return pollMsg.awaitReactions({
+			filter: (reaction: MessageReaction) => emotes.includes(reaction.emoji.name),
+			time: timespan
+		}).then(reactions => {
 			let maxVotes = 0;
 			reactions.forEach(reaction => {
 				if (reaction.users.cache.size > maxVotes) maxVotes = reaction.users.cache.size;

@@ -15,7 +15,7 @@ export async function roleParser(msg: Message, input: string): Promise<Role> {
 	if (roleList.size > 1) {
 		throw 'Multiple roles with that name exist. Lookup by ID for role information.';
 	}
-	return roleList.array()[0];
+	return [...roleList.values()][0];
 }
 
 export async function userParser(msg: Message, input: string): Promise<GuildMember> {

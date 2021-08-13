@@ -54,7 +54,7 @@ export default class extends Command {
 			throw `${msg.author}, This command must be used when replying to a message`;
 		}
 
-		const target = await msg.channel.messages.fetch(msg.reference.messageID);
+		const target = await msg.channel.messages.fetch(msg.reference.messageId);
 
 		if (!target) throw 'Something went wrong and I couldn\'t find that message.';
 

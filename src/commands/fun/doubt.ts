@@ -12,7 +12,7 @@ export default class extends Command {
 			return msg.channel.send(this.extendedHelp);
 		}
 
-		const message = await msg.channel.messages.fetch(msg.reference.messageID);
+		const message = await msg.channel.messages.fetch(msg.reference.messageId);
 		return message.react('❎');
 	}
 
