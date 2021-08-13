@@ -14,7 +14,7 @@ export default class extends Command {
 
 	async run(msg: Message): Promise<void> {
 		const bot = msg.client;
-		await bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
+		bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
 		msg.channel.send(`Shutting down ${BOT.NAME}`)
 			.then(() => {
 				bot.destroy();

@@ -4,7 +4,8 @@ import { GUILDS, CHANNELS, ROLES } from '@root/config';
 async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
 	if (guild.id !== GUILDS.MAIN) return;
 
-	const [logEntry] = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD', limit: 1 })).entries.array();
+	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
 
@@ -29,7 +30,8 @@ async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): P
 async function processBanRemove(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
 	if (guild.id !== GUILDS.MAIN) return;
 
-	const [logEntry] = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_REMOVE', limit: 1 })).entries.array();
+	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_REMOVE', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
 
@@ -54,8 +56,8 @@ async function processBanRemove(guild: Guild, target: User, modLog: TextChannel)
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, member: GuildMember, modLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN || oldMember.roles.cache.equals(member.roles.cache)) return;
 
-	const logEntries = (await member.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 5 })).entries.array();
-	const logEntry = logEntries.find(entry => {
+	const logs = (await member.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 5 })).entries;
+	const logEntry = [...logs.values()].find(entry => {
 		if (!('id' in entry.target)) return false;
 		return entry.target.id === member.id;
 	});
@@ -84,7 +86,8 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 async function processMemberRemove(member: GuildMember | PartialGuildMember, modLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const [logEntry] = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries.array();
+	const logs = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
 	if (!logEntry) return;
 
 	if (!('id' in logEntry.target)

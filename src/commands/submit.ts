@@ -10,7 +10,7 @@ export default class extends Command {
 	enabled = false;
 
 	async run(msg: Message, [imgDesc]: [string]): Promise<Message> {
-		const [attachment] = msg.attachments.array();
+		const [attachment] = [...msg.attachments.values()];
 		if (!attachment.height) return msg.channel.send('The attachment must be an image file (jpg or png).');
 
 		const submissionChannel = await msg.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;

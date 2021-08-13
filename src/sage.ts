@@ -9,13 +9,15 @@ import { version as sageVersion } from '@root/package.json';
 import { registerFont } from 'canvas';
 import { SageData } from '@lib/types/SageData';
 
+const ALL_INTENTS = 8;
+
 consoleStamp(console, {
 	format: ':date(dd/mm/yy hh:MM:ss.L tt)'
 });
 
 async function main() {
 	const bot = new Client({
-		fetchAllMembers: true,
+		intents: [ALL_INTENTS],
 		allowedMentions: { parse: ['users'] }
 	});
 

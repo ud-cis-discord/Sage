@@ -36,7 +36,7 @@ export default class extends Command {
 			.then(async () => {
 				const loadingMsg = await msg.channel.send('<a:loading:755121200929439745> working...');
 
-				for (const channel of category.children.array()) {
+				for (const channel of [...category.children.values()]) {
 					await channel.setParent(CHANNELS.ARCHIVE, { reason });
 					await channel.lockPermissions();
 					await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);

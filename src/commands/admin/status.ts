@@ -14,7 +14,7 @@ export default class extends Command {
 
 	async run(msg: Message, [status]: ['online' | 'idle' | 'dnd' | 'invisible']): Promise<Message> {
 		const bot = msg.client;
-		await bot.user.setStatus(status);
+		bot.user.setStatus(status);
 
 		return msg.channel.send(`Set ${BOT.NAME}'s status to ${status}`);
 	}

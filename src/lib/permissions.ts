@@ -10,6 +10,6 @@ export function adminPerms(msg: Message): boolean {
 }
 
 export async function botMasterPerms(msg: Message): Promise<boolean> {
-	const team = (await msg.client.fetchApplication()).owner as Team;
+	const team = (await msg.client.application).owner as Team;
 	return team.members.has(msg.author.id);
 }

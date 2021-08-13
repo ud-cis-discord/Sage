@@ -17,7 +17,7 @@ export default class extends Command {
 
 	run(msg: Message, [member]: [GuildMember]): Promise<Message> {
 		const roles = member.roles.cache.size > 1
-			? member.roles.cache.filter(r => r.id !== r.guild.id).sort().array().join(' ')
+			? [...member.roles.cache.filter(r => r.id !== r.guild.id).sort().values()].join(' ')
 			: 'none';
 
 		const accountCreated = `${member.user.createdAt.getMonth()}/${member.user.createdAt.getDate()}/${member.user.createdAt.getFullYear()} 

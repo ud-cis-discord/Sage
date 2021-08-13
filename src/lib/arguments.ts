@@ -40,7 +40,7 @@ export async function userParser(msg: Message, input: string): Promise<GuildMemb
 		throw `The query you entered matches \`${retMembers.map(member => member.user.tag).join('`, `')}\`. Try entering one of these tags to get a specific user.`;
 	}
 
-	return retMembers.array()[0];
+	return [...retMembers.values()][0];
 }
 
 export function channelParser(msg: Message, input: string): TextChannel {
