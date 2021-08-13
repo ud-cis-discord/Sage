@@ -9,7 +9,7 @@ async function register(bot: Client): Promise<void> {
 
 async function filterMessages(msg: Message): Promise<Message | void> {
 	if (await filter(msg.content, BLACKLIST)) {
-		msg.delete({ reason: `${msg.member} used a bad word.` });
+		msg.delete();
 
 		return msg.author.send(`You used a restricted word. Please refrain from doing so again.`)
 			.catch(() => msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`));
