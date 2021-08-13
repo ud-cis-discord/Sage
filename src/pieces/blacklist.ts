@@ -2,7 +2,7 @@ import { BLACKLIST } from '@root/config';
 import { Client, Message } from 'discord.js';
 
 async function register(bot: Client): Promise<void> {
-	bot.on('message', async (msg) => filterMessages(msg)
+	bot.on('messageCreate', async (msg) => filterMessages(msg)
 		.catch(async error => bot.emit('error', error))
 	);
 }

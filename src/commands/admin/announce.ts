@@ -16,7 +16,6 @@ export default class extends Command {
 	async run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
 		await channel.send(content, {
 			files: msg.attachments.map(attachment => attachment.attachment),
-			disableMentions: 'none',
 			allowedMentions: { parse: ['everyone', 'roles'] }
 		});
 

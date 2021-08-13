@@ -12,7 +12,7 @@ async function register(bot: Client): Promise<void> {
 		bot.emit('error', error);
 	}
 
-	bot.on('message', msg => {
+	bot.on('messageCreate', msg => {
 		runCommand(msg)
 			.catch(async error => bot.emit('error', error));
 	});
@@ -72,10 +72,10 @@ async function loadCommands(bot: Client) {
 }
 
 async function runCommand(msg: Message) {
-	if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'dm') || msg.author.bot) return;
+	if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
 
 	let commandName: string;
-	if (msg.channel.type !== 'dm' || msg.content.toLowerCase().startsWith(PREFIX)) {
+	if (msg.channel.type !== 'DM' || msg.content.toLowerCase().startsWith(PREFIX)) {
 		[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
 	} else {
 		[commandName] = msg.content.split(' ');
@@ -85,8 +85,8 @@ async function runCommand(msg: Message) {
 	const command = getCommand(msg.client, commandName);
 	if (!command || command.enabled === false) return;
 
-	if (msg.channel.type === 'dm' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
-	if (msg.channel.type === 'text' && command.runInGuild === false) {
+	if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
+	if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
 		await msg.reply('That command is not available here. Try again in DMs.');
 		return msg.delete();
 	}

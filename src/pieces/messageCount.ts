@@ -10,7 +10,7 @@ const maxGreen = '00ff00';
 const maxLevel = 20;
 
 async function register(bot: Client): Promise<void> {
-	bot.on('message', async msg => countMessages(msg)
+	bot.on('messageCreate', async msg => countMessages(msg)
 		.catch(async error => bot.emit('error', error))
 	);
 }
@@ -19,7 +19,7 @@ async function countMessages(msg: Message): Promise<void> {
 	const bot = msg.client;
 
 	if (
-		msg.channel.type !== 'text'
+		msg.channel.type !== 'GUILD_TEXT'
 		|| msg.guild?.id !== GUILDS.MAIN
 		|| msg.content.toLowerCase().startsWith(PREFIX)
 		|| msg.author.bot
@@ -109,7 +109,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setThumbnail(msg.author.avatarURL())
 		.setTitle('<:stevepeace:746223639770431578> Level up!')
 		.setDescription(embedText)
-		.addField('XP to next level:', user.levelExp, true)
+		.addField('XP to next level:', user.levelExp.toString(), true)
 		.setColor(createLevelHex(user.level))
 		.setFooter(`You can turn the messages off by sending \`${PREFIX}lp\``)
 		.setTimestamp();

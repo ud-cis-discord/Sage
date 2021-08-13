@@ -26,7 +26,7 @@ export default class extends Command {
 					.setTitle('Pending reminders')
 					.setColor('DARK_AQUA'));
 			}
-			const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
+			const hidden = reminder.mode === 'private' && msg.channel.type !== 'DM';
 			embeds[Math.floor(i / 25)].addField(
 				`${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
 				hidden ? 'Some time in the future.' : reminderTime(reminder));

@@ -29,7 +29,7 @@ export default class extends Command {
 			msg.channel.send({ embeds: [embed] });
 		} else {
 			msg.author.send({ embeds: [embed] })
-				.then(() => { if (msg.channel.type !== 'dm') msg.channel.send('Your message count has been sent to your DMs.'); })
+				.then(() => { if (msg.channel.type !== 'DM') msg.channel.send('Your message count has been sent to your DMs.'); })
 				.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again.'));
 		}
 		return;

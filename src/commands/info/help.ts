@@ -74,7 +74,7 @@ export default class extends Command {
 			});
 
 			msg.author.send(helpStr, { split: { char: '\n' } })
-				.then(() => { if (msg.channel.type !== 'dm') msg.channel.send('I\'ve sent all commands to your DMs'); })
+				.then(() => { if (msg.channel.type !== 'DM') msg.channel.send('I\'ve sent all commands to your DMs'); })
 				.catch(() => msg.channel.send('I couldnt send you a DM. Please enable DMs and try again'));
 		}
 	}

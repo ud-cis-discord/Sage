@@ -43,11 +43,11 @@ export default class extends Command {
 	async argParser(msg: Message, input: string): Promise<[string, string, string]> {
 		if (input === '' || !msg.reference) throw `Usage: ${this.usage}\n${this.extendedHelp}`;
 
-		const link = `https://discord.com/channels/${msg.reference.guildID}/${msg.reference.channelID}/${msg.reference.messageID}`;
+		const link = `https://discord.com/channels/${msg.reference.guildId}/${msg.reference.channelId}/${msg.reference.messageId}`;
 		const assignment = input.trim();
 
 		if (!('parentID' in msg.channel)) throw 'This command is only available in Text channels.';
-		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentID });
+		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentId });
 
 		if (!course) throw 'This command must be run in a class specific channel';
 

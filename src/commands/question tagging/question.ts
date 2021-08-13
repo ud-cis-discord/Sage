@@ -46,7 +46,7 @@ export default class extends Command {
 				break;
 			}
 		}
-		if (!failed && msg.channel.type !== 'dm') {
+		if (!failed && msg.channel.type !== 'DM') {
 			return msg.channel.send('I\'ve sent the list to your DMs.');
 		}
 	}

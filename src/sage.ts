@@ -16,7 +16,6 @@ consoleStamp(console, {
 async function main() {
 	const bot = new Client({
 		fetchAllMembers: true,
-		disableMentions: 'everyone',
 		allowedMentions: { parse: ['users'] }
 	});
 

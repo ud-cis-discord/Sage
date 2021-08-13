@@ -47,7 +47,7 @@ export function channelParser(msg: Message, input: string): TextChannel {
 	input = input.replace(/<#!?(\d+)>/, '$1').trim().toLowerCase();
 
 	const gChannels: Collection<string, TextChannel> = msg.guild.channels.cache
-		.filter(channel => (channel.type === 'text' || channel.type === 'news')
+		.filter(channel => (channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_NEWS')
 			&& (channel.id === input || channel.name === input)) as Collection<string, TextChannel>;
 
 	if (!gChannels || gChannels.size < 1) {
