@@ -6,17 +6,15 @@ import { CHANNELS } from '@root/config';
 async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('error', async error => {
-		const { embed, attachments } = await generateLogEmbed(error);
-		errLog.send({ embeds: [embed], files: attachments });
+		const [embed, attachments] = await generateLogEmbed(error);
+		errLog.send({ embeds: [embed as MessageEmbed], files: attachments as MessageAttachment[] });
 	});
 }
 
 export default register;
 
-async function generateLogEmbed(error: CommandError): Promise<LogEmbed> {
+async function generateLogEmbed(error: CommandError): Promise<Array<MessageEmbed | MessageAttachment[]>> {
 	console.error(error);
-
-	let retEmbed: LogEmbed;
 	const embed = new MessageEmbed();
 	const attachments: MessageAttachment[] = [];
 
@@ -48,12 +46,5 @@ async function generateLogEmbed(error: CommandError): Promise<LogEmbed> {
 		embed.addField('Original message', `[Check for flies](${error.msgLink})`);
 	}
 
-	retEmbed.attachments = attachments;
-	retEmbed.embed = embed;
-	return retEmbed;
-}
-
-interface LogEmbed {
-	embed: MessageEmbed,
-	attachments: MessageAttachment[]
+	return [embed, attachments];
 }

@@ -1,4 +1,4 @@
-import { EmbedField, Message, MessageEmbed } from 'discord.js';
+import { EmbedField, Message, MessageEmbed, Util } from 'discord.js';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -73,9 +73,24 @@ export default class extends Command {
 				}
 			});
 
-			msg.author.send(helpStr)
-				.then(() => { if (msg.channel.type !== 'DM') msg.channel.send('I\'ve sent all commands to your DMs'); })
-				.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again'));
+			const splitStr = Util.splitMessage(helpStr, { char: '\n' });
+
+			let notified = false;
+			splitStr.forEach(helpMsg => {
+				msg.author.send(helpMsg)
+					.then(() => {
+						if (!notified) {
+							if (msg.channel.type !== 'DM') msg.channel.send('I\'ve sent all commands to your DMs');
+							notified = true;
+						}
+					})
+					.catch(() => {
+						if (!notified) {
+							msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again');
+							notified = true;
+						}
+					});
+			});
 		}
 	}
 

@@ -7,7 +7,7 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Sends an announcement from Sage to a specified channel or announcements if no channel is given.';
-	usage = '[channel]|<content>';
+	usage = '[channel] | <content>';
 
 	async permissions(msg: Message): Promise<boolean> {
 		return await botMasterPerms(msg);
@@ -16,7 +16,7 @@ export default class extends Command {
 	async run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
 		await channel.send({
 			content: content,
-			files: msg.attachments.map(attachment => attachment.attachment),
+			files: [...msg.attachments.values()],
 			allowedMentions: { parse: ['everyone', 'roles'] }
 		});
 
