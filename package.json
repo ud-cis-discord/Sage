@@ -32,7 +32,7 @@
 		"@octokit/rest": "^18.3.5",
 		"canvas": "^2.8.0",
 		"console-stamp": "^3.0.2",
-		"discord.js": "^13.0.1",
+		"discord.js": "^13.1.0",
 		"module-alias": "^2.2.2",
 		"moment": "^2.29.1",
 		"mongodb": "^3.6.3",
