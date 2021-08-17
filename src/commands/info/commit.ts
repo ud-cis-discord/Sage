@@ -1,6 +1,5 @@
 import { Message, MessageEmbed } from 'discord.js';
 import { execSync } from 'child_process';
-import { botMasterPerms } from '@lib/permissions';
 import { homepage as github } from '@root/package.json';
 import { Command } from '@lib/types/Command';
 
@@ -8,10 +7,6 @@ export default class extends Command {
 
 	description = 'Get info about the most recent commit that is currently running.';
 	extendedHelp = 'Merge commits and version bumps are ignored.';
-
-	async permissions(msg: Message): Promise<boolean> {
-		return await botMasterPerms(msg);
-	}
 
 	run(msg: Message): Promise<Message> {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();

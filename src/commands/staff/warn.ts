@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import { staffPerms } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
-import { DB, EMAIL } from '@root/config';
+import { BOT, DB, EMAIL, MAINTAINERS } from '@root/config';
 import { Command } from '@root/src/lib/types/Command';
 
 export default class extends Command {
@@ -57,6 +57,12 @@ export default class extends Command {
 		const target = await msg.channel.messages.fetch(msg.reference.messageId);
 
 		if (!target) throw 'Something went wrong and I couldn\'t find that message.';
+
+		if (target.author.id === BOT.CLIENT_ID) {
+			target.delete();
+			msg.delete();
+			throw `You shouldn't have to warn Sage! Contact ${MAINTAINERS} if you believe there is a problem.`;
+		}
 
 		return [target, input === '' ? 'Breaking course or server rules' : input];
 	}

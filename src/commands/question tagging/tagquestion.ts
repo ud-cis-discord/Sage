@@ -29,11 +29,18 @@ export default class extends Command {
 			return msg.channel.send('I couldn\'t find a message with that message link.');
 		}
 
+		let header: string;
+		if (question.embeds[0]) {
+			header = question.embeds[0].description;
+		} else {
+			header = question.cleanContent;
+		}
+
 		const newQuestion: QuestionTag = {
 			link: messageLink,
 			course: courseId,
 			assignment: assignmentId,
-			header: question.cleanContent.length < 200 ? question.cleanContent : `${question.cleanContent.slice(0, 200)}...`
+			header: header.length < 200 ? header : `${header.slice(0, 200)}...`
 		};
 
 		msg.client.mongo.collection(DB.QTAGS).insertOne(newQuestion);
