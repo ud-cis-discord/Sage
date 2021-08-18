@@ -26,10 +26,10 @@ export default class extends Command {
 			.addField('Level Progress', `You're **${user.curExp}** messages away from **Level ${user.level + 1}**
 			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
 		if (here === 'here') {
-			msg.channel.send(embed);
+			msg.channel.send({ embeds: [embed] });
 		} else {
-			msg.author.send(embed)
-				.then(() => { if (msg.channel.type !== 'dm') msg.channel.send('Your message count has been sent to your DMs.'); })
+			msg.author.send({ embeds: [embed] })
+				.then(() => { if (msg.channel.type !== 'DM') msg.channel.send('Your message count has been sent to your DMs.'); })
 				.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again.'));
 		}
 		return;

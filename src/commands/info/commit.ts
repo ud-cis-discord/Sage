@@ -1,6 +1,5 @@
 import { Message, MessageEmbed } from 'discord.js';
 import { execSync } from 'child_process';
-import { botMasterPerms } from '@lib/permissions';
 import { homepage as github } from '@root/package.json';
 import { Command } from '@lib/types/Command';
 
@@ -9,19 +8,17 @@ export default class extends Command {
 	description = 'Get info about the most recent commit that is currently running.';
 	extendedHelp = 'Merge commits and version bumps are ignored.';
 
-	async permissions(msg: Message): Promise<boolean> {
-		return await botMasterPerms(msg);
-	}
-
 	run(msg: Message): Promise<Message> {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
-		return msg.channel.send(new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setAuthor(author)
 			.setTitle(message)
 			.setDescription(`Commit [${hash.slice(0, 8)}](${github}/commit/${hash}) on ${branch}`)
 			.setColor('#fbb848')
-			.setTimestamp(new Date(timestamp)));
+			.setTimestamp(new Date(timestamp));
+
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 

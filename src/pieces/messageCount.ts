@@ -6,20 +6,20 @@ import { SageUser } from '@lib/types/SageUser';
 const xpRatio = 1.25;
 const startingColor = 80;
 const greenIncrement = 8;
-const maxGreen = '00ff00';
+const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
 
 async function register(bot: Client): Promise<void> {
-	bot.on('message', async msg => countMessages(msg)
-		.catch(async error => bot.emit('error', error))
-	);
+	bot.on('messageCreate', async msg => {
+		countMessages(msg).catch(async error => bot.emit('error', error));
+	});
 }
 
 async function countMessages(msg: Message): Promise<void> {
 	const bot = msg.client;
 
 	if (
-		msg.channel.type !== 'text'
+		msg.channel.type !== 'GUILD_TEXT'
 		|| msg.guild?.id !== GUILDS.MAIN
 		|| msg.content.toLowerCase().startsWith(PREFIX)
 		|| msg.author.bot
@@ -62,12 +62,10 @@ async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise
 		if (!(addRole = msg.guild.roles.cache.find(r => r.name === `Level ${entry.level}`))
 			&& entry.level <= maxLevel) { // make a new level role if it doesn't exist
 			addRole = await msg.guild.roles.create({
-				data: {
-					name: `Level ${entry.level}`,
-					color: createLevelHex(entry.level),
-					position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
-					permissions: 0
-				},
+				name: `Level ${entry.level}`,
+				color: createLevelRgb(entry.level),
+				position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
+				permissions: BigInt(0),
 				reason: `${msg.author.username} is the first to get to Level ${entry.level}`
 			});
 		}
@@ -80,12 +78,11 @@ async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise
 		if (entry.level > maxLevel
 			&& !(addRole = msg.guild.roles.cache.find(r => r.name === `Power User`))) {
 			addRole = await msg.guild.roles.create({
-				data: {
-					name: `Power User`,
-					color: maxGreen,
-					position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
-					permissions: 0
-				}
+				name: `Power User`,
+				color: maxGreen,
+				position: msg.guild.roles.cache.get(ROLES.VERIFIED).position + 1,
+				permissions: BigInt(0),
+				reason: `${msg.author.username} is the first to become a power user!`
 			});
 		}
 		if (entry.level > maxLevel && !msg.member.roles.cache.find(r => r.name === 'Power User')) {
@@ -109,18 +106,20 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setThumbnail(msg.author.avatarURL())
 		.setTitle('<:stevepeace:746223639770431578> Level up!')
 		.setDescription(embedText)
-		.addField('XP to next level:', user.levelExp, true)
-		.setColor(createLevelHex(user.level))
+		.addField('XP to next level:', user.levelExp.toString(), true)
+		.setColor(createLevelRgb(user.level))
 		.setFooter(`You can turn the messages off by sending \`${PREFIX}lp\``)
 		.setTimestamp();
 
 	// eslint-disable-next-line no-extra-parens
-	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send(`${msg.member}, you have leveled up!`, embed);
+	return (msg.guild.channels.cache.get(CHANNELS.SAGE) as TextChannel).send({
+		content: `${msg.member}, you have leveled up!`,
+		embeds: [embed]
+	});
 }
 
-function createLevelHex(level: number): string {
-	return `#${[2, Math.min(startingColor + (level * greenIncrement), 255), 0]
-		.map(val => val.toString(16).padStart(2, '0')).join('')}`;
+function createLevelRgb(level: number): [number, number, number] {
+	return [2, Math.min(startingColor + (level * greenIncrement), 255), 0];
 }
 
 export default register;

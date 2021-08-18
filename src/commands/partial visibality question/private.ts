@@ -1,4 +1,4 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Message, MessageAttachment, MessageEmbed, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
@@ -20,6 +20,8 @@ export default class extends Command {
 			.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
 			.setDescription(question)
 			.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${questionId} <response>`);
+
+		const attachments: MessageAttachment[] = [];
 		if (msg.attachments) {
 			let imageSet = false;
 			msg.attachments.forEach(attachment => {
@@ -27,13 +29,16 @@ export default class extends Command {
 					embed.setImage(attachment.url);
 					imageSet = true;
 				} else {
-					embed.attachFiles([attachment]);
+					attachments.push(attachment);
 				}
 			});
 		}
 
 		const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
-		const questionMessage = await privateChannel.send(embed);
+		const questionMessage = await privateChannel.send({
+			embeds: [embed],
+			files: attachments
+		});
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
 		const entry: PVQuestion = {

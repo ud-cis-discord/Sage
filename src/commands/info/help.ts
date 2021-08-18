@@ -1,4 +1,4 @@
-import { EmbedField, Message, MessageEmbed } from 'discord.js';
+import { EmbedField, Message, MessageEmbed, Util } from 'discord.js';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -51,7 +51,7 @@ export default class extends Command {
 				.setTimestamp(Date.now())
 				.setColor('RANDOM');
 
-			return msg.channel.send(embed);
+			return msg.channel.send({ embeds: [embed] });
 		} else {
 			let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command, or you can visit our website here:\n<${website}>\n`;
 			const categories: Array<string> = [];
@@ -68,14 +68,29 @@ export default class extends Command {
 				if (useableCmds.size > 0) {
 					helpStr += `\n**${categoryName} Commands**\n`;
 					useableCmds.forEach(command => {
-						helpStr += `\`${PREFIX}${command.name}\` ⇒ ${command.description ? command.description : 'No decirption provided'}\n`;
+						helpStr += `\`${PREFIX}${command.name}\` ⇒ ${command.description ? command.description : 'No description provided'}\n`;
 					});
 				}
 			});
 
-			msg.author.send(helpStr, { split: { char: '\n' } })
-				.then(() => { if (msg.channel.type !== 'dm') msg.channel.send('I\'ve sent all commands to your DMs'); })
-				.catch(() => msg.channel.send('I couldnt send you a DM. Please enable DMs and try again'));
+			const splitStr = Util.splitMessage(helpStr, { char: '\n' });
+
+			let notified = false;
+			splitStr.forEach(helpMsg => {
+				msg.author.send(helpMsg)
+					.then(() => {
+						if (!notified) {
+							if (msg.channel.type !== 'DM') msg.channel.send('I\'ve sent all commands to your DMs');
+							notified = true;
+						}
+					})
+					.catch(() => {
+						if (!notified) {
+							msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again');
+							notified = true;
+						}
+					});
+			});
 		}
 	}
 

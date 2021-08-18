@@ -13,7 +13,7 @@ export default class extends Command {
 	run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
 		msg.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
 
-		const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
+		const hidden = reminder.mode === 'private' && msg.channel.type !== 'DM';
 		return msg.channel.send(`Canceled reminder: **${hidden ? 'Private reminder.' : reminder.content}**`);
 	}
 

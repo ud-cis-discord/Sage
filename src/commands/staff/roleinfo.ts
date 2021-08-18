@@ -25,13 +25,15 @@ export default class extends Command {
 			.setTitle(`${role.name} | ${role.members.size} members`)
 			.setFooter(`Role ID: ${role.id}`);
 
+		const attachments: MessageAttachment[] = [];
+
 		if (members instanceof MessageAttachment) {
 			embed.addField('Members', 'Too many to display, see attached file.', true);
-			embed.attachFiles([members]);
+			attachments.push(members);
 		} else {
 			embed.addField('Members', role.members.size < 1 ? 'None' : members, true);
 		}
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed], files: attachments });
 	}
 
 	async argParser(msg: Message, input: string): Promise<Array<Role>> {

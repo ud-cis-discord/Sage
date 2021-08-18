@@ -25,7 +25,7 @@ export default class extends Command {
 			comic = await fetch(`http://xkcd.com/${comicId}/info.0.json`).then(r => r.json());
 		}
 
-		return msg.channel.send(this.createComicEmbed(comic));
+		return msg.channel.send({ embeds: [this.createComicEmbed(comic)] });
 	}
 
 	argParser(_msg: Message, input: string): Array<string | number> {

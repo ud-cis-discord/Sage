@@ -26,42 +26,40 @@ export default class extends Command {
 		`This action will archive ${channelCount} channels and unenroll ${userCount} users. ` +
 		'Send `yes` in the next 30 seconds to confirm.');
 
-		return msg.channel.awaitMessages(
-			(m: Message) => m.author.id === msg.author.id && m.content === 'yes',
-			{
-				max: 1,
-				time: 30e3,
-				errors: ['time']
-			})
-			.then(async () => {
-				const loadingMsg = await msg.channel.send('<a:loading:755121200929439745> working...');
+		return msg.channel.awaitMessages({
+			filter: (m: Message) => m.author.id === msg.author.id && m.content === 'yes',
+			max: 1,
+			time: 30e3,
+			errors: ['time']
+		}).then(async () => {
+			const loadingMsg = await msg.channel.send('<a:loading:755121200929439745> working...');
 
-				for (const channel of category.children.array()) {
-					await channel.setParent(CHANNELS.ARCHIVE, { reason });
-					await channel.lockPermissions();
-					await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
-				}
-				await category.delete(reason);
+			for (const channel of [...category.children.values()]) {
+				await channel.setParent(CHANNELS.ARCHIVE, { reason });
+				await channel.lockPermissions();
+				await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
+			}
+			await category.delete();
 
-				await msg.guild.members.fetch();
-				const staffRole = await msg.guild.roles.fetch(course.roles.staff);
-				const studentRole = await msg.guild.roles.fetch(course.roles.student);
+			await msg.guild.members.fetch();
+			const staffRole = await msg.guild.roles.fetch(course.roles.staff);
+			const studentRole = await msg.guild.roles.fetch(course.roles.student);
 
-				for (const [, member] of staffRole.members) {
-					if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
-				}
-				for (const [, member] of studentRole.members) {
-					if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
-				}
+			for (const [, member] of staffRole.members) {
+				if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
+			}
+			for (const [, member] of studentRole.members) {
+				if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
+			}
 
-				staffRole.delete(reason);
-				studentRole.delete(reason);
+			staffRole.delete(reason);
+			studentRole.delete(reason);
 
-				await msg.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course.name } });
-				await msg.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course.name });
+			await msg.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course.name } });
+			await msg.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course.name });
 
-				return loadingMsg.edit(`${channelCount} channels archived and ${userCount} users unenrolled from ${course.name}`);
-			})
+			return loadingMsg.edit(`${channelCount} channels archived and ${userCount} users unenrolled from ${course.name}`);
+		})
 			.catch(() => msg.channel.send('Time has expired, removal canceled.'));
 	}
 

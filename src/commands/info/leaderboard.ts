@@ -88,10 +88,12 @@ export default class extends Command {
 			.setFooter(`Showing page ${page} (${start + 1} - ${end || users.length})`)
 			.setColor(msg.guild.members.cache.get(displUsers[0].discordId).displayHexColor)
 			.setDescription(content)
-			.attachFiles([{ name: 'leaderboard.png', attachment: canvas.toBuffer() }])
 			.setImage('attachment://leaderboard.png');
 
-		return msg.channel.send(embed);
+		return msg.channel.send({
+			embeds: [embed],
+			files: [{ name: 'leaderboard.png', attachment: canvas.toBuffer() }]
+		});
 	}
 	argParser(_msg: Message, input: string): Array<number | null> {
 		return [parseInt(input) > 1 ? parseInt(input) : 1];

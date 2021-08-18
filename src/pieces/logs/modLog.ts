@@ -1,10 +1,12 @@
-import { Client, TextChannel, Guild, User, EmbedField, MessageEmbed, GuildMember, PartialGuildMember } from 'discord.js';
+import { Client, TextChannel, EmbedField, MessageEmbed, GuildMember, PartialGuildMember, GuildBan } from 'discord.js';
 import { GUILDS, CHANNELS, ROLES } from '@root/config';
 
-async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
+async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> {
+	const { guild, user } = ban;
 	if (guild.id !== GUILDS.MAIN) return;
 
-	const [logEntry] = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD', limit: 1 })).entries.array();
+	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
 
@@ -16,19 +18,22 @@ async function processBanAdd(guild: Guild, target: User, modLog: TextChannel): P
 		});
 	}
 
-	modLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
-		.setTitle(`${target.tag} was banned.`)
+		.setTitle(`${user.tag} was banned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
-		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${target.id}`)
-		.setTimestamp());
+		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}`)
+		.setTimestamp();
+	modLog.send({ embeds: [embed] });
 }
 
-async function processBanRemove(guild: Guild, target: User, modLog: TextChannel): Promise<void> {
-	if (guild.id !== GUILDS.MAIN) return;
+async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<void> {
+	const { guild, user } = ban;
+	if (ban.guild.id !== GUILDS.MAIN) return;
 
-	const [logEntry] = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_REMOVE', limit: 1 })).entries.array();
+	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_REMOVE', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
 
@@ -40,20 +45,21 @@ async function processBanRemove(guild: Guild, target: User, modLog: TextChannel)
 		});
 	}
 
-	modLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
-		.setTitle(`${target.tag} was unbanned.`)
+		.setTitle(`${user.tag} was unbanned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
-		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${target.id}`)
-		.setTimestamp());
+		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}`)
+		.setTimestamp();
+	modLog.send({ embeds: [embed] });
 }
 
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, member: GuildMember, modLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN || oldMember.roles.cache.equals(member.roles.cache)) return;
 
-	const logEntries = (await member.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 5 })).entries.array();
-	const logEntry = logEntries.find(entry => {
+	const logs = (await member.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 5 })).entries;
+	const logEntry = [...logs.values()].find(entry => {
 		if (!('id' in entry.target)) return false;
 		return entry.target.id === member.id;
 	});
@@ -69,44 +75,47 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 	}
 
 	if (muted !== null) {
-		modLog.send(new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle(`${member.user.tag} ${muted} by ${logEntry.executor.tag}`)
 			.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 			.setColor('DARK_RED')
 			.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
-			.setTimestamp());
+			.setTimestamp();
+		modLog.send({ embeds: [embed] });
 	}
 }
 
 async function processMemberRemove(member: GuildMember | PartialGuildMember, modLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const [logEntry] = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries.array();
+	const logs = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
 	if (!logEntry) return;
 
 	if (!('id' in logEntry.target)
 		|| logEntry.target.id !== member.id
 		|| (Date.now() - logEntry.createdTimestamp) > 10e3) return;
 
-	modLog.send(new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
 		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 		.setColor('YELLOW')
 		.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
-		.setTimestamp());
+		.setTimestamp();
+	modLog.send({ embeds: [embed] });
 }
 
 async function register(bot: Client): Promise<void> {
 	const modLog = await bot.channels.fetch(CHANNELS.MOD_LOG) as TextChannel;
 
-	bot.on('guildBanAdd', (guild, target) => {
-		processBanAdd(guild, target, modLog)
-			.catch(async error => bot.emit('error', error));
+	bot.on('guildBanAdd', ban => {
+		processBanAdd(ban, modLog).catch(async error => bot.emit('error', error));
+		return;
 	});
 
-	bot.on('guildBanRemove', (guild, target) => {
-		processBanRemove(guild, target, modLog)
-			.catch(async error => bot.emit('error', error));
+	bot.on('guildBanRemove', ban => {
+		processBanRemove(ban, modLog).catch(async error => bot.emit('error', error));
+		return;
 	});
 
 	bot.on('guildMemberUpdate', (oldMember, newMember) => {

@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import { staffPerms } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
-import { DB, EMAIL } from '@root/config';
+import { BOT, DB, EMAIL, MAINTAINERS } from '@root/config';
 import { Command } from '@root/src/lib/types/Command';
 
 export default class extends Command {
@@ -18,8 +18,8 @@ export default class extends Command {
 	}
 
 	async run(msg: Message, [target, reason]: [Message, string]): Promise<Message> {
-		if ('parentID' in msg.channel) {
-			const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentID });
+		if ('parentId' in msg.channel) {
+			const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentId });
 
 			if (course) {
 				const staffChannel = msg.guild.channels.cache.get(course.channels.staff) as TextChannel;
@@ -33,7 +33,7 @@ export default class extends Command {
 						name: 'Message content',
 						value: target.content || '*This message had no text content*'
 					}]);
-				staffChannel.send(embed);
+				staffChannel.send({ embeds: [embed] });
 			}
 		}
 
@@ -54,9 +54,15 @@ export default class extends Command {
 			throw `${msg.author}, This command must be used when replying to a message`;
 		}
 
-		const target = await msg.channel.messages.fetch(msg.reference.messageID);
+		const target = await msg.channel.messages.fetch(msg.reference.messageId);
 
 		if (!target) throw 'Something went wrong and I couldn\'t find that message.';
+
+		if (target.author.id === BOT.CLIENT_ID) {
+			target.delete();
+			msg.delete();
+			throw `You shouldn't have to warn Sage! Contact ${MAINTAINERS} if you believe there is a problem.`;
+		}
 
 		return [target, input === '' ? 'Breaking course or server rules' : input];
 	}

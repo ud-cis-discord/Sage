@@ -39,7 +39,7 @@ export default class extends Command {
 		return [{
 			owner: msg.author.id,
 			content,
-			mode: msg.channel.type === 'dm' ? 'private' : 'public',
+			mode: msg.channel.type === 'DM' ? 'private' : 'public',
 			expires: new Date(duration + Date.now()),
 			repeat
 		}];

@@ -2,14 +2,14 @@ import { BLACKLIST } from '@root/config';
 import { Client, Message } from 'discord.js';
 
 async function register(bot: Client): Promise<void> {
-	bot.on('message', async (msg) => filterMessages(msg)
-		.catch(async error => bot.emit('error', error))
-	);
+	bot.on('messageCreate', async (msg) => {
+		filterMessages(msg).catch(async error => bot.emit('error', error));
+	});
 }
 
 async function filterMessages(msg: Message): Promise<Message | void> {
 	if (await filter(msg.content, BLACKLIST)) {
-		msg.delete({ reason: `${msg.member} used a bad word.` });
+		msg.delete();
 
 		return msg.author.send(`You used a restricted word. Please refrain from doing so again.`)
 			.catch(() => msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`));

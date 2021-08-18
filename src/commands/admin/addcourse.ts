@@ -20,14 +20,12 @@ export default class extends Command {
 
 		const reason = `Creating new course ${course} as requested by ${msg.author.username} (${msg.author.id}).`;
 		const staffRole = await msg.guild.roles.create({
-			data: {
-				name: `${course} Staff`,
-				permissions: 0,
-				mentionable: true
-			},
-			reason
+			name: `${course} Staff`,
+			permissions: BigInt(0),
+			mentionable: true,
+			reason: reason
 		});
-		const studentRole = await msg.guild.roles.create({ data: { name: `CISC ${course}`, permissions: 0 }, reason });
+		const studentRole = await msg.guild.roles.create({ name: `CISC ${course}`, permissions: BigInt(0), reason: reason });
 
 		const standardPerms: Array<OverwriteResolvable> = [{
 			id: ROLES.ADMIN,
@@ -48,7 +46,7 @@ export default class extends Command {
 		const staffPerms = [standardPerms[0], standardPerms[1], standardPerms[2]];
 
 		const categoryChannel = await msg.guild.channels.create(`CISC ${course}`, {
-			type: 'category',
+			type: 'GUILD_CATEGORY',
 			permissionOverwrites: standardPerms,
 			reason
 		});
@@ -57,14 +55,14 @@ export default class extends Command {
 		await this.createTextChannel(msg.guild, `${course}_labs`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(msg.guild, `${course}_projects`, standardPerms, categoryChannel.id, reason);
 		const staffChannel = await msg.guild.channels.create(`${course}_staff`, {
-			type: 'text',
+			type: 'GUILD_TEXT',
 			parent: categoryChannel.id,
 			topic: '[no message count]',
 			permissionOverwrites: staffPerms,
 			reason
 		});
 		const privateQuestionChannel = await msg.guild.channels.create(`${course}_private_qs`, {
-			type: 'text',
+			type: 'GUILD_TEXT',
 			parent: categoryChannel.id,
 			topic: '[no message count]',
 			permissionOverwrites: staffPerms,
@@ -103,7 +101,7 @@ export default class extends Command {
 
 	async createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {
 		return guild.channels.create(name, {
-			type: 'text',
+			type: 'GUILD_TEXT',
 			parent,
 			permissionOverwrites,
 			reason

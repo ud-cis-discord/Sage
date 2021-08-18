@@ -29,11 +29,18 @@ export default class extends Command {
 			return msg.channel.send('I couldn\'t find a message with that message link.');
 		}
 
+		let header: string;
+		if (question.embeds[0]) {
+			header = question.embeds[0].description;
+		} else {
+			header = question.cleanContent;
+		}
+
 		const newQuestion: QuestionTag = {
 			link: messageLink,
 			course: courseId,
 			assignment: assignmentId,
-			header: question.cleanContent.length < 200 ? question.cleanContent : `${question.cleanContent.slice(0, 200)}...`
+			header: header.length < 200 ? header : `${header.slice(0, 200)}...`
 		};
 
 		msg.client.mongo.collection(DB.QTAGS).insertOne(newQuestion);
@@ -43,11 +50,12 @@ export default class extends Command {
 	async argParser(msg: Message, input: string): Promise<[string, string, string]> {
 		if (input === '' || !msg.reference) throw `Usage: ${this.usage}\n${this.extendedHelp}`;
 
-		const link = `https://discord.com/channels/${msg.reference.guildID}/${msg.reference.channelID}/${msg.reference.messageID}`;
+		const link = `https://discord.com/channels/${msg.reference.guildId}/${msg.reference.channelId}/${msg.reference.messageId}`;
 		const assignment = input.trim();
 
-		if (!('parentID' in msg.channel)) throw 'This command is only available in Text channels.';
-		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentID });
+		if (!('parentId' in msg.channel)) throw 'This command is only available in Text channels.';
+		// eslint-disable-next-line no-extra-parens
+		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ 'channels.category': msg.channel.parentId });
 
 		if (!course) throw 'This command must be run in a class specific channel';
 

@@ -26,7 +26,7 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 
 	const updated = await newMember.client.mongo.collection(DB.USERS).updateOne({ discordId: newMember.id }, {
 		$set: {
-			roles: newMember.roles.cache.keyArray().filter(role => role !== GUILDS.MAIN)
+			roles: [...newMember.roles.cache.keys()].filter(role => role !== GUILDS.MAIN)
 		}
 	});
 

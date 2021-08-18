@@ -26,13 +26,13 @@ export default class extends Command {
 					.setTitle('Pending reminders')
 					.setColor('DARK_AQUA'));
 			}
-			const hidden = reminder.mode === 'private' && msg.channel.type !== 'dm';
+			const hidden = reminder.mode === 'private' && msg.channel.type !== 'DM';
 			embeds[Math.floor(i / 25)].addField(
 				`${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
 				hidden ? 'Some time in the future.' : reminderTime(reminder));
 		});
-
-		embeds.forEach(embed => msg.channel.send(embed));
+		// TODO: possibly send as a list of 10 embeds at a time
+		embeds.forEach(embed => msg.channel.send({ embeds: [embed] }));
 	}
 
 }

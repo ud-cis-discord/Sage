@@ -3,7 +3,7 @@ import { SageUser } from '@lib/types/SageUser';
 import { DB, GUILDS, MAINTAINERS, PREFIX, ROLES } from '@root/config';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
-	if (msg.channel.type !== 'dm' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
+	if (msg.channel.type !== 'DM' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
 
 	const givenHash = msg.content.trim();
 
@@ -65,7 +65,7 @@ async function register(bot: Client): Promise<void> {
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
 	guild.members.fetch();
 
-	bot.on('message', async msg => {
+	bot.on('messageCreate', async msg => {
 		verify(msg, bot, guild)
 			.catch(async error => bot.emit('error', error));
 	});

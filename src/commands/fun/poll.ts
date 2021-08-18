@@ -29,14 +29,14 @@ export default class extends Command {
 			.setColor('RANDOM');
 
 
-		const pollMsg = await msg.channel.send(pollEmbed);
+		const pollMsg = await msg.channel.send({ embeds: [pollEmbed] });
 
 		emotes.forEach(emote => pollMsg.react(emote));
 
-		return pollMsg.awaitReactions(
-			(reaction: MessageReaction) => emotes.includes(reaction.emoji.name),
-			{ time: timespan }
-		).then(reactions => {
+		return pollMsg.awaitReactions({
+			filter: (reaction: MessageReaction) => emotes.includes(reaction.emoji.name),
+			time: timespan
+		}).then(reactions => {
 			let maxVotes = 0;
 			reactions.forEach(reaction => {
 				if (reaction.users.cache.size > maxVotes) maxVotes = reaction.users.cache.size;
@@ -54,28 +54,30 @@ export default class extends Command {
 			}];
 
 			if (maxVotes <= 1) {
-				pollMsg.edit(pollEmbed
+				pollMsg.edit({ embeds: [pollEmbed
 					.addField('Results', 'The poll ended but it looks like no one voted ☹!')
-					.setFooter('This poll has ended'));
+					.setFooter('This poll has ended')] });
 
-				return pollMsg.channel.send(new MessageEmbed()
+				const embed = new MessageEmbed()
 					.setTitle(`Poll from ${msg.member.displayName}`)
 					.setDescription(`The poll ended but it looks like no one voted ☹!\n\n[Click to view poll](${pollMsg.url})`)
-					.setColor(pollEmbed.color));
+					.setColor(pollEmbed.color);
+				return pollMsg.channel.send({ embeds: [embed] });
 			}
 
 			const winners = reactions
 				.filter(reaction => reaction.users.cache.size >= maxVotes)
 				.map(reaction => choices[emotes.indexOf(reaction.emoji.name)]);
 
-			pollMsg.edit(pollEmbed
+			pollMsg.edit({ embeds: [pollEmbed
 				.addField('Results', this.winMessage(winners, maxVotes - 1))
-				.setFooter('This poll has ended'));
+				.setFooter('This poll has ended')] });
 			pollMsg.reactions.removeAll();
-			return pollMsg.channel.send(new MessageEmbed()
+			const embed = new MessageEmbed()
 				.setTitle(`Poll from ${msg.member.displayName} Result`)
 				.addField(question, `${this.winMessage(winners, maxVotes - 1)}\n\n[Click to view poll](${pollMsg.url})`)
-				.setColor(pollEmbed.color));
+				.setColor(pollEmbed.color);
+			return pollMsg.channel.send({ embeds: [embed] });
 		});
 	}
 

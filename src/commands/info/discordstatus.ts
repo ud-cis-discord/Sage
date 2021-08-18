@@ -52,7 +52,7 @@ export default class extends Command {
 			.setFooter(`Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}`)
 			.setColor('BLURPLE');
 
-		return msg.channel.send(embed);
+		return msg.channel.send({ embeds: [embed] });
 	}
 
 }
