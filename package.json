@@ -1,6 +1,6 @@
 {
 	"name": "sage",
-	"version": "2.2.9",
+	"version": "2.3.0",
 	"engines": {
 		"node": ">=16.0.0"
 	},
