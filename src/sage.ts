@@ -1,7 +1,7 @@
 import 'module-alias/register';
 import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
-import { Client, Intents } from 'discord.js';
+import { Client, Intents, PartialTypes } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
 import { Octokit } from '@octokit/rest';
@@ -9,7 +9,7 @@ import { version as sageVersion } from '@root/package.json';
 import { registerFont } from 'canvas';
 import { SageData } from '@lib/types/SageData';
 
-const SAGE_INTENTS = [
+const BOT_INTENTS = [
 	Intents.FLAGS.DIRECT_MESSAGES,
 	Intents.FLAGS.GUILDS,
 	Intents.FLAGS.GUILD_BANS,
@@ -20,13 +20,19 @@ const SAGE_INTENTS = [
 	Intents.FLAGS.GUILD_MESSAGE_REACTIONS
 ];
 
+const BOT_PARTIALS: PartialTypes[] = [
+	'CHANNEL',
+	'MESSAGE'
+];
+
 consoleStamp(console, {
 	format: ':date(dd/mm/yy hh:MM:ss.L tt)'
 });
 
 async function main() {
 	const bot = new Client({
-		intents: SAGE_INTENTS,
+		partials: BOT_PARTIALS,
+		intents: BOT_INTENTS,
 		allowedMentions: { parse: ['users'] }
 	});
 

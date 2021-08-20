@@ -13,12 +13,13 @@ async function register(bot: Client): Promise<void> {
 	}
 
 	bot.on('messageCreate', msg => {
+		if (msg.channel.partial) msg.channel.fetch();
 		runCommand(msg)
 			.catch(async error => bot.emit('error', error));
 	});
 
 	bot.on('messageUpdate', (oldMsg, msg) => {
-		if (oldMsg.content !== msg.content && '_edits' in msg) {
+		if (oldMsg.content !== msg.content && '_update' in msg) {
 			runCommand(msg)
 				.catch(async error => bot.emit('error', error));
 		}
