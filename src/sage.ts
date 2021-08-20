@@ -21,7 +21,8 @@ const BOT_INTENTS = [
 ];
 
 const BOT_PARTIALS: PartialTypes[] = [
-	'CHANNEL'
+	'CHANNEL',
+	'MESSAGE'
 ];
 
 consoleStamp(console, {
