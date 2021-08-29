@@ -32,8 +32,8 @@ export default class extends Command {
 
 		msg.client.mongo.collection(DB.USERS).updateMany({}, { $set: {
 			count: 0,
-			levelExp: 0,
-			level: 0,
+			levelExp: FIRST_LEVEL,
+			level: 1,
 			curExp: FIRST_LEVEL
 		} });
 
