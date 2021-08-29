@@ -1,6 +1,6 @@
 import { DB, FIRST_LEVEL, ROLES } from '@root/config';
-import { botMasterPerms } from '@root/src/lib/permissions';
-import { Command } from '@root/src/lib/types/Command';
+import { botMasterPerms } from '@lib/permissions';
+import { Command } from '@lib/types/Command';
 import { Message } from 'discord.js';
 
 export default class extends Command {
@@ -9,8 +9,8 @@ export default class extends Command {
 
 	enabled = false;
 
-	async permissions(msg: Message): Promise<boolean> {
-		return await botMasterPerms(msg);
+	permissions(msg: Message): Promise<boolean> {
+		return botMasterPerms(msg);
 	}
 
 	async run(msg: Message): Promise<Message> {
@@ -37,7 +37,7 @@ export default class extends Command {
 			curExp: FIRST_LEVEL
 		} });
 
-		return await msg.reply('I\'ve reset all levels in the guild.');
+		return msg.reply('I\'ve reset all levels in the guild.');
 	}
 
 }
