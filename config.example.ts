@@ -48,6 +48,14 @@ export const CHANNELS = {			// Channel IDs
 	ARCHIVE: ''
 };
 
+export const LEVEL_TIER_ROLES = [
+	'',
+	'',
+	'',
+	'',
+	''
+];
+
 export const FIRST_LEVEL = 10;
 export const GITHUB_TOKEN = '';
 export const PREFIX = 's;';
