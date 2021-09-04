@@ -4,7 +4,7 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = 'Submit a profile picture to the pfp contest.';
+	description = 'Submit an image to the currently running contest.';
 	extendedHelp = 'Exactly one file must be attached when running this command.';
 	usage = '[more information]';
 	enabled = false;
@@ -16,7 +16,7 @@ export default class extends Command {
 		const submissionChannel = await msg.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 		const embed = new MessageEmbed()
 			.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
-			.setTitle('New pfp submission')
+			.setTitle('New contest submission')
 			.addField('URL', attachment.url)
 			.setDescription(imgDesc)
 			.setImage(attachment.url)

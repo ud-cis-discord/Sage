@@ -8,6 +8,11 @@ const startingColor = 80;
 const greenIncrement = 8;
 const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
+const countedChannelTypes = [
+	'GUILD_TEXT',
+	'GUILD_PUBLIC_THREAD',
+	'GUILD_PRIVATE_THREAD'
+];
 
 async function register(bot: Client): Promise<void> {
 	bot.on('messageCreate', async msg => {
@@ -19,7 +24,7 @@ async function countMessages(msg: Message): Promise<void> {
 	const bot = msg.client;
 
 	if (
-		msg.channel.type !== 'GUILD_TEXT'
+		!countedChannelTypes.includes(msg.channel.type)
 		|| msg.guild?.id !== GUILDS.MAIN
 		|| msg.content.toLowerCase().startsWith(PREFIX)
 		|| msg.author.bot
@@ -104,7 +109,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 	}
 	const embed = new MessageEmbed()
 		.setThumbnail(msg.author.avatarURL())
-		.setTitle('<:stevepeace:746223639770431578> Level up!')
+		.setTitle('<:steve_peace:883541149032267816> Level up!')
 		.setDescription(embedText)
 		.addField('XP to next level:', user.levelExp.toString(), true)
 		.setColor(createLevelRgb(user.level))
