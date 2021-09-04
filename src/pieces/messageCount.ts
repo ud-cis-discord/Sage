@@ -109,7 +109,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 	}
 	const embed = new MessageEmbed()
 		.setThumbnail(msg.author.avatarURL())
-		.setTitle('<:stevepeace:746223639770431578> Level up!')
+		.setTitle('<:steve_peace:883541149032267816> Level up!')
 		.setDescription(embedText)
 		.addField('XP to next level:', user.levelExp.toString(), true)
 		.setColor(createLevelRgb(user.level))

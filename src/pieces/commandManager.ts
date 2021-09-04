@@ -88,7 +88,7 @@ async function runCommand(msg: Message) {
 
 	if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
 	if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
-		await msg.author.send('The command you just tried to run is not available in public channels. Try again in DMs')
+		await msg.author.send(`<@!${msg.author.id}>, the command you just tried to run is not available in public channels. Try again in DMs.`)
 			.catch(async () => { await msg.reply('That command is not available here, try again in DMs'); });
 		return msg.delete();
 	}
