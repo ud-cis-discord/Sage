@@ -17,6 +17,10 @@ export default class extends Command {
 	}
 
 	async run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
+		if (question.type === 'private') {
+			return msg.channel.send(`\`${PREFIX}sudoreply\` has been depreciated for private questions. Please reply in thread <#${question.threadId}>.`);
+		}
+
 		const asker = await msg.client.users.fetch(question.owner);
 		const embed = new MessageEmbed()
 			.setAuthor(`${msg.author.tag} replied to question ${question.questionId}`, msg.author.avatarURL())

@@ -10,33 +10,18 @@ export const runInGuild = false;
 export default class extends Command {
 
 	async run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
+		if (question.type === 'private') {
+			return msg.channel.send(`\`${PREFIX}reply\` has been depreciated for private questions. Please reply in thread <#${question.threadId}>.`);
+		}
 		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
 		const channel = await msg.client.channels.fetch(channelId) as TextChannel;
 
-		const shownAuthor = question.type === 'private' ? msg.author.tag : 'Anonymous';
-		const shownAvatar = question.type === 'private' ? msg.author.avatarURL() : null;
-
 		const embed = new MessageEmbed()
-			.setAuthor(`${shownAuthor} responded to ${question.questionId}`, shownAvatar)
+			.setAuthor(`Anonymous responded to ${question.questionId}`, msg.client.user.avatarURL())
 			.setDescription(`${response}\n\n[Jump to question](${question.messageLink})`);
 
 		const attachments: MessageAttachment[] = [];
 
-		if (question.type === 'private') {
-			embed.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${question.questionId} <response>`);
-
-			if (msg.attachments) {
-				let imageSet = false;
-				msg.attachments.forEach(attachment => {
-					if (!imageSet && attachment.height) {
-						embed.setImage(attachment.url);
-						imageSet = true;
-					} else {
-						attachments.push(attachment);
-					}
-				});
-			}
-		}
 
 		return channel.send({ embeds: [embed], files: attachments })
 			.then(() => msg.channel.send('I\'ve forwarded your message along.'));

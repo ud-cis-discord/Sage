@@ -1,4 +1,4 @@
-import { Message, MessageAttachment, MessageEmbed, TextChannel } from 'discord.js';
+import { GuildChannel, Message, MessageAttachment, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
@@ -14,12 +14,32 @@ export default class extends Command {
 	runInGuild = false;
 
 	async run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
+		const bot = msg.client;
 		const questionId = await generateQuestionId(msg);
+
+		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
+		let privThread: ThreadChannel;
+		if (courseGeneral.isText()) {
+			privThread = await courseGeneral.threads.create({
+				name: `${msg.author.username}‘s private question (${questionId})'`,
+				autoArchiveDuration: 60,
+				reason: `${msg.author.username} asked a private question`,
+				type: `GUILD_PRIVATE_THREAD`
+			});
+		} else {
+			throw `Something went wrong creating ${msg.author.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
+		}
+
+		privThread.guild.members.fetch();
+		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(course.roles.staff)).forEach(user => {
+			privThread.members.add(user);
+		});
+		privThread.members.add(msg.author.id);
+
 
 		const embed = new MessageEmbed()
 			.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
-			.setDescription(question)
-			.setFooter(`To respond to this question use: \n${PREFIX}sudoreply ${questionId} <response>`);
+			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
 
 		const attachments: MessageAttachment[] = [];
 		if (msg.attachments) {
@@ -41,16 +61,25 @@ export default class extends Command {
 		});
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
+		embed.setDescription(question);
+		embed.setTitle(`${msg.author.username}'s Question`);
+		embed.setFooter(`When you're done with this question, you can send \`${PREFIX}archive\` to close it`);
+		await privThread.send({
+			embeds: [embed],
+			files: attachments
+		});
+
 		const entry: PVQuestion = {
 			owner: msg.author.id,
 			type: 'private',
 			questionId,
-			messageLink
+			messageLink,
+			threadId: privThread.id
 		};
 
 		msg.client.mongo.collection(DB.PVQ).insertOne(entry);
 
-		return msg.channel.send(`Your question has been sent to the staff, any responses will be sent here. Question ID: ${questionId}`);
+		return msg.channel.send(`Your question has been sent to the staff. Any conversation about it will be had here: <#${privThread.id}>`);
 	}
 
 	async argParser(msg: Message, input: string): Promise<[Course, string]> {
