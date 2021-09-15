@@ -55,26 +55,25 @@ export default class extends Command {
 		}
 
 		const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
-		const questionMessage = await privateChannel.send({
+		await privateChannel.send({
+			embeds: [embed],
+			files: attachments
+		});
+
+		embed.setDescription(question);
+		embed.setTitle(`${msg.author.username}'s Question`);
+		embed.setFooter(`When you're done with this question, you can send \`${PREFIX}archive\` to close it`);
+		const questionMessage = await privThread.send({
 			embeds: [embed],
 			files: attachments
 		});
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
-		embed.setDescription(question);
-		embed.setTitle(`${msg.author.username}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`${PREFIX}archive\` to close it`);
-		await privThread.send({
-			embeds: [embed],
-			files: attachments
-		});
-
 		const entry: PVQuestion = {
 			owner: msg.author.id,
 			type: 'private',
 			questionId,
-			messageLink,
-			threadId: privThread.id
+			messageLink
 		};
 
 		msg.client.mongo.collection(DB.PVQ).insertOne(entry);
