@@ -12,7 +12,8 @@ import {
 	PartialMessage,
 	MessageAttachment,
 	Role,
-	Guild
+	Guild,
+	ThreadChannel
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { GUILDS, CHANNELS } from '@root/config';
@@ -447,6 +448,68 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 	}
 }
 
+async function processThreadCreate(thread: ThreadChannel, serverLog: TextChannel): Promise<void> {
+	if (thread.guild.id !== GUILDS.MAIN) return;
+
+	const logs = (await thread.guild.fetchAuditLogs({ type: 'THREAD_CREATE', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
+	const embed = new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`Thread created: "${thread.name}"`)
+		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
+		.setDescription(`<#${thread.id}>`)
+		.setColor('GREYPLE')
+		.setFooter(`Thread ID: ${thread.id}`)
+		.setTimestamp();
+
+	serverLog.send({ embeds: [embed] });
+}
+
+async function processThreadDelete(thread: ThreadChannel, serverLog: TextChannel): Promise<void> {
+	if (thread.guild.id !== GUILDS.MAIN) return;
+
+	const logs = (await thread.guild.fetchAuditLogs({ type: 'THREAD_DELETE', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
+	const embed = new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`Thread deleted: "${thread.name}"`)
+		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
+		.setColor('GREYPLE')
+		.setFooter(`Thread ID: ${thread.id}`)
+		.setTimestamp();
+
+	serverLog.send({ embeds: [embed] });
+}
+
+async function processThreadUpdate(oldThread: ThreadChannel, newThread: ThreadChannel, serverLog: TextChannel): Promise<void> {
+	if (newThread.guild.id !== GUILDS.MAIN) return;
+
+	const logs = (await newThread.guild.fetchAuditLogs({ type: 'THREAD_UPDATE', limit: 1 })).entries;
+	const [logEntry] = [...logs.values()];
+	const embed = new MessageEmbed()
+		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setTitle(`Thread updated: "${newThread.name}"`)
+		.setFields([{ name: 'Thread type', inline: false, value: `${newThread.type}` }])
+		.setDescription(`<#${newThread.id}>`)
+		.setColor('GREYPLE')
+		.setFooter(`Thread ID: ${newThread.id}`)
+		.setTimestamp();
+
+	if (newThread.name !== oldThread.name) {
+		embed.addField('New name', newThread.name, false);
+		embed.addField('Old name', oldThread.name, false);
+	}
+
+	if (newThread.archived !== oldThread.archived) {
+		embed.addField('Archive status updated', `Changed from ${
+			oldThread.archived ? 'archived to unarchived' : 'unarchived to archived'
+		}.`);
+	}
+
+	serverLog.send({ embeds: [embed] });
+	return;
+}
+
 async function register(bot: Client): Promise<void> {
 	const serverLog = await bot.channels.fetch(CHANNELS.SERVER_LOG) as TextChannel;
 
@@ -512,6 +575,21 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('roleUpdate', (oldRole, newRole) => {
 		processRoleUpdate(oldRole, newRole, serverLog)
+			.catch(async error => bot.emit('error', error));
+	});
+
+	bot.on('threadCreate', (thread) => {
+		processThreadCreate(thread, serverLog)
+			.catch(async error => bot.emit('error', error));
+	});
+
+	bot.on('threadDelete', (thread) => {
+		processThreadDelete(thread, serverLog)
+			.catch(async error => bot.emit('error', error));
+	});
+
+	bot.on('threadUpdate', (oldThread, newThread) => {
+		processThreadUpdate(oldThread, newThread, serverLog)
 			.catch(async error => bot.emit('error', error));
 	});
 }
