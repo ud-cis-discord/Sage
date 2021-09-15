@@ -3,5 +3,4 @@ export interface PVQuestion {
 	questionId: string;
 	messageLink: string;
 	type: 'private' | 'anonymous';
-	threadId: string;
 }
