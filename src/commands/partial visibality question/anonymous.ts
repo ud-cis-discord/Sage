@@ -18,7 +18,7 @@ export default class extends Command {
 		const questionId = await generateQuestionId(msg);
 
 		const studentEmbed = new MessageEmbed()
-			.setAuthor(`Anonymous asked Question ${questionId}`)
+			.setAuthor(`Anonymous asked Question ${questionId}`, msg.client.user.avatarURL())
 			.setDescription(question);
 
 		const generalChannel = await msg.client.channels.fetch(course.channels.general) as TextChannel;
@@ -37,7 +37,8 @@ export default class extends Command {
 			owner: msg.author.id,
 			type: 'anonymous',
 			questionId,
-			messageLink
+			messageLink,
+			threadId: null
 		};
 
 		msg.client.mongo.collection(DB.PVQ).insertOne(entry);

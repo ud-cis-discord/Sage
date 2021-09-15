@@ -73,7 +73,8 @@ export default class extends Command {
 			owner: msg.author.id,
 			type: 'private',
 			questionId,
-			messageLink
+			messageLink,
+			threadId: privThread.id
 		};
 
 		msg.client.mongo.collection(DB.PVQ).insertOne(entry);
