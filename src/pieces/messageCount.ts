@@ -10,8 +10,7 @@ const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
 const countedChannelTypes = [
 	'GUILD_TEXT',
-	'GUILD_PUBLIC_THREAD',
-	'GUILD_PRIVATE_THREAD'
+	'GUILD_PUBLIC_THREAD'
 ];
 
 async function register(bot: Client): Promise<void> {
