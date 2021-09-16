@@ -1,5 +1,6 @@
 #!/bin/bash
 DOC_DIR="ud-cis-discord.github.io"
+SAGE_DIR="SageV2"
 if [[ ! -d ../ud-cis-discord.github.io ]]
 then
 	echo "docs repo doesn't exist where expected, exiting"
@@ -12,8 +13,9 @@ then
 	exit 1
 fi
 
-mv ./Commands.md ../$DOC_DIR/pages/Commands.md
-mv ./'Staff Commands.md' ../$DOC_DIR/pages/'Staff Commands.md'
 cd ../$DOC_DIR
+git pull
+mv ../$SAGE_DIR/Commands.md ./pages/Commands.md
+mv ../$SAGE_DIR/'Staff Commands.md' ./pages/'Staff Commands.md'
 git commit -a -m 'jenkins pipeline automatic docs update'
 git push
