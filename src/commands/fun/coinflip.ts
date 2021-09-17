@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable eqeqeq */
 import { Message } from 'discord.js';
 import { Command } from '@lib/types/Command';
@@ -11,27 +10,19 @@ export default class extends Command {
 	description = 'Have Sage flip a coin for you!';
 	aliases = ['flip', 'coin', 'cf'];
 
-	async run(msg: Message) {
+	async run(msg: Message): Promise<void> {
 		const coinFlip = await msg.channel.send('flipping...');
-		/*
-		const coinImage = await msg.channel.send({ files: [{
-			attachment: `${__dirname}../../../../../assets/images/coinflip.gif`,
-			name: `coin_flip.gif`
-		}] });
-		*/
-
 		const result = COIN_FLIP[Math.floor(Math.random() * COIN_FLIP.length)];
 
 		setTimeout(() => {
-			//	coinImage.delete();
 			if (result == COIN_FLIP[0]) {
 				coinFlip.edit({ files: [{
-					attachment: `${__dirname}../../../../../assets/images/steve_heads.png`,
+					attachment: `${__dirname}../../../../../assets/images/steve_heads.png`, //	aliases don't work for file uploads
 					name: `steve_heads.png`
 				}] });
 			} else {
 				coinFlip.edit({ files: [{
-					attachment: `${__dirname}../../../../../assets/images/steve_tails.png`,
+					attachment: `${__dirname}../../../../../assets/images/steve_tails.png`, //	aliases don't work for file uploads
 					name: `steve_tails.png`
 				}] });
 			}
