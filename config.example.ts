@@ -23,6 +23,7 @@ export const GUILDS = {			// Guild IDs for each guild
 
 export const ROLES = {			// Role IDS for each role
 	ADMIN: '',
+	STUDENT_ADMIN: '',
 	STAFF: '',
 	VERIFIED: '',
 	MUTED: '',
