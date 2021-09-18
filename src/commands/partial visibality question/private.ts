@@ -31,14 +31,10 @@ export default class extends Command {
 		}
 
 		privThread.guild.members.fetch();
-		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN)).forEach(user => {
-			privThread.members.add(user);
-		});
-		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(course.roles.staff)).forEach(user => {
+		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN || course.roles.staff)).forEach(user => {
 			privThread.members.add(user);
 		});
 		privThread.members.add(msg.author.id);
-
 
 		const embed = new MessageEmbed()
 			.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
