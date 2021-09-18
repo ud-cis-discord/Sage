@@ -2,7 +2,7 @@ import { GuildChannel, Message, MessageAttachment, MessageEmbed, TextChannel, Th
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
-import { BOT, DB, MAINTAINERS, PREFIX } from '@root/config';
+import { BOT, DB, MAINTAINERS, PREFIX, ROLES } from '@root/config';
 import { generateQuestionId } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 
@@ -31,11 +31,11 @@ export default class extends Command {
 		}
 
 		privThread.guild.members.fetch();
-		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(course.roles.staff)).forEach(user => {
+		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN) || mem.roles.cache.has(course.roles.staff)
+		).forEach(user => {
 			privThread.members.add(user);
 		});
 		privThread.members.add(msg.author.id);
-
 
 		const embed = new MessageEmbed()
 			.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
