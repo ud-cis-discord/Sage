@@ -31,7 +31,8 @@ export default class extends Command {
 		}
 
 		privThread.guild.members.fetch();
-		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN || course.roles.staff)).forEach(user => {
+		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN) || mem.roles.cache.has(course.roles.staff)
+		).forEach(user => {
 			privThread.members.add(user);
 		});
 		privThread.members.add(msg.author.id);
