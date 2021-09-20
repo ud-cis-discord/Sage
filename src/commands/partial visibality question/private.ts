@@ -22,7 +22,7 @@ export default class extends Command {
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({
 				name: `${msg.author.username}‘s private question (${questionId})'`,
-				autoArchiveDuration: 60,
+				autoArchiveDuration: 4320,
 				reason: `${msg.author.username} asked a private question`,
 				type: `GUILD_PRIVATE_THREAD`
 			});
