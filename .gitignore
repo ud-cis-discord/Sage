@@ -4,6 +4,9 @@ resources/*
 !resources/.exists
 src/commands/admin/eval.ts
 
+# macOS stuff
+.DS_Store
+
 # Logs
 logs
 !src/pieces/logs
