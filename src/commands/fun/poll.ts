@@ -1,7 +1,6 @@
 import { BOT } from '@root/config';
 import { Message, MessageEmbed, MessageReaction } from 'discord.js';
 import parse from 'parse-duration';
-import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -22,10 +21,12 @@ export default class extends Command {
 		});
 		choiceText = choiceText.trim();
 
+		const mdTimestamp = `<t:${Math.floor(Date.now() / 1000) + (timespan / 1000)}:R>`;
+
 		const pollEmbed = new MessageEmbed()
 			.setTitle(`Poll from ${msg.member.displayName}`)
 			.addField(question, choiceText)
-			.setFooter(`This poll ends in ${prettyMilliseconds(timespan, { verbose: true })}`)
+			.setDescription(`This poll ends ${mdTimestamp}`)
 			.setColor('RANDOM');
 
 
@@ -55,12 +56,12 @@ export default class extends Command {
 
 			if (maxVotes <= 1) {
 				pollMsg.edit({ embeds: [pollEmbed
-					.addField('Results', 'The poll ended but it looks like no one voted ☹!')
-					.setFooter('This poll has ended')] });
+					.addField('Results', 'The poll ended but it looks like no one voted ☹')
+					.setDescription(`This poll ended ${mdTimestamp}`)] });
 
 				const embed = new MessageEmbed()
 					.setTitle(`Poll from ${msg.member.displayName}`)
-					.setDescription(`The poll ended but it looks like no one voted ☹!\n\n[Click to view poll](${pollMsg.url})`)
+					.setDescription(`The poll ended but it looks like no one voted ☹\n\n[Click to view poll](${pollMsg.url})`)
 					.setColor(pollEmbed.color);
 				return pollMsg.channel.send({ embeds: [embed] });
 			}
@@ -71,7 +72,7 @@ export default class extends Command {
 
 			pollMsg.edit({ embeds: [pollEmbed
 				.addField('Results', this.winMessage(winners, maxVotes - 1))
-				.setFooter('This poll has ended')] });
+				.setDescription(`This poll ended ${mdTimestamp}`)] });
 			pollMsg.reactions.removeAll();
 			const embed = new MessageEmbed()
 				.setTitle(`Poll from ${msg.member.displayName} Result`)
