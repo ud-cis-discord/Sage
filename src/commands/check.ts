@@ -23,7 +23,7 @@ export default class extends Command {
 			.setTitle(`${msg.author.username}'s Progress`)
 			.setThumbnail(msg.author.avatarURL())
 			.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, true)
-			.addField('Level Progress', `You're **${user.curExp}** messages away from **Level ${user.level + 1}**
+			.addField('Level Progress', `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
 			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
 		if (here === 'here') {
 			msg.channel.send({ embeds: [embed] });

@@ -26,7 +26,7 @@ export default class extends Command {
 		const info = execSync(`cd ${__dirname} && git log --max-count=1 --skip=${commitNumber} --no-merges --format="%H%n%an%n%s%n%ci"` +
 			' && git branch --show-current').toString().split('\n');
 
-		if (info[2].toLowerCase() === 'version bump') {
+		if (info[2].toLowerCase().startsWith('version bump')) {
 			return this.getGitInfo(commitNumber + 1);
 		}
 
