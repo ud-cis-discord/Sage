@@ -85,6 +85,10 @@ async function runCommand(msg: Message) {
 
 	const command = getCommand(msg.client, commandName);
 	if (!command || command.enabled === false) return;
+	if (command.restricted) {
+		msg.author.send('This command is only available in #sages_place.');
+		return msg.delete();
+	}
 
 	if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
 	if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {

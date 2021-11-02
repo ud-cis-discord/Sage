@@ -11,6 +11,7 @@ export default class extends Command {
 	usage = '[Role|list]';
 	aliases = ['role'];
 	runInDM = false;
+	restricted = true;
 
 	async run(msg: Message, [cmd]: [Role | 'list']): Promise<Message> {
 		const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);

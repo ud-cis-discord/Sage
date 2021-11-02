@@ -7,6 +7,7 @@ export abstract class Command {
 	name: string;
 	category: string;
 	enabled: boolean;
+	restricted?: boolean;
 	aliases?: Array<string>;
 	description?: string;
 	usage?: string;
