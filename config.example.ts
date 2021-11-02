@@ -59,6 +59,7 @@ export const LEVEL_TIER_ROLES = [
 
 export const FIRST_LEVEL = 10;
 export const GITHUB_TOKEN = '';
+export const GITHUB_PROJECT = '';
 export const PREFIX = 's;';
 export const MAINTAINERS = '';	// The current maintainers of this bot
 export const SEMESTER_ID = '';	// The current semester ID. i.e. s21
