@@ -1,7 +1,7 @@
 import { Client, GuildMember, PartialGuildMember } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
-import { DB, GUILDS } from '@root/config';
+import { DB, GUILDS, ROLES } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -35,6 +35,20 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 	}
 }
 
+async function memberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
+	if (member.partial) {
+		await member.fetch();
+	}
+
+	const dbMember: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+
+	dbMember.isVerified = false;
+	dbMember.discordId = '';
+	dbMember.roles = dbMember.roles.filter(role => role !== ROLES.VERIFIED);
+
+	await member.client.mongo.collection(DB.USERS).replaceOne({ discordId: member.id }, dbMember);
+}
+
 async function register(bot: Client): Promise<void> {
 	bot.on('guildMemberAdd', member => {
 		memberAdd(member)
@@ -43,6 +57,9 @@ async function register(bot: Client): Promise<void> {
 	bot.on('guildMemberUpdate', async (oldMember, newMember) => {
 		memberUpdate(oldMember, newMember)
 			.catch(async error => bot.emit('error', error));
+	});
+	bot.on('guildMemberRemove', async (member) => {
+		memberRemove(member);
 	});
 }
 
