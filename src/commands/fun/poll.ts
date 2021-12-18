@@ -3,6 +3,9 @@ import { Message, MessageEmbed, MessageReaction } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 
+const QUESTION_CHAR_LIMIT = 1024;
+const EMBED_TITLE_CHAR_LIMIT = 256;
+
 export default class extends Command {
 
 	description = `Have ${BOT.NAME} create a poll for you`;
@@ -15,6 +18,11 @@ export default class extends Command {
 	async run(msg: Message, [timespan, question, ...choices]: [number, string, ...Array<string>]): Promise<Message> {
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
+		if (question.length > QUESTION_CHAR_LIMIT) {
+			msg.channel.send(`Your question is too long. Please keep it under ${QUESTION_CHAR_LIMIT} characters!`);
+			return;
+		}
+
 		let choiceText = '';
 		choices.forEach((choice, option) => {
 			choiceText += `${emotes[option]} ${choice}\n`;
@@ -25,7 +33,8 @@ export default class extends Command {
 
 		const pollEmbed = new MessageEmbed()
 			.setTitle(`Poll from ${msg.member.displayName}`)
-			.addField(question, choiceText)
+			.addField('Question', question)
+			.addField('Choices', choiceText, false)
 			.setDescription(`This poll ends ${mdTimestamp}`)
 			.setColor('RANDOM');
 
@@ -44,7 +53,12 @@ export default class extends Command {
 			});
 
 			pollEmbed.fields = [{
-				name: question,
+				name: 'Question',
+				value: question,
+				inline: false
+			},
+			{
+				name: 'Choices',
 				value: choiceText
 					.split('\n')
 					.map((choice, idx) => {
@@ -76,7 +90,9 @@ export default class extends Command {
 			pollMsg.reactions.removeAll();
 			const embed = new MessageEmbed()
 				.setTitle(`Poll from ${msg.member.displayName} Result`)
-				.addField(question, `${this.winMessage(winners, maxVotes - 1)}\n\n[Click to view poll](${pollMsg.url})`)
+				.addField('Question',
+					question.length > EMBED_TITLE_CHAR_LIMIT ? `${question.slice(0, EMBED_TITLE_CHAR_LIMIT - 3)}...` : question)
+				.addField('Result', `${this.winMessage(winners, maxVotes - 1)}\n\n[Click to view poll](${pollMsg.url})`)
 				.setColor(pollEmbed.color);
 			return pollMsg.channel.send({ embeds: [embed] });
 		});
