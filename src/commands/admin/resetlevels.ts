@@ -2,6 +2,7 @@ import { DB, FIRST_LEVEL, LEVEL_TIER_ROLES, ROLES } from '@root/config';
 import { botMasterPerms } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { Message } from 'discord.js';
+import { SageUser } from '@root/src/lib/types/SageUser';
 
 export default class extends Command {
 
@@ -18,7 +19,7 @@ export default class extends Command {
 
 		await msg.guild.members.fetch();
 		msg.guild.members.cache.forEach(member => {
-			if (member.user.bot) return;
+			if (member.user.bot || !member.roles.cache.has(ROLES.VERIFIED)) return;
 			let level: number;
 			let lvlTier = -1;
 
@@ -43,12 +44,15 @@ export default class extends Command {
 			}
 		});
 
-		msg.client.mongo.collection(DB.USERS).updateMany({}, { $set: {
-			count: 0,
-			levelExp: FIRST_LEVEL,
-			level: 1,
-			curExp: FIRST_LEVEL
-		} });
+		msg.client.mongo.collection<SageUser>(DB.USERS).updateMany(
+			{ roles: { $all: [ROLES.VERIFIED] } }, {
+				$set: {
+					count: 0,
+					levelExp: FIRST_LEVEL,
+					level: 1,
+					curExp: FIRST_LEVEL
+				}
+			});
 
 		return msg.reply('I\'ve reset all levels in the guild.');
 	}
