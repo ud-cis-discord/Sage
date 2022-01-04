@@ -5,6 +5,7 @@ import { DB, GUILDS, ROLES } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
+	member.guild.roles.fetch();
 
 	const entry: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
@@ -16,6 +17,11 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	}
 
 	entry.roles.forEach(role => {
+		/* This might happen if a course was removed between when they left and when they re-joined
+		   we also don't want people that are TAs one semester and not the next to be staff on re-join */
+		if (!member.guild.roles.cache.has(role) || role === ROLES.STAFF) return;
+		console.log(`adding ${role}`);
+
 		member.roles.add(role, 'Automatically assigned by Role Handler on join.')
 			.catch(async error => member.client.emit('error', error));
 	});
@@ -44,7 +50,7 @@ async function memberRemove(member: GuildMember | PartialGuildMember): Promise<v
 
 	dbMember.isVerified = false;
 	dbMember.discordId = '';
-	dbMember.roles = dbMember.roles.filter(role => role !== ROLES.VERIFIED);
+	dbMember.roles = dbMember.roles.filter(role => role !== ROLES.VERIFIED && role !== ROLES.STAFF);
 
 	await member.client.mongo.collection(DB.USERS).replaceOne({ discordId: member.id }, dbMember);
 }
