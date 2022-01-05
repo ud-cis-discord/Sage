@@ -4,7 +4,7 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Get a random number within a user-specified range (min and max inclusive). If no range is specified by the user, defaults to a range from 1 to 6. Also works for negative numbers!';
-	usage = '<min #> | <max #>';
+	usage = '[min #] | [max #]';
 	aliases = ['random', 'rand'];
 
 	run(msg: Message, [minimum, maximum]: Array<number>): Promise<Message> {
