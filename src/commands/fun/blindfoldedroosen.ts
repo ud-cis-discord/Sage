@@ -4,7 +4,7 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = `You've been challenged to a sword fight. However, your opponent, Professor Roosen, has decided to wear a blindfold. Feeling lucky?`;
-	aliases = ['br', 'blindfoldedroosen'];
+	aliases = ['br', 'bfr'];
 
 	run(msg: Message): Promise<Message> {
 		const chosenSword = Math.floor(Math.random() * 6);
