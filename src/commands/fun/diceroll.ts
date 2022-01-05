@@ -6,7 +6,7 @@ export default class extends Command {
 
 	description = `Get a random integer within a user-specified range (min and max inclusive). If no range is specified, defaults to a range from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;
 	usage = '[min #] | [max #]';
-	aliases = ['random', 'rand'];
+	aliases = ['random', 'rand', 'dice', 'roll'];
 
 	run(msg: Message, [minimum, maximum]: Array<number>): Promise<Message> {
 		return msg.channel.send(`Your random number is ${Math.floor((Math.random() * (maximum - minimum + 1)) + minimum)}`);
