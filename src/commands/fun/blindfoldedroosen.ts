@@ -11,7 +11,7 @@ export default class extends Command {
 		const chosenSword = Math.floor(Math.random() * 6);
 		// 5 is a random number I chose to be the blindfolded Roosen, no other meaning
 		if (chosenSword === 5) {
-			return msg.channel.send('Ooooooooooooh... ouch! Roosen has accidentally killed you! You lose.');
+			return msg.channel.send('Ooooooooooooh... ouch! Blindfolded Roosen has killed you! You lose.');
 		} else {
 			return msg.channel.send('You\'ve won the fight against blindfolded Roosen. You live another day!');
 		}
