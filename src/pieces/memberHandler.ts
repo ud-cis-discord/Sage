@@ -17,10 +17,8 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	}
 
 	entry.roles.forEach(role => {
-		/* This might happen if a course was removed between when they left and when they re-joined
-		   we also don't want people that are TAs one semester and not the next to be staff on re-join */
-		if (!member.guild.roles.cache.has(role) || role === ROLES.STAFF) return;
-		console.log(`adding ${role}`);
+		// This might happen if a course was removed between when they left and when they re-joined.
+		if (!member.guild.roles.cache.has(role)) return;
 
 		member.roles.add(role, 'Automatically assigned by Role Handler on join.')
 			.catch(async error => member.client.emit('error', error));
@@ -42,6 +40,7 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 }
 
 async function memberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
+	if (member.guild.id !== GUILDS.MAIN) return;
 	if (member.partial) {
 		await member.fetch();
 	}
@@ -53,6 +52,7 @@ async function memberRemove(member: GuildMember | PartialGuildMember): Promise<v
 	dbMember.isVerified = false;
 	dbMember.discordId = '';
 	dbMember.roles = dbMember.roles.filter(role => role !== ROLES.VERIFIED && role !== ROLES.STAFF);
+	dbMember.isStaff = false;
 
 	await member.client.mongo.collection(DB.USERS).replaceOne({ discordId: member.id }, dbMember);
 }

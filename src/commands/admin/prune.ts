@@ -1,7 +1,7 @@
 import { Command } from '@lib/types/Command';
 import { ROLES } from '@root/config';
 import { adminPerms } from '@root/src/lib/permissions';
-import { Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 
 const PRUNE_TIMEOUT = 30;
 
@@ -16,7 +16,7 @@ export default class extends Command {
 
 	async run(msg: Message): Promise<void> {
 		let timeout = PRUNE_TIMEOUT;
-		msg.guild.members.fetch();
+		await msg.guild.members.fetch();
 		const toKick = msg.guild.members.cache.filter(member => !member.user.bot && !member.roles.cache.has(ROLES.VERIFIED));
 
 		const confirmEmbed = new MessageEmbed()
@@ -62,10 +62,15 @@ export default class extends Command {
 			} else {
 				confirmEmbed.setTitle(`<a:loading:928003042954059888> Pruning ${toKick.size} members...`);
 				confirmMsg.edit({ embeds: [confirmEmbed], components: [new MessageActionRow({ components: confirmBtns })] });
+
+				const awaitedKicks: Promise<GuildMember>[] = [];
 				toKick.forEach(member => {
+					awaitedKicks.push(member.kick('Pruned by the prune command'));
 					console.log(`pruning ${member.displayName}`);
 					return;
 				});
+				await Promise.all(awaitedKicks);
+
 				confirmEmbed.setTitle(`:white_check_mark: Pruned ${toKick.size} members!`);
 				confirmMsg.edit({ embeds: [confirmEmbed], components: [new MessageActionRow({ components: confirmBtns })] });
 			}
