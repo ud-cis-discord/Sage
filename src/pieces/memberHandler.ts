@@ -48,6 +48,8 @@ async function memberRemove(member: GuildMember | PartialGuildMember): Promise<v
 
 	const dbMember: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
+	if (!dbMember) return;
+
 	dbMember.isVerified = false;
 	dbMember.discordId = '';
 	dbMember.roles = dbMember.roles.filter(role => role !== ROLES.VERIFIED && role !== ROLES.STAFF);
