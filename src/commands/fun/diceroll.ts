@@ -13,8 +13,9 @@ export default class extends Command {
 
 	argParser(_msg: Message, input: string): Array<number> {
 		const [minimum, maximum] = input.split('|').map(arg => arg.trim());
+		const DEFAULT_RANGE = [1, 6];
 		if (!input) {
-			return [1, 6];
+			return DEFAULT_RANGE;
 		} else {
 			if (!maximum) {
 				throw ('If you provide a minimum, you must also provide a maximum.');
