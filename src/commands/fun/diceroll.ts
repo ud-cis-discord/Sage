@@ -4,7 +4,7 @@ import { Command } from '@lib/types/Command';
 const DEFAULT_RANGE = [1, 6];
 export default class extends Command {
 
-	description = `Get a random number within a user-specified range (min and max inclusive). If no range is specified by the user, defaults to a range from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;
+	description = `Get a random integer within a user-specified range (min and max inclusive). If no range is specified, defaults to a range from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;
 	usage = '[min #] | [max #]';
 	aliases = ['random', 'rand'];
 
