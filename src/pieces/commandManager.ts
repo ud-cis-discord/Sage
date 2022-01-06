@@ -3,7 +3,7 @@ import { getCommand, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { CommandError } from '@lib/types/errors';
-import { DB, MAINTAINERS, PREFIX } from '@root/config';
+import { DB, MAINTAINERS, PREFIX, CHANNELS } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -85,7 +85,7 @@ async function runCommand(msg: Message) {
 
 	const command = getCommand(msg.client, commandName);
 	if (!command || command.enabled === false) return;
-	if (command.restricted) {
+	if (msg.channel.id !== CHANNELS.SAGE && command.restricted) {
 		msg.author.send('This command is only available in #sages_place.');
 		return msg.delete();
 	}
