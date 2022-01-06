@@ -65,14 +65,16 @@ export default class extends Command {
 
 				const awaitedKicks: Promise<GuildMember>[] = [];
 				toKick.forEach(member => {
-					awaitedKicks.push(member.kick('Pruned by the prune command'));
-					console.log(`pruning ${member.displayName}`);
+					awaitedKicks.push(member.kick(`Pruned by ${msg.member.displayName} (${msg.author.id})`));
 					return;
 				});
 				await Promise.all(awaitedKicks);
 
 				confirmEmbed.setTitle(`:white_check_mark: Pruned ${toKick.size} members!`);
-				confirmMsg.edit({ embeds: [confirmEmbed], components: [new MessageActionRow({ components: confirmBtns })] });
+				confirmMsg.edit({
+					embeds: [confirmEmbed],
+					components: [new MessageActionRow({ components: confirmBtns })]
+				});
 			}
 			collector.stop();
 		}).on('end', async collected => {
@@ -97,7 +99,7 @@ export default class extends Command {
 	}
 
 	countdown(msg: Message, timeout: number, confirmBtns: MessageButton[], confirmEmbed: MessageEmbed): void {
-		confirmEmbed.setFooter(`This command will expire in ${timeout} seconds`);
+		confirmEmbed.setFooter(`This command will expire in ${timeout}s`);
 		msg.edit({ embeds: [confirmEmbed], components: [new MessageActionRow({ components: confirmBtns })] });
 	}
 
