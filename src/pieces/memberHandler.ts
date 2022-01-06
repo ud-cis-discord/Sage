@@ -41,9 +41,6 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 
 async function memberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
-	if (member.partial) {
-		await member.fetch();
-	}
 
 	const dbMember: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 

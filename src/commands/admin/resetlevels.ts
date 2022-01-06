@@ -16,6 +16,7 @@ export default class extends Command {
 
 	async run(msg: Message): Promise<Message> {
 		const loadingMsg = await msg.channel.send('loading... <a:loading:928003042954059888>');
+		await msg.guild.roles.fetch();
 		const lvl1 = msg.guild.roles.cache.find(role => role.id === ROLES.LEVEL_ONE);
 
 		await msg.guild.members.fetch();
