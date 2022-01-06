@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { adminPerms } from '@lib/permissions';
 import { RequestError } from '@octokit/types';
-import { BOT } from '@root/config';
+import { BOT, GITHUB_PROJECT } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { Message } from 'discord.js';
 
@@ -48,7 +48,7 @@ export default class extends Command {
 
 		const splitArgs = args.map(arg => arg.trim());
 
-		let project = 'SageV2';
+		let project = GITHUB_PROJECT;
 		let labels = [];
 		let milestone = '';
 		let body = '';

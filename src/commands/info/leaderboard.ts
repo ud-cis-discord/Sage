@@ -17,6 +17,7 @@ export default class extends Command {
 
 		// eslint-disable-next-line no-extra-parens
 		const users: Array<SageUser> = (await msg.client.mongo.collection('users').find().toArray() as Array<SageUser>)
+			.filter(user => msg.guild.members.cache.has(user.discordId))
 			.sort((ua, ub) => ua.level - ub.level !== 0 ? ua.level > ub.level ? -1 : 1 : ua.curExp < ub.curExp ? -1 : 1); // filter on level first, then remaining xp
 
 		page = page * 10 > users.length ? Math.floor(users.length / 10) + 1 : page;
