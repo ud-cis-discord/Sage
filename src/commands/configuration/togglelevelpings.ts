@@ -7,7 +7,6 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = `Toggles whether or not you will receive notifications from Sage on a level up.`;
-	restricted = true;
 	aliases = ['levelpings', 'lp'];
 
 	async run(msg: Message): Promise<Message> {

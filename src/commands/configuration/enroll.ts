@@ -10,7 +10,6 @@ export default class extends Command {
 	usage = '<course>';
 	extendedHelp = 'If you use this command on a course you are already enrolled in, you will be unenrolled.';
 	runInDM = false;
-	restricted = true;
 	aliases = ['unenroll'];
 
 	async run(msg: Message, [desiredCourse]: [string]): Promise<Message> {

@@ -8,7 +8,6 @@ export default class extends Command {
 	extendedHelp = 'Exactly one file must be attached when running this command.';
 	usage = '[more information]';
 	enabled = false;
-	restricted = true;
 
 	async run(msg: Message, [imgDesc]: [string]): Promise<Message> {
 		const [attachment] = [...msg.attachments.values()];

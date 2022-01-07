@@ -7,7 +7,6 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = `Toggles whether or not your personally identifiable information will be sent by instructors over Discord.`;
-	restricted = true;
 	aliases = ['pii'];
 
 	async run(msg: Message): Promise<Message> {

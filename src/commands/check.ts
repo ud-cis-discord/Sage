@@ -10,7 +10,6 @@ export default class extends Command {
 	sent in the same channel that the command was used in (rather than the user's dms).`;
 	usage = '[here]';
 	aliases = ['count'];
-	restricted = true;
 
 	async run(msg: Message, [here]: [string]): Promise<void> {
 		const user: SageUser = await msg.author.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
