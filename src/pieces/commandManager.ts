@@ -85,8 +85,10 @@ async function runCommand(msg: Message) {
 
 	const command = getCommand(msg.client, commandName);
 	if (!command || command.enabled === false) return;
-	if (msg.channel.id !== CHANNELS.SAGE && command.restricted) {
-		msg.author.send('This command is only available in #sages_place.');
+
+	//	restricted commands
+	if (msg.guild && command.restricted && msg.channel.id !== CHANNELS.SAGE) {
+		msg.author.send(`This command is only available in <#${CHANNELS.SAGE}>.`);
 		return msg.delete();
 	}
 
