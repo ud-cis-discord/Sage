@@ -1,7 +1,7 @@
 import { Client, GuildMember, PartialGuildMember } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
-import { DB, GUILDS, ROLES } from '@root/config';
+import { DB, FIRST_LEVEL, GUILDS, ROLES } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -41,15 +41,30 @@ async function memberUpdate(oldMember: GuildMember | PartialGuildMember, newMemb
 
 async function memberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
+	await member.guild.roles.fetch();
 
-	const dbMember: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+	let dbMember: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
 	if (!dbMember) return;
 
-	dbMember.isVerified = false;
-	dbMember.discordId = '';
-	dbMember.roles = dbMember.roles.filter(role => role !== ROLES.VERIFIED && role !== ROLES.STAFF);
-	dbMember.isStaff = false;
+	dbMember = {
+		...dbMember,
+		isVerified: false,
+		discordId: '',
+		roles: dbMember.roles.filter(role => {
+			const levelRole = member.guild.roles.cache.find(guildRole => guildRole.name.toLowerCase() === `level ${dbMember.level}`);
+			console.log(levelRole.id);
+			return role !== ROLES.VERIFIED
+				&& role !== ROLES.STAFF
+				&& role !== levelRole.id;
+		}),
+		isStaff: false,
+		level: 1,
+		curExp: FIRST_LEVEL,
+		levelExp: FIRST_LEVEL,
+		count: 0
+	};
+	dbMember.roles.push(ROLES.LEVEL_ONE);
 
 	await member.client.mongo.collection(DB.USERS).replaceOne({ discordId: member.id }, dbMember);
 }
