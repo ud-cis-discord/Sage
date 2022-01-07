@@ -21,7 +21,7 @@ export default class extends Command {
 		msg.client.commands.set(command.name, command);
 
 		const { commandSettings } = await msg.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: msg.client.user.id }) as SageData;
-		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: true };
+		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: true, restricted: command.restricted };
 		msg.client.mongo.collection(DB.CLIENT_DATA).updateOne(
 			{ _id: msg.client.user.id },
 			{ $set: { commandSettings } },

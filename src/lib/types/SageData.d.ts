@@ -5,5 +5,5 @@ export interface SageData {
 		type: ActivityType;
 		name: string;
 	};
-	commandSettings: Array<{ name: string, enabled: boolean }>;
+	commandSettings: Array<{ name: string, enabled: boolean, restricted: boolean }>;
 }
