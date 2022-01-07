@@ -2,13 +2,12 @@ import { Formatters, Message } from 'discord.js';
 import { botMasterPerms } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { DB } from '@root/config';
-import { getCommand } from '@root/src/lib/utils';
-import { SageData } from '@root/src/lib/types/SageData';
-
+import { getCommand } from '@lib/utils';
+import { SageData } from '@lib/types/SageData';
 
 export default class extends Command {
 
-	description = 'Restrict a command to #sages_place';
+	description = 'Unrestrict a command, so that it can be used in any channel.';
 	usage = '<command>';
 	alias = 'unres';
 

@@ -2,8 +2,8 @@ import { Message, Formatters } from 'discord.js';
 import { adminPerms, botMasterPerms, staffPerms } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { DB } from '@root/config';
-import { getCommand } from '@root/src/lib/utils';
-import { SageData } from '@root/src/lib/types/SageData';
+import { getCommand } from '@lib/utils';
+import { SageData } from '@lib/types/SageData';
 
 
 export default class extends Command {
