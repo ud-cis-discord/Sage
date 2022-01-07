@@ -11,7 +11,18 @@ export default class extends Command {
 		return await botMasterPerms(msg);
 	}
 
-	run(msg: Message): Promise<Message> {
+	run(msg: Message, [restricted]: [string]): Promise<Message> {
+		const keywords = ['restricted', 'restrict', 'res', 'r'];
+
+		if (keywords.includes(restricted)) {
+			let commands = '[ Restricted ]\n.Unrestricted\n';
+
+			msg.client.commands.forEach(command => {
+				commands += `\n${command.restricted === true ? `[ ${command.name} ]` : `.${command.name}`} `;
+			});
+
+			return msg.channel.send(Formatters.codeBlock('css', commands));
+		}
 		let commands = '+ Enabled\n- Disabled\n';
 
 		msg.client.commands.forEach(command => {
