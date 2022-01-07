@@ -52,11 +52,14 @@ async function loadCommands(bot: Client) {
 
 		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
 		let enable: boolean;
+		let restrict: boolean;
 		if (oldSettings) {
 			enable = oldSettings.enabled;
+			restrict = oldSettings.restricted;
 		} else {
 			enable = command.enabled !== false;
-			oldCommandSettings.push({ name: command.name, enabled: enable });
+			restrict = command.restricted !== false;
+			oldCommandSettings.push({ name: command.name, enabled: enable, restricted: restrict });
 		}
 		command.enabled = enable;
 
@@ -88,7 +91,7 @@ async function runCommand(msg: Message) {
 
 	//	restricted commands
 	if (msg.guild && command.restricted && msg.channel.id !== CHANNELS.SAGE) {
-		msg.author.send(`This command is only available in <#${CHANNELS.SAGE}>.`);
+		msg.author.send(`${command.name} is only available in <#${CHANNELS.SAGE}>`);
 		return msg.delete();
 	}
 

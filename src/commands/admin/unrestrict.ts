@@ -1,5 +1,5 @@
-import { Message, Formatters } from 'discord.js';
-import { adminPerms, botMasterPerms, staffPerms } from '@lib/permissions';
+import { Formatters, Message } from 'discord.js';
+import { botMasterPerms } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { DB } from '@root/config';
 import { getCommand } from '@root/src/lib/utils';
@@ -10,37 +10,33 @@ export default class extends Command {
 
 	description = 'Restrict a command to #sages_place';
 	usage = '<command>';
-	alias = ['res'];
+	alias = 'unres';
 
 	async permissions(msg: Message): Promise<boolean> {
 		return await botMasterPerms(msg);
 	}
 
 	async run(msg: Message, [command]: [Command]): Promise<Message> {
-		if (command.restricted) throw msg.channel.send(`${command.name} is already restricted.`);
-		command.restricted = true;
+		if (!command.restricted) throw msg.channel.send(`${command.name} is already unrestricted.`);
+		command.restricted = false;
 		msg.client.commands.set(command.name, command);
 
 		//	database jargon
 		const { commandSettings } = await msg.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: msg.client.user.id }) as SageData;
-		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: command.enabled, restricted: true };
+		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: command.enabled, restricted: false };
 		msg.client.mongo.collection(DB.CLIENT_DATA).updateOne(
 			{ _id: msg.client.user.id },
 			{ $set: { commandSettings } },
 			{ upsert: true }
 		);
 
-		return msg.channel.send(Formatters.codeBlock('css', `[ ${command.name} Restricted ]`));
+		return msg.channel.send(Formatters.codeBlock('ini', `[ ${command.name} unrestricted ]`));
 	}
 
 	argParser(msg: Message, input: string): Array<Command> {
 		const command = getCommand(msg.client, input);
 
 		if (!command) throw `I couldn't find a command called \`${input}\``;
-
-		if (command.permissions === staffPerms || command.permissions === adminPerms || command.permissions === botMasterPerms) {
-			throw 'This command cannot be restricted.';
-		}
 
 		return [command];
 	}
