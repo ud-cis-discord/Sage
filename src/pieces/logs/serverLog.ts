@@ -16,7 +16,8 @@ import {
 	ThreadChannel
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
-import { GUILDS, CHANNELS } from '@root/config';
+import { GUILDS, CHANNELS, DB } from '@root/config';
+import { SageUser } from '@root/src/lib/types/SageUser';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
@@ -309,6 +310,29 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 	}
 
 	serverLog.send({ embeds: [embed], files: attachments });
+
+	const bot = msg.client;
+	handleExpDetract(bot, msg);
+}
+
+async function handleExpDetract(bot: Client, msg: Message | PartialMessage) {
+	const user: SageUser = await msg.author.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+	console.log(user);
+	// bot.mongo.collection(DB.USERS).findOneAndUpdate(
+	// 	{ user },
+	// 	{ $inc: { count: -1, curExp: +1 } }
+	// );
+	if (user.curExp < user.levelExp) {
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: -1, curExp: +1 } }
+		);
+	} else { // we can't have negative exp
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: -1, curExp: 0 } }
+		);
+	}
 }
 
 async function processBulkDelete(messages: Array<Message | PartialMessage>, serverLog: TextChannel): Promise<void> {
