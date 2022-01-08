@@ -16,9 +16,19 @@ Sage was originally created by Ben Segal, Josh Lyon, and Ren Ross, and currently
 		<br>
 		<a href="https://github.com/joshualyon7">Josh Lyon</a>
 	</div>
-	<div style="float: left; text-align: center; padding: 10px"">
+	<div style="float: left; text-align: center; padding: 10px;">
 		<img src="https://avatars.githubusercontent.com/u/60983762?s=460&u=46281912deec981f7c2160fe20ac9516bc59f3ff&v=4" height="30px" style="border-radius: 15px">
 		<br>
 		<a href="https://github.com/renross">Ren Ross</a>
-	<div>
+	</div>
+	<div style="float: left; text-align: center; padding: 10px;">
+		<img src="https://avatars.githubusercontent.com/u/58154576?v=4" height="30px" style="border-radius: 15px">
+		<br>
+		<a href="https://github.com/sbrugel">Simon Brugel</a>
+	</div>
+	<div style="float: left; text-align: center; padding: 10px;">
+		<img src="https://avatars.githubusercontent.com/u/79226283?v=4" height="30px" style="border-radius: 15px">
+		<br>
+		<a href="https://github.com/bladetyr">Blade Tyrrell</a>
+	</div>
 </div>
