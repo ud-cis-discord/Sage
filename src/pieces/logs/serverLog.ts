@@ -325,9 +325,21 @@ async function handleExpDetract(bot: Client, msg: Message | PartialMessage) {
 	if (user.curExp < user.levelExp) {
 		bot.mongo.collection(DB.USERS).findOneAndUpdate(
 			{ discordId: msg.author.id },
-			{ $inc: { count: -1, curExp: +1 } }
+			{ $inc: { count: 0, curExp: +1 } }
 		);
 	} else { // we can't have negative exp
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: 0, curExp: 0 } }
+		);
+	}
+
+	if (user.count < 1) {
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: 0, curExp: 0 } }
+		);
+	} else { // we can't have negative message counts
 		bot.mongo.collection(DB.USERS).findOneAndUpdate(
 			{ discordId: msg.author.id },
 			{ $inc: { count: -1, curExp: 0 } }
