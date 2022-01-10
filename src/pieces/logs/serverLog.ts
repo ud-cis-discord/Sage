@@ -16,8 +16,7 @@ import {
 	ThreadChannel
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
-import { GUILDS, CHANNELS, DB } from '@root/config';
-import { SageUser } from '@root/src/lib/types/SageUser';
+import { GUILDS, CHANNELS } from '@root/config';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
@@ -284,13 +283,26 @@ async function processInviteDelete(invite: Invite, serverLog: TextChannel): Prom
 
 async function processMessageDelete(msg: Message | PartialMessage, serverLog: TextChannel): Promise<void> {
 	if (!('name' in msg.channel) || msg.guild.id !== GUILDS.MAIN) return;
-	const embed = new MessageEmbed()
-		.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
-		.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
-			`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
-		.setFooter(`Message ID: ${msg.id} | Author ID: ${msg.author.id}`)
-		.setColor('ORANGE')
-		.setTimestamp();
+
+	let embed;
+	if (!msg.author) { // this message is a partial, so author/content information is not available.
+		embed = new MessageEmbed()
+			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
+				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
+			.setFooter(`Message ID: ${msg.id}`)
+			.setColor('ORANGE')
+			.setTimestamp();
+		serverLog.send({ embeds: [embed] });
+		return;
+	} else {
+		embed = new MessageEmbed()
+			.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
+			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
+				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
+			.setFooter(`Message ID: ${msg.id} | Author ID: ${msg.author.id}`)
+			.setColor('ORANGE')
+			.setTimestamp();
+	}
 
 	const attachments: MessageAttachment[] = [];
 
@@ -310,41 +322,6 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 	}
 
 	serverLog.send({ embeds: [embed], files: attachments });
-
-	const bot = msg.client;
-	handleExpDetract(bot, msg);
-}
-
-async function handleExpDetract(bot: Client, msg: Message | PartialMessage) {
-	const user: SageUser = await msg.author.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
-	console.log(user);
-	// bot.mongo.collection(DB.USERS).findOneAndUpdate(
-	// 	{ user },
-	// 	{ $inc: { count: -1, curExp: +1 } }
-	// );
-	if (user.curExp < user.levelExp) {
-		bot.mongo.collection(DB.USERS).findOneAndUpdate(
-			{ discordId: msg.author.id },
-			{ $inc: { count: 0, curExp: +1 } }
-		);
-	} else { // we can't have negative exp
-		bot.mongo.collection(DB.USERS).findOneAndUpdate(
-			{ discordId: msg.author.id },
-			{ $inc: { count: 0, curExp: 0 } }
-		);
-	}
-
-	if (user.count < 1) {
-		bot.mongo.collection(DB.USERS).findOneAndUpdate(
-			{ discordId: msg.author.id },
-			{ $inc: { count: 0, curExp: 0 } }
-		);
-	} else { // we can't have negative message counts
-		bot.mongo.collection(DB.USERS).findOneAndUpdate(
-			{ discordId: msg.author.id },
-			{ $inc: { count: -1, curExp: 0 } }
-		);
-	}
 }
 
 async function processBulkDelete(messages: Array<Message | PartialMessage>, serverLog: TextChannel): Promise<void> {

@@ -1,4 +1,4 @@
-import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
+import { Client, TextChannel, Role, Message, MessageEmbed, PartialMessage } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
 import { CHANNELS, PREFIX, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
@@ -16,6 +16,10 @@ const countedChannelTypes = [
 async function register(bot: Client): Promise<void> {
 	bot.on('messageCreate', async msg => {
 		countMessages(msg).catch(async error => bot.emit('error', error));
+	});
+	bot.on('messageDelete', async msg => {
+		if (msg.content && msg.content.startsWith(';s')) return;
+		handleExpDetract(msg);
 	});
 }
 
@@ -45,6 +49,35 @@ async function countMessages(msg: Message): Promise<void> {
 		(err, { value }) => handleLevelUp(err, value as SageUser, msg)
 			.catch(async error => bot.emit('error', error))
 	);
+}
+
+async function handleExpDetract(msg: Message | PartialMessage) {
+	const bot = msg.client;
+	let user: SageUser;
+	try {
+		user = await msg.author.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+	} catch (error) { // message deleted is a partial, cannot get user, so ignore.
+		return;
+	}
+
+	if (user.curExp < user.levelExp) {
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: 0, curExp: +1 } }
+		);
+	} else { // if exp for this level exceeds the max, roll back a level.
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $set: { curExp: 1 }, $inc: { level: -1 } }
+		);
+	}
+
+	if (user.count >= 1) { // it wouldn't make sense to have a negative message count (when using s;check here)
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: -1, curExp: 0 } }
+		);
+	}
 }
 
 async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise<void> {
