@@ -43,7 +43,6 @@ export function readdirRecursive(dir: string): string[] {
 	return results;
 }
 
-
 export function reminderTime({ expires: date, repeat }: Reminder): string {
 	const now = new Date();
 	let prettyDateTime = '';
@@ -69,4 +68,12 @@ export function reminderTime({ expires: date, repeat }: Reminder): string {
 	}
 
 	return prettyDateTime;
+}
+
+export function calcNeededExp(levelExp: number, direction: string): number {
+	const xpRatio = 1.25;
+	if (direction === '+') { // calculate exp for next level
+		return Math.floor(levelExp * xpRatio);
+	}
+	return Math.ceil(levelExp / xpRatio); // calculate exp for previous level
 }

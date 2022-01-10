@@ -2,8 +2,8 @@ import { Client, TextChannel, Role, Message, MessageEmbed, PartialMessage } from
 import { DatabaseError } from '@lib/types/errors';
 import { CHANNELS, PREFIX, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
+import { calcNeededExp } from '@lib/utils';
 
-const xpRatio = 1.25;
 const startingColor = 80;
 const greenIncrement = 8;
 const maxGreen:[number, number, number] = [0, 255, 0];
@@ -68,7 +68,7 @@ async function handleExpDetract(msg: Message | PartialMessage) {
 	} else { // if exp for this level exceeds the max, roll back a level.
 		bot.mongo.collection(DB.USERS).findOneAndUpdate(
 			{ discordId: msg.author.id },
-			{ $set: { curExp: 1 }, $inc: { level: -1 } }
+			{ $set: { curExp: 1, levelExp: calcNeededExp(user.levelExp, '-') }, $inc: { level: -1 } }
 		);
 	}
 
@@ -90,7 +90,7 @@ async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise
 	}
 
 	if (--entry.curExp <= 0) {
-		entry.curExp = entry.levelExp = Math.floor(entry.levelExp * xpRatio);
+		entry.curExp = entry.levelExp = calcNeededExp(entry.levelExp, '+');
 		entry.level++;
 		if (entry.levelPings) {
 			sendLevelPing(msg, entry);
