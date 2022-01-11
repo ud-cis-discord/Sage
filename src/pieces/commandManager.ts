@@ -59,8 +59,13 @@ async function loadCommands(bot: Client) {
 			defaultPermission: false
 		};
 
-		if (!guildCmd) guildCmd = await commands.create(cmdData);
-		else await commands.edit(guildCmd.id, cmdData);
+		if (!guildCmd) {
+			guildCmd = await commands.create(cmdData);
+			console.log(`${command.name} does not exist, creating...`);
+		} else {
+			await commands.edit(guildCmd.id, cmdData);
+			console.log(`${command.name} already exists, editing...`);
+		}
 		guildCmd.permissions.add({ permissions: command.tempPermissions || DEFAULT_PERMS });
 
 		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
