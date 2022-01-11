@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
 
 
 export abstract class Command {
@@ -14,12 +14,12 @@ export abstract class Command {
 	runInDM?: boolean;
 	runInGuild?: boolean;
 	options?: ApplicationCommandOptionData[];
+	tempPermissions?: ApplicationCommandPermissionData[];
 
 	// functions
 	abstract run?(msg: Message, args?: Array<unknown>): Promise<unknown>;
 	tempRun?(interaction: CommandInteraction): Promise<void>;
 	permissions?(msg: Message): Promise<boolean> | boolean;
-	tempPermissions?(interaction: CommandInteraction): Promise<boolean> | boolean;
 	argParser?(msg: Message, input: string): Promise<Array<unknown>> | Array<unknown>;
 
 }

@@ -1,8 +1,14 @@
-import { Collection, Client, ApplicationCommandData, CommandInteraction } from 'discord.js';
+import { Collection, Client, CommandInteraction, ApplicationCommandPermissionData } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS } from '@root/config';
+import { DB, GUILDS, ROLES } from '@root/config';
+
+const DEFAULT_PERMS: ApplicationCommandPermissionData[] = [{
+	id: ROLES.VERIFIED,
+	type: 'ROLE',
+	permission: true
+}];
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -20,11 +26,11 @@ async function loadCommands(bot: Client) {
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
 	const oldCommandSettings = sageData?.commandSettings || [];
+	bot.guilds.cache.get(GUILDS.MAIN).commands.fetch();
 	const { commands } = bot.guilds.cache.get(GUILDS.MAIN);
-	const appCommands = bot.application.commands;
-	const cmdList: ApplicationCommandData[] = [];
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
+
 	for (const file of commandFiles) {
 		const commandModule = await import(file);
 
@@ -40,15 +46,22 @@ async function loadCommands(bot: Client) {
 		// eslint-disable-next-line new-cap
 		const command: Command = new commandModule.default;
 
-
 		command.name = name;
 
 		command.category = dirs[dirs.length - 2];
-		cmdList.push({
+
+		let guildCmd = commands.cache.find(cmd => cmd.name === command.name);
+
+		const cmdData = {
 			name: command.name,
 			description: command.category,
-			options: command?.options
-		});
+			options: command?.options,
+			defaultPermission: false
+		};
+
+		if (!guildCmd) guildCmd = await commands.create(cmdData);
+		else await commands.edit(guildCmd.id, cmdData);
+		guildCmd.permissions.add({ permissions: command.tempPermissions || DEFAULT_PERMS });
 
 		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
 		let enable: boolean;
@@ -69,9 +82,6 @@ async function loadCommands(bot: Client) {
 		);
 	}
 
-	await appCommands.create(cmdList.find(cmd => cmd.name === 'diceroll'));
-	await commands.set(cmdList);
-
 	console.log(`${bot.commands.size} commands loaded.`);
 }
 
@@ -86,10 +96,6 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 			content: 'This command must be run in DMs, not public channels',
 			ephemeral: true
 		});
-	}
-
-	if (command.permissions && !await command.tempPermissions(interaction)) {
-		return interaction.reply({ content: 'Missing permissions', ephemeral: true });
 	}
 
 	if (bot.commands.get(interaction.commandName).tempRun !== undefined) return bot.commands.get(interaction.commandName)?.tempRun(interaction);
