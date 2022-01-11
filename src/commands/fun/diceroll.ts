@@ -1,15 +1,37 @@
-import { Message } from 'discord.js';
+import { CommandInteraction, Message } from 'discord.js';
 import { Command } from '@lib/types/Command';
+import { tempAdminPerms } from '@root/src/lib/permissions';
 
 const DEFAULT_RANGE = [1, 6];
 export default class extends Command {
+
+	tempPermissions(interaction: CommandInteraction): boolean | Promise<boolean> {
+		return tempAdminPerms(interaction);
+	}
 
 	description = `Get a random integer within a user-specified range (min and max inclusive). If no range is specified, defaults to a range from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;
 	usage = '[min #] | [max #]';
 	aliases = ['random', 'rand', 'dice', 'roll'];
 
-	run(msg: Message, [minimum, maximum]: Array<number>): Promise<Message> {
-		return msg.channel.send(`Your random number is ${Math.floor((Math.random() * (maximum - minimum + 1)) + minimum)}`);
+	options = [
+		{
+			name: 'min',
+			description: 'minimum of the roll range',
+			type: 10
+		},
+		{
+			name: 'max',
+			description: 'minimum of the roll range',
+			type: 10
+		}
+	]
+
+	run(_msg: Message): Promise<void> { return; }
+
+	tempRun(interaction: CommandInteraction): Promise<void> {
+		const min = interaction.options.getNumber('min') || DEFAULT_RANGE[0];
+		const max = interaction.options.getNumber('max') || DEFAULT_RANGE[1];
+		return interaction.reply(`Your random number is ${Math.floor((Math.random() * (max - min + 1)) + min)}`);
 	}
 
 	argParser(_msg: Message, input: string): Array<number> {

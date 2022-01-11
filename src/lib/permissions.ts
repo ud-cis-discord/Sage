@@ -1,5 +1,5 @@
 import { ROLES } from '@root/config';
-import { Message, Team } from 'discord.js';
+import { CommandInteraction, Message, Team } from 'discord.js';
 
 export function staffPerms(msg: Message): boolean {
 	return msg.member ? msg.member.roles.cache.has(ROLES.STAFF) : false;
@@ -7,6 +7,10 @@ export function staffPerms(msg: Message): boolean {
 
 export function adminPerms(msg: Message): boolean {
 	return msg.member ? msg.member.roles.cache.has(ROLES.ADMIN) : false;
+}
+
+export function tempAdminPerms(interaction: CommandInteraction): boolean {
+	return interaction.member ? interaction.member.roles.cache.has(ROLES.ADMIN) : false;
 }
 
 export async function botMasterPerms(msg: Message): Promise<boolean> {

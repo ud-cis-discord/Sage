@@ -1,9 +1,8 @@
-import { Collection, Client, Message } from 'discord.js';
-import { getCommand, readdirRecursive } from '@lib/utils';
+import { Collection, Client, ApplicationCommandData, CommandInteraction } from 'discord.js';
+import { readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { CommandError } from '@lib/types/errors';
-import { DB, MAINTAINERS, PREFIX } from '@root/config';
+import { DB, GUILDS } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -12,17 +11,8 @@ async function register(bot: Client): Promise<void> {
 		bot.emit('error', error);
 	}
 
-	bot.on('messageCreate', msg => {
-		if (msg.channel.partial) msg.channel.fetch();
-		runCommand(msg)
-			.catch(async error => bot.emit('error', error));
-	});
-
-	bot.on('messageUpdate', (oldMsg, msg) => {
-		if (oldMsg.content !== msg.content && '_update' in msg) {
-			runCommand(msg)
-				.catch(async error => bot.emit('error', error));
-		}
+	bot.on('interactionCreate', interaction => {
+		if (interaction.isCommand()) runCommand(interaction, bot);
 	});
 }
 
@@ -30,6 +20,9 @@ async function loadCommands(bot: Client) {
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
 	const oldCommandSettings = sageData?.commandSettings || [];
+	const { commands } = bot.guilds.cache.get(GUILDS.MAIN);
+	const appCommands = bot.application.commands;
+	const cmdList: ApplicationCommandData[] = [];
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
@@ -47,8 +40,15 @@ async function loadCommands(bot: Client) {
 		// eslint-disable-next-line new-cap
 		const command: Command = new commandModule.default;
 
+
 		command.name = name;
+
 		command.category = dirs[dirs.length - 2];
+		cmdList.push({
+			name: command.name,
+			description: command.category,
+			options: command?.options
+		});
 
 		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
 		let enable: boolean;
@@ -69,54 +69,76 @@ async function loadCommands(bot: Client) {
 		);
 	}
 
+	await appCommands.create(cmdList.find(cmd => cmd.name === 'diceroll'));
+	await commands.set(cmdList);
+
 	console.log(`${bot.commands.size} commands loaded.`);
 }
 
-async function runCommand(msg: Message) {
-	if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
-
-	let commandName: string;
-	if (msg.channel.type !== 'DM' || msg.content.toLowerCase().startsWith(PREFIX)) {
-		[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
-	} else {
-		[commandName] = msg.content.split(' ');
-	}
-	const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
-
-	const command = getCommand(msg.client, commandName);
-	if (!command || command.enabled === false) return;
-
-	if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
-	if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
-		await msg.author.send(`<@!${msg.author.id}>, the command you just tried to run is not available in public channels. Try again in DMs.`)
-			.catch(async () => { await msg.reply('That command is not available here, try again in DMs'); });
-		return msg.delete();
+async function runCommand(interaction: CommandInteraction, bot: Client): Promise<void> {
+	const command = bot.commands.get(interaction.commandName);
+	if (interaction.channel.type === 'DM' && !command.runInDM) {
+		return interaction.reply('This command cannot be run in DMs');
 	}
 
-	if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
-
-	let args: Array<unknown>;
-	if (command.argParser) {
-		try {
-			args = await command.argParser(msg, unparsedArgs);
-		} catch (error) {
-			msg.channel.send(error);
-			return;
-		}
-	} else {
-		args = [unparsedArgs];
+	if (interaction.channel.type === 'GUILD_TEXT' && !command.runInGuild) {
+		return interaction.reply({
+			content: 'This command must be run in DMs, not public channels',
+			ephemeral: true
+		});
 	}
 
-	try {
-		command.run(msg, args)
-			?.catch(async (error: Error) => {
-				msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-				msg.client.emit('error', new CommandError(error, msg));
-			});
-	} catch (error) {
-		msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-		msg.client.emit('error', new CommandError(error, msg));
+	if (command.permissions && !await command.tempPermissions(interaction)) {
+		return interaction.reply({ content: 'Missing permissions', ephemeral: true });
 	}
+
+	if (bot.commands.get(interaction.commandName).tempRun !== undefined) return bot.commands.get(interaction.commandName)?.tempRun(interaction);
+	else return interaction.reply('We haven\'t switched that one over yet');
+	// interaction.reply(interaction.commandName);
+	// if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
+
+	// let commandName: string;
+	// if (msg.channel.type !== 'DM' || msg.content.toLowerCase().startsWith(PREFIX)) {
+	// 	[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
+	// } else {
+	// 	[commandName] = msg.content.split(' ');
+	// }
+	// const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
+
+	// const command = getCommand(msg.client, commandName);
+	// if (!command || command.enabled === false) return;
+
+	// if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
+	// if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
+	// 	await msg.author.send(`<@!${msg.author.id}>, the command you just tried to run is not available in public channels. Try again in DMs.`)
+	// 		.catch(async () => { await msg.reply('That command is not available here, try again in DMs'); });
+	// 	return msg.delete();
+	// }
+
+	// if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
+
+	// let args: Array<unknown>;
+	// if (command.argParser) {
+	// 	try {
+	// 		args = await command.argParser(msg, unparsedArgs);
+	// 	} catch (error) {
+	// 		msg.channel.send(error);
+	// 		return;
+	// 	}
+	// } else {
+	// 	args = [unparsedArgs];
+	// }
+
+	// try {
+	// 	command.run(msg, args)
+	// 		?.catch(async (error: Error) => {
+	// 			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
+	// 			msg.client.emit('error', new CommandError(error, msg));
+	// 		});
+	// } catch (error) {
+	// 	msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
+	// 	msg.client.emit('error', new CommandError(error, msg));
+	// }
 }
 
 export default register;
