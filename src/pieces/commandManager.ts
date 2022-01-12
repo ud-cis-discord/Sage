@@ -28,6 +28,7 @@ async function loadCommands(bot: Client) {
 	const oldCommandSettings = sageData?.commandSettings || [];
 	await bot.guilds.cache.get(GUILDS.MAIN).commands.fetch();
 	const { commands } = bot.guilds.cache.get(GUILDS.MAIN);
+	let numNew = 0, numEdited = 0;
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
 
@@ -60,17 +61,18 @@ async function loadCommands(bot: Client) {
 
 		const cmdData = {
 			name: command.name,
-			description: command.description && command.description.length > 0
-				&& command?.description.length < 100 ? command.description : command.category,
+			description: command.description,
 			options: command?.options || [],
 			defaultPermission: false
 		};
 
 		if (!guildCmd) {
 			awaitedCmds.push(commands.create(cmdData));
+			numNew++;
 			console.log(`${command.name} does not exist, creating...`);
 		} else if (!isCmdEqual(cmdData, guildCmd)) {
 			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
+			numEdited++;
 			console.log(`a different version of ${command.name} already exists, editing...`);
 		}
 
@@ -94,7 +96,6 @@ async function loadCommands(bot: Client) {
 	}
 
 	const resolvedCmds = await Promise.all(awaitedCmds);
-	console.log('done awaiting command editing');
 
 	const awaitedPerms: Promise<ApplicationCommandPermissions[]>[] = [];
 	resolvedCmds.forEach(cmd => {
@@ -104,7 +105,7 @@ async function loadCommands(bot: Client) {
 	});
 	await Promise.all(awaitedPerms);
 
-	console.log(`${bot.commands.size} commands loaded.`);
+	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited)`);
 }
 
 async function runCommand(interaction: CommandInteraction, bot: Client): Promise<void> {

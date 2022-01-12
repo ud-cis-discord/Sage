@@ -1,4 +1,4 @@
-import { CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, Message } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const DEFAULT_RANGE = [1, 6];
@@ -15,16 +15,18 @@ export default class extends Command {
 	usage = '[min #] | [max #]';
 	aliases = ['random', 'rand', 'dice', 'roll'];
 
-	options = [
+	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'minimum',
 			description: 'minimum of the roll range',
-			type: 10
+			type: 'NUMBER',
+			required: false
 		},
 		{
 			name: 'maximum',
 			description: 'minimum of the roll range',
-			type: 10
+			type: 'NUMBER',
+			required: false
 		}
 	]
 

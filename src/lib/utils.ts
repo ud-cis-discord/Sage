@@ -1,4 +1,4 @@
-import { ApplicationCommand, ApplicationCommandOptionData, Client, Message, MessageAttachment } from 'discord.js';
+import { ApplicationCommandOptionData, Client, Message, MessageAttachment } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
@@ -10,19 +10,21 @@ export function getCommand(bot: Client, cmd: string): Command {
 	return bot.commands.get(cmd) || bot.commands.find(command => command.aliases && command.aliases.includes(cmd));
 }
 
-export function isCmdEqual(abbrCmd: CompCommand, appCmd: ApplicationCommand): boolean {
-	return abbrCmd.name === appCmd.name
-		&& abbrCmd.description === appCmd.description
-		&& isOptionsListEqual(abbrCmd.options, appCmd.options);
+export function isCmdEqual(cmd1: CompCommand, cmd2: CompCommand): boolean {
+	return cmd1.name === cmd2.name
+		&& cmd1.description === cmd2.description
+		&& isOptionsListEqual(cmd1.options, cmd2.options);
 }
 
 export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2: ApplicationCommandOptionData[]): boolean {
-	return list1.every(list1Option => list2.find(list2Option =>
+	const valid = list1.every(list1Option => list2.find(list2Option =>
 		list2Option.name === list1Option.name
 			&& list2Option.description === list1Option.description
 			&& list2Option.required === list1Option.required
 			&& list2Option.type === list1Option.type
 	));
+	if (!valid) console.log('options list not quite right');
+	return valid;
 }
 
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
