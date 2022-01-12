@@ -1,14 +1,9 @@
-import { ApplicationCommandOptionData, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
 import { Command } from '@lib/types/Command';
+import { ROLES } from '@root/config';
 
 const DEFAULT_RANGE = [1, 6];
 export default class extends Command {
-
-	// tempPermissions: ApplicationCommandPermissionData[] = [{
-	// 	id: ROLES.STAFF,
-	// 	type: 'ROLE',
-	// 	permission: true
-	// }];
 
 	description = `Get a random integer between \`minimum\` and \`maximum\`.`;
 	extendedHelp = `User specified minimum and maximum are inclusive. If no range is specified, defaults to a range from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;

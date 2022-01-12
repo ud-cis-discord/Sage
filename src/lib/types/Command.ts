@@ -1,3 +1,4 @@
+import { ROLES } from '@root/config';
 import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
 
 
@@ -14,7 +15,11 @@ export abstract class Command {
 	runInDM?: boolean = true;
 	runInGuild?: boolean = true;
 	options?: ApplicationCommandOptionData[];
-	tempPermissions?: ApplicationCommandPermissionData[];
+	tempPermissions: ApplicationCommandPermissionData[] = [{
+		id: ROLES.VERIFIED,
+		type: 'ROLE',
+		permission: true
+	}];
 
 	// functions
 	abstract run?(msg: Message, args?: Array<unknown>): Promise<unknown>;

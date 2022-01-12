@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Client, Message, MessageAttachment } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Client, Message, MessageAttachment } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
@@ -25,6 +25,12 @@ export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2:
 	));
 	if (!valid) console.log('options list not quite right');
 	return valid;
+}
+
+export function isPermissionEqual(perm1: ApplicationCommandPermissionData, perm2: ApplicationCommandPermissionData): boolean {
+	return perm1.id === perm2.id
+		&& perm1.permission === perm2.permission
+		&& perm1.type === perm2.type;
 }
 
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {

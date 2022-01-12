@@ -1,14 +1,8 @@
-import { Collection, Client, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommand, ApplicationCommandPermissions } from 'discord.js';
-import { isCmdEqual, readdirRecursive } from '@lib/utils';
+import { Collection, Client, CommandInteraction, ApplicationCommand } from 'discord.js';
+import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS, ROLES } from '@root/config';
-
-const DEFAULT_PERMS: ApplicationCommandPermissionData[] = [{
-	id: ROLES.VERIFIED,
-	type: 'ROLE',
-	permission: true
-}];
+import { DB, GUILDS } from '@root/config';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -95,17 +89,28 @@ async function loadCommands(bot: Client) {
 		);
 	}
 
-	const resolvedCmds = await Promise.all(awaitedCmds);
+	await Promise.all(awaitedCmds);
 
-	const awaitedPerms: Promise<ApplicationCommandPermissions[]>[] = [];
-	resolvedCmds.forEach(cmd => {
-		awaitedPerms.push(cmd.permissions.add({
-			permissions: bot.commands.find(botCmd => botCmd.name === cmd.name).tempPermissions || DEFAULT_PERMS
-		}));
-	});
-	await Promise.all(awaitedPerms);
+	let permsUpdated = 0;
+	console.log('Checking for updated permissions...');
+	await Promise.all(commands.cache.map(async command => {
+		const curPerms = await command.permissions.fetch({ command: command.id });
 
-	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited)`);
+		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
+		if (botCmd
+			&& (botCmd.tempPermissions.length !== curPerms.length
+			|| !botCmd.tempPermissions.every(perm =>
+				curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
+			console.log(`Updating permissions for ${botCmd.name}`);
+			permsUpdated++;
+			return commands.permissions.set({
+				command: command.id,
+				permissions: botCmd.tempPermissions
+			});
+		}
+	}));
+
+	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited) and ${permsUpdated} permission${permsUpdated === 1 ? '' : 's'} updated.`);
 }
 
 async function runCommand(interaction: CommandInteraction, bot: Client): Promise<void> {
