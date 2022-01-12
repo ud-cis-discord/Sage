@@ -1,4 +1,4 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand } from 'discord.js';
+import { Collection, Client, CommandInteraction, ApplicationCommand, ApplicationCommandPermissionData } from 'discord.js';
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -94,7 +94,12 @@ async function loadCommands(bot: Client) {
 	let permsUpdated = 0;
 	console.log('Checking for updated permissions...');
 	await Promise.all(commands.cache.map(async command => {
-		const curPerms = await command.permissions.fetch({ command: command.id });
+		let curPerms: ApplicationCommandPermissionData[];
+		try {
+			curPerms = await command.permissions.fetch({ command: command.id });
+		} catch (err) {
+			curPerms = [];
+		}
 
 		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
 		if (botCmd
