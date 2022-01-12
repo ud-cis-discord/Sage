@@ -18,7 +18,7 @@ async function register(bot: Client): Promise<void> {
 		countMessages(msg).catch(async error => bot.emit('error', error));
 	});
 	bot.on('messageDelete', async msg => {
-		if (msg.content && msg.content.startsWith(';s')) return;
+		if (msg.content && msg.content.startsWith('s;')) return;
 		handleExpDetract(msg);
 	});
 }
