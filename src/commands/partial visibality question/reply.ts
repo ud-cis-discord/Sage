@@ -3,11 +3,12 @@ import { BOT, DB, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { MessageEmbed, Message, TextChannel, MessageAttachment } from 'discord.js';
 
-export const description = `Reply to a question you previously asked with ${BOT.NAME}.`;
-export const usage = '<questionID> <response>';
-export const runInGuild = false;
 
 export default class extends Command {
+
+	description = `Reply to a question you previously asked with ${BOT.NAME}.`;
+	usage = '<questionID> <response>';
+	runInGuild = false;
 
 	async run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
 		if (question.type === 'private') {

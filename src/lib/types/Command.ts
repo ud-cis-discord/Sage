@@ -8,11 +8,11 @@ export abstract class Command {
 	category: string;
 	enabled: boolean;
 	aliases?: Array<string>;
-	description?: string;
+	description: string;
 	usage?: string;
 	extendedHelp?: string;
-	runInDM?: boolean;
-	runInGuild?: boolean;
+	runInDM?: boolean = true;
+	runInGuild?: boolean = true;
 	options?: ApplicationCommandOptionData[];
 	tempPermissions?: ApplicationCommandPermissionData[];
 
@@ -22,4 +22,10 @@ export abstract class Command {
 	permissions?(msg: Message): Promise<boolean> | boolean;
 	argParser?(msg: Message, input: string): Promise<Array<unknown>> | Array<unknown>;
 
+}
+
+export interface CompCommand {
+	name: string,
+	description: string,
+	options: ApplicationCommandOptionData[]
 }

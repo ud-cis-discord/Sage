@@ -6,8 +6,7 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `Use this command to assign a role to yourself! 
-	Use the argument 'list' to see a list of all self-assignable roles.`;
+	description = `Assign a role to yourself! Use \`/assign list\` to get the assignable roles`;
 	usage = '[Role|list]';
 	aliases = ['role'];
 	runInDM = false;

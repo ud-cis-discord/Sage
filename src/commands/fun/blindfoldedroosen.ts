@@ -3,7 +3,8 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `You've been challenged to a sword fight. However, your opponent, Professor Roosen, has decided to wear a blindfold. Feeling lucky?`;
+	description = 'Challenge a blindfolded Prof. Roosen to a sword fight!';
+	extendedHelp = 'You\'ve been challenged to a sword fight. However, your opponent, Professor Roosen, has decided to wear a blindfold. Feeling lucky?';
 	aliases = ['br', 'bfr'];
 
 	run(msg: Message): Promise<Message> {

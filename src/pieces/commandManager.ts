@@ -1,5 +1,5 @@
-import { Collection, Client, CommandInteraction, ApplicationCommandPermissionData } from 'discord.js';
-import { readdirRecursive } from '@lib/utils';
+import { Collection, Client, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommand, ApplicationCommandPermissions } from 'discord.js';
+import { isCmdEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, ROLES } from '@root/config';
@@ -26,10 +26,12 @@ async function loadCommands(bot: Client) {
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
 	const oldCommandSettings = sageData?.commandSettings || [];
-	bot.guilds.cache.get(GUILDS.MAIN).commands.fetch();
+	await bot.guilds.cache.get(GUILDS.MAIN).commands.fetch();
 	const { commands } = bot.guilds.cache.get(GUILDS.MAIN);
 
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
+
+	const awaitedCmds: Promise<ApplicationCommand>[] = [];
 
 	for (const file of commandFiles) {
 		const commandModule = await import(file);
@@ -48,25 +50,29 @@ async function loadCommands(bot: Client) {
 
 		command.name = name;
 
+		if (!command.description || command.description.length >= 100 || command.description.length <= 0) {
+			throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
+		}
+
 		command.category = dirs[dirs.length - 2];
 
-		let guildCmd = commands.cache.find(cmd => cmd.name === command.name);
+		const guildCmd = commands.cache.find(cmd => cmd.name === command.name);
 
 		const cmdData = {
 			name: command.name,
-			description: command.category,
-			options: command?.options,
+			description: command.description && command.description.length > 0
+				&& command?.description.length < 100 ? command.description : command.category,
+			options: command?.options || [],
 			defaultPermission: false
 		};
 
 		if (!guildCmd) {
-			guildCmd = await commands.create(cmdData);
+			awaitedCmds.push(commands.create(cmdData));
 			console.log(`${command.name} does not exist, creating...`);
-		} else {
-			await commands.edit(guildCmd.id, cmdData);
-			console.log(`${command.name} already exists, editing...`);
+		} else if (!isCmdEqual(cmdData, guildCmd)) {
+			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
+			console.log(`a different version of ${command.name} already exists, editing...`);
 		}
-		guildCmd.permissions.add({ permissions: command.tempPermissions || DEFAULT_PERMS });
 
 		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
 		let enable: boolean;
@@ -87,16 +93,27 @@ async function loadCommands(bot: Client) {
 		);
 	}
 
+	const resolvedCmds = await Promise.all(awaitedCmds);
+	console.log('done awaiting command editing');
+
+	const awaitedPerms: Promise<ApplicationCommandPermissions[]>[] = [];
+	resolvedCmds.forEach(cmd => {
+		awaitedPerms.push(cmd.permissions.add({
+			permissions: bot.commands.find(botCmd => botCmd.name === cmd.name).tempPermissions || DEFAULT_PERMS
+		}));
+	});
+	await Promise.all(awaitedPerms);
+
 	console.log(`${bot.commands.size} commands loaded.`);
 }
 
 async function runCommand(interaction: CommandInteraction, bot: Client): Promise<void> {
 	const command = bot.commands.get(interaction.commandName);
-	if (interaction.channel.type === 'DM' && !command.runInDM) {
+	if (interaction.channel.type === 'DM' && command.runInDM === false) {
 		return interaction.reply('This command cannot be run in DMs');
 	}
 
-	if (interaction.channel.type === 'GUILD_TEXT' && !command.runInGuild) {
+	if (interaction.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
 		return interaction.reply({
 			content: 'This command must be run in DMs, not public channels',
 			ephemeral: true

@@ -5,9 +5,7 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `Displays the users current message count. 
-	If the word 'here' is used as an argument, the message count will be 
-	sent in the same channel that the command was used in (rather than the user's dms).`;
+	description = `Displays the users current message count. Use \`/check here\` to send in the current channel`;
 	usage = '[here]';
 	aliases = ['count'];
 

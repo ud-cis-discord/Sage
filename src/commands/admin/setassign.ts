@@ -7,8 +7,7 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `Adds a role to the assignable collection of the database 
-	if that role is not already in it. If the role is already in the collection, it removes it.`;
+	description = `Adds a role to the assignable collection of the database, or removes it if it's there already`;
 	usage = '<role>';
 	aliases = ['addassign'];
 	runInDM = false;

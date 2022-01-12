@@ -8,6 +8,7 @@ import { Message } from 'discord.js';
 export default class extends Command {
 
 	usage = '<title>|[options]';
+	description = `Creates an issue in ${BOT.NAME}' repository.`;
 	extendedHelp = `You must pass in an issue title. Flags can be any of:
 	--labels=[comma, separated, list]\n--milestone=[milestone number]\n--project=[project (defaults to SageV2)]]`;
 

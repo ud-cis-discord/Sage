@@ -1,5 +1,5 @@
-import { Client, Message, MessageAttachment } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { ApplicationCommand, ApplicationCommandOptionData, Client, Message, MessageAttachment } from 'discord.js';
+import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
 import moment from 'moment';
@@ -8,6 +8,21 @@ import { Reminder } from '@lib/types/Reminder';
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
 	return bot.commands.get(cmd) || bot.commands.find(command => command.aliases && command.aliases.includes(cmd));
+}
+
+export function isCmdEqual(abbrCmd: CompCommand, appCmd: ApplicationCommand): boolean {
+	return abbrCmd.name === appCmd.name
+		&& abbrCmd.description === appCmd.description
+		&& isOptionsListEqual(abbrCmd.options, appCmd.options);
+}
+
+export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2: ApplicationCommandOptionData[]): boolean {
+	return list1.every(list1Option => list2.find(list2Option =>
+		list2Option.name === list1Option.name
+			&& list2Option.description === list1Option.description
+			&& list2Option.required === list1Option.required
+			&& list2Option.type === list1Option.type
+	));
 }
 
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
