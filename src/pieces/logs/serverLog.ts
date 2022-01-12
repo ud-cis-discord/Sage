@@ -285,7 +285,7 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 	if (!('name' in msg.channel) || msg.guild.id !== GUILDS.MAIN) return;
 
 	let embed;
-	if (!msg.author) { // this message is a partial, so author/content information is not available.
+	if (msg.partial) { // this message is a partial, so author/content information is not available.
 		embed = new MessageEmbed()
 			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
 				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
