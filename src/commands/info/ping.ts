@@ -13,9 +13,10 @@ export default class extends Command {
 	}
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const response = await interaction.channel.send('Ping?');
-		response.delete();
-		return interaction.reply(`Pong! Round trip took ${prettyMilliseconds(response.createdTimestamp - interaction.createdTimestamp)}, REST ping ${interaction.client.ws.ping}ms.`);
+		const msgTime = new Date().getTime();
+		await interaction.reply('Ping?');
+		interaction.editReply(`Pong! Round trip took ${prettyMilliseconds(msgTime - interaction.createdTimestamp)}, REST ping ${interaction.client.ws.ping}ms.`);
+		return;
 	}
 
 }
