@@ -31,14 +31,14 @@ export default class extends Command {
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		const bot = interaction.client;
-		const name = interaction.options.getString('content');
-		const type = interaction.options.getString('status');
-		bot.user.setActivity(name, { type });
+		const content = interaction.options.getString('content');
+		const type = interaction.options.getString('status').toUpperCase() as ActivityType;
+		bot.user.setActivity(content, { type });
 		bot.mongo.collection(DB.CLIENT_DATA).updateOne(
 			{ _id: bot.user.id },
-			{ $set: { status: { type, name } } },
+			{ $set: { status: { type, content } } },
 			{ upsert: true });
-		return interaction.reply(`Set ${BOT.NAME}'s activity to *${type} ${name}*`);
+		return interaction.reply(`Set ${BOT.NAME}'s activity to *${type} ${content}*`);
 	}
 
 	async run(msg: Message, [type, name]: [ActivityType, string]): Promise<Message> {
