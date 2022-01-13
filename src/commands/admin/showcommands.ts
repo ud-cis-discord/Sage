@@ -16,7 +16,7 @@ export default class extends Command {
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const restricted = interaction.options.getString('restricted');
+		const restricted = interaction.options.getBoolean('restricted');
 		if (restricted) {
 			/*
 			let commands = '[ Restricted ]\n.Unrestricted\n';
