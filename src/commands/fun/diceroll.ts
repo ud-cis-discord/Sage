@@ -1,6 +1,5 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { ROLES } from '@root/config';
 
 const DEFAULT_RANGE = [1, 6];
 const DEFAULT_ROLLS = 1;
