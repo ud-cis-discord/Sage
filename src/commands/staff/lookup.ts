@@ -1,16 +1,71 @@
 import { DB, EMAIL } from '@root/config';
 import { userParser } from '@lib/arguments';
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { Message, GuildMember, MessageEmbed } from 'discord.js';
+import { Message, GuildMember, MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
+	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+
+
 	description = 'Looks up information about a given user';
 	usage = '<user>';
 	runInDM = false;
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'user',
+			type: 'USER',
+			description: 'The member to look up',
+			required: true
+		}
+	];
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const user = interaction.options.getUser('user');
+		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
+
+		if (!entry) {
+			interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
+			return;
+		}
+
+		const embed = new MessageEmbed()
+			.setColor('GREEN')
+			.setAuthor(user.username, user.avatarURL())
+			.setFooter(`ID: ${user.id}`)
+			.addFields([
+				{
+					name: 'Email:',
+					value: entry.email,
+					inline: true
+				},
+				{
+					name: 'Messages: ',
+					value: entry.count.toString(),
+					inline: true
+				}
+			]);
+
+		if (!entry.pii) {
+			const sender: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
+			interaction.reply({ content: `That user has not opted in to have their information shared over Discord. 
+	An email has been sent to you containing the requested data.`, ephemeral: true });
+			this.sendEmail(sender.email, user.username, entry);
+			return;
+		}
+
+		interaction.user.send({ embeds: [embed] }).then(() => interaction.reply({
+			content: 'I\'ve sent the requested info to your DMs',
+			ephemeral: true
+		})).catch(() => interaction.reply({
+			content: 'I couldn\'t send you a DM. Please enable DMs and try again',
+			ephemeral: true
+		}));
+		return;
+	}
 
 	permissions(msg: Message): boolean {
 		return staffPerms(msg);
