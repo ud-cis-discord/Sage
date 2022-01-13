@@ -1,8 +1,8 @@
-import { adminPerms, ADMIN_PERMS } from '@lib/permissions';
+import { ADMIN_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CategoryChannel, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CategoryChannel, CommandInteraction, Message } from 'discord.js';
 
 export default class extends Command {
 
@@ -16,13 +16,63 @@ export default class extends Command {
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
-		description: '',
-		type: 'STRING',
+		description: 'The course ID of the course to be removed (ex: 108).',
+		type: 'CHANNEL',
 		required: true
 	}]
 
-	permissions(msg: Message): boolean {
-		return adminPerms(msg);
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const course = `CISC ${interaction.options.getString('course')}`;
+		const category = await interaction.client.channels.fetch(course.channels.category) as CategoryChannel;
+
+		//	 grabbing course data
+		const channelCount = category.children.size;
+		const userCount = await interaction.client.mongo.collection(DB.USERS).countDocuments({ courses: course.name });
+		const reason = `Removing course \`${course.name}\` as requested by ` +
+		`${interaction.user.tag}\` \`(${interaction.user.id})\``;
+
+		//	a warning gets issued for this command
+		await interaction.channel.send(`Are you sure you want to delete ${course.name}. ` +
+		`This action will archive ${channelCount} channels and unenroll ${userCount} users. ` +
+		'Send `yes` in the next 30 seconds to confirm.');
+
+		return interaction.channel.awaitMessages({
+			filter: (m: Message) => m.author.id === interaction.user.id && m.content === 'yes',
+			max: 1,
+			time: 30e3,
+			errors: ['time']
+		}).then(async () => {
+			await interaction.reply('<a:loading:755121200929439745> working...');
+
+			//	archving the course channels
+			for (const channel of [...category.children.values()]) {
+				await channel.setParent(CHANNELS.ARCHIVE, { reason });
+				await channel.lockPermissions();
+				await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
+			}
+			await category.delete();
+
+			//	removing course roles
+			await interaction.guild.members.fetch();
+			const staffRole = await interaction.guild.roles.fetch(course.roles.staff);
+			const studentRole = await interaction.guild.roles.fetch(course.roles.student);
+
+			for (const [, member] of staffRole.members) {
+				if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
+			}
+			for (const [, member] of studentRole.members) {
+				if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
+			}
+
+			staffRole.delete(reason);
+			studentRole.delete(reason);
+
+			// update and remove from database
+			await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course.name } });
+			await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course.name });
+
+			await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from ${course.name}`);
+		});
 	}
 
 	async run(msg: Message, [course]: [Course]): Promise<Message> {
