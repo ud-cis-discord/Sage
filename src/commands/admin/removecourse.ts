@@ -22,6 +22,7 @@ export default class extends Command {
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
+		/*
 		const course = `CISC ${interaction.options.getString('course')}`;
 		const category = await interaction.client.channels.fetch(course.channels.category) as CategoryChannel;
 
@@ -73,6 +74,7 @@ export default class extends Command {
 
 			await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from ${course.name}`);
 		});
+		*/
 	}
 
 	async run(msg: Message, [course]: [Course]): Promise<Message> {
