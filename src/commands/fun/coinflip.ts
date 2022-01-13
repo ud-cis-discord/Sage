@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction, Message } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { setTimeout } from 'timers';
 
