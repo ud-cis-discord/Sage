@@ -4,12 +4,12 @@ import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
 const args = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
-
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to the given status and content`;
 	usage = '<status>|<content>';
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	//	botmaster perms
 
 	options: ApplicationCommandOptionData[] = [
 		{
