@@ -7,19 +7,19 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Creates a courses category and adds all necessary channels/roles.';
+	extendedHelp = 'This command will create all channels in a courses category,' +
+	'add all course roles, and add the course to the database. ';
 	usage = '<course ID>';
 	runInDM = false;
 	aliases = ['addc', 'createcourse', 'createc'];
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	options: ApplicationCommandOptionData[] = [
-		{
-			name: 'course',
-			description: 'The course ID of the course to be added (ex: 108).',
-			type: 'STRING',
-			required: true
-		}
-	]
+	options: ApplicationCommandOptionData[] = [{
+		name: 'course',
+		description: 'The course ID of the course to be added (ex: 108).',
+		type: 'STRING',
+		required: true
+	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		interaction.reply('<a:loading:755121200929439745> working...');
