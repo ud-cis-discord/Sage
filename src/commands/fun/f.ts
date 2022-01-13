@@ -16,8 +16,8 @@ export default class extends Command {
 	run(_msg: Message): Promise<void> { return; }
 
 	tempRun(interaction: CommandInteraction): Promise<void> {
-		const replyContent = (interaction.options.get('target'))
-			? `${interaction.user.username} paid their respects to ${interaction.options.get('target').user.username}`
+		const replyContent = interaction.options.get('target')
+			? `${interaction.user.username} paid their respects to ${interaction.options.getUser('target').username}`
 			: `${interaction.user.username} paid their respects`;
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/f.png`,
