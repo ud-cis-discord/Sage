@@ -38,7 +38,8 @@ export default class extends Command {
 			{ _id: bot.user.id },
 			{ $set: { status: { type, content } } },
 			{ upsert: true });
-		return interaction.reply(`Set ${BOT.NAME}'s activity to *${type} ${content}*`);
+		const replyType = type[0] + type.slice(1).toLowerCase();
+		return interaction.reply(`Set ${BOT.NAME}'s activity to *${replyType} ${content}*`);
 	}
 
 	async run(msg: Message, [type, name]: [ActivityType, string]): Promise<Message> {
