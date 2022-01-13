@@ -1,15 +1,25 @@
-import { adminPerms } from '@lib/permissions';
+import { adminPerms, ADMIN_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { CategoryChannel, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CategoryChannel, Message } from 'discord.js';
 
 export default class extends Command {
 
 	description = 'Remove a course';
 	extendedHelp = 'This command will archive all channels in a courses category, remove all course roles,' +
 	'and purge the course from the database. This is the only command with an `are you sure?` warning.';
+	usage = '<course ID>';
+	runInDM = false;
 	aliases = ['deletecourse', 'removec', 'deletec'];
+	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+
+	options: ApplicationCommandOptionData[] = [{
+		name: 'course',
+		description: '',
+		type: 'STRING',
+		required: true
+	}]
 
 	permissions(msg: Message): boolean {
 		return adminPerms(msg);
