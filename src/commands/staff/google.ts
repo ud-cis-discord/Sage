@@ -1,15 +1,11 @@
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { BOT, ROLES } from '@root/config';
+import { BOT } from '@root/config';
 import { MessageEmbed, Message, ApplicationCommandPermissionData, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
-	tempPermissions: ApplicationCommandPermissionData[] = [{
-		id: ROLES.STAFF,
-		permission: true,
-		type: 'ROLE'
-	}];
+	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
 	aliases = ['lmgt', 'lmg'];
 	description = `Have ${BOT.NAME} google something for someone`;

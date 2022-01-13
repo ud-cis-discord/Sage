@@ -1,5 +1,5 @@
 import { ROLES } from '@root/config';
-import { Message, Team } from 'discord.js';
+import { ApplicationCommandPermissionData, Message, Team } from 'discord.js';
 
 export function staffPerms(msg: Message): boolean {
 	return msg.member ? msg.member.roles.cache.has(ROLES.STAFF) : false;
@@ -14,3 +14,15 @@ export async function botMasterPerms(msg: Message): Promise<boolean> {
 	const team = msg.client.application.owner as Team;
 	return team.members.has(msg.author.id);
 }
+
+export const STAFF_PERMS: ApplicationCommandPermissionData = {
+	id: ROLES.STAFF,
+	permission: true,
+	type: 'ROLE'
+};
+
+export const ADMIN_PERMS: ApplicationCommandPermissionData = {
+	id: ROLES.ADMIN,
+	permission: true,
+	type: 'ROLE'
+};
