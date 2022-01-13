@@ -7,6 +7,7 @@ export default class extends Command {
 	description = 'Get info about the most recent commit that is currently running.';
 	extendedHelp = 'Merge commits and version bumps are ignored.';
 
+	// required for export default
 	async run(): Promise<void> {
 		return;
 	}
