@@ -52,11 +52,17 @@ export default class extends Command {
 				.setTitle('Argument error')
 				.setDescription('Your maximum must be greater than your minimum.');
 			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
-		} else if (numRolls < 1 || numRolls > 10) {
+		} else if (!Number.isInteger(min) || !Number.isInteger(max)) {
 			responseEmbed = new MessageEmbed()
 				.setColor('#ff0000')
 				.setTitle('Argument error')
-				.setDescription('You can only roll between 1 and 10 dice.');
+				.setDescription('The values you entered were not whole numbers. Remember that this command works with integers only.');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		} else if (numRolls < 1 || numRolls > 10 || !Number.isInteger(numRolls)) {
+			responseEmbed = new MessageEmbed()
+				.setColor('#ff0000')
+				.setTitle('Argument error')
+				.setDescription('You can only roll between 1 and 10 whole dice.');
 			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
 		}
 
