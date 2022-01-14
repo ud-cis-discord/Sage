@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
@@ -6,42 +6,51 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Find a comic from xkcd.';
-	usage = '[latest | comicNumber]';
-	extendedHelp = 'If given no parameters, sends a random comic. You can also specify a comic by its number or get the latest comic with `latest`.';
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'comic',
+			description: `The comic to send. Can be 'latest', 'random', or a number.`,
+			type: 'STRING',
+			required: true
+		}
+	]
 
-	async run(msg: Message, [comicId]: [number | 'latest' | 'random']): Promise<Message> {
+	run(_msg: Message): Promise<void> { return; }
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
 		const latest: XkcdComic = await await fetch('http://xkcd.com/info.0.json').then(r => r.json());
+		const comicChoice = interaction.options.getString('comic');
 
 		let comic: XkcdComic;
 
-		if (comicId === 'latest') {
-			comic = latest;
-		} else if (comicId === 'random') {
+		if (comicChoice.toLowerCase() === 'random') {
 			comic = await fetch(`http://xkcd.com/${Math.trunc((Math.random() * (latest.num - 1)) + 1)}/info.0.json`).then(r => r.json());
-		} else {
-			if (comicId < 1 || comicId > latest.num) {
-				return msg.channel.send(`Comic ${comicId} does not exists.`);
+		} else if (comicChoice.toLowerCase() === 'latest') {
+			comic = latest;
+		} else if (!isNaN(Number(comicChoice))) {
+			let errorEmbed: MessageEmbed;
+			if (Number(comicChoice) < 1 || Number(comicChoice) > latest.num || !Number.isInteger(Number(comicChoice))) {
+				errorEmbed = new MessageEmbed()
+					.setTitle('Error')
+					.setDescription(`Comic ${comicChoice} does not exist.`)
+					.setColor('RED');
+				return interaction.reply({
+					ephemeral: true,
+					embeds: [errorEmbed]
+				});
 			}
-			comic = await fetch(`http://xkcd.com/${comicId}/info.0.json`).then(r => r.json());
+			comic = await fetch(`http://xkcd.com/${comicChoice}/info.0.json`).then(r => r.json());
+		} else {
+			const errorEmbed = new MessageEmbed()
+				.setTitle('Error')
+				.setDescription(`Unknown parameter supplied. Please enter 'latest', 'random', or a number.`)
+				.setColor('RED');
+			return interaction.reply({
+				ephemeral: true,
+				embeds: [errorEmbed]
+			});
 		}
-
-		return msg.channel.send({ embeds: [this.createComicEmbed(comic)] });
-	}
-
-	argParser(_msg: Message, input: string): Array<string | number> {
-		if (!input) {
-			return ['random'];
-		}
-
-		if (input.toLowerCase() === 'latest') {
-			return [input.toLowerCase()];
-		}
-
-		if (isNaN(parseInt(input))) {
-			throw `Usage: ${this.usage}`;
-		}
-
-		return [parseInt(input)];
+		return interaction.reply({ embeds: [this.createComicEmbed(comic)] });
 	}
 
 	createComicEmbed(comic: XkcdComic): MessageEmbed {

@@ -1,7 +1,6 @@
 import { BOT } from '@root/config';
-import { ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { Decimal128 } from 'mongodb';
 
 const DECISION_TIMEOUT = 10;
 const CHOICES = ['rock', 'paper', 'scissors'];
