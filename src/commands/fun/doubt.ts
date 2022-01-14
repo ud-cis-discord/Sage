@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildMember, Message, MessageReaction } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, GuildMember, Message } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
