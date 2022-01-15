@@ -111,15 +111,4 @@ export default class extends Command {
 		}
 	}
 
-
-	// argParser(msg: Message, input: string): [string] {
-	// 	input = input.trim().toLowerCase();
-
-	// 	if (!input || !this.choices.includes(input)) {
-	// 		throw `Usage: ${this.usage}`;
-	// 	}
-
-	// 	return [input];
-	// }
-
 }

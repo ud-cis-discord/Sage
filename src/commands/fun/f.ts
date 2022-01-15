@@ -3,7 +3,7 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = 'Press F to pay respects';
+	description = 'Press F to pay respects.';
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'target',
