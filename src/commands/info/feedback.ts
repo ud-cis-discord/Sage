@@ -28,7 +28,7 @@ export default class extends Command {
 
 		feedbackChannel.send({ embeds: [embed] });
 
-		return interaction.reply({content: `Thanks! I've sent your feedback to ${MAINTAINERS}.`, ephemeral: true});
+		return interaction.reply({ content: `Thanks! I've sent your feedback to ${MAINTAINERS}.`, ephemeral: true });
 	}
 
 	async run(): Promise<void> {
