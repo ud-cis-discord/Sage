@@ -22,18 +22,17 @@ export default class extends Command {
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		/*
-		const course = `CISC ${interaction.options.getString('course')}`;
-		const category = await interaction.client.channels.fetch(course.channels.category) as CategoryChannel;
+		const course = interaction.options.getChannel('course') as CategoryChannel;
+		//	const category = await interaction.client.channels.fetch(course.channels.category) as CategoryChannel;
 
 		//	 grabbing course data
-		const channelCount = category.children.size;
-		const userCount = await interaction.client.mongo.collection(DB.USERS).countDocuments({ courses: course.name });
-		const reason = `Removing course \`${course.name}\` as requested by ` +
+		const channelCount = course.children.size;
+		const userCount = await interaction.client.mongo.collection(DB.USERS).countDocuments({ courses: course });
+		const reason = `Removing course \`${course}\` as requested by ` +
 		`${interaction.user.tag}\` \`(${interaction.user.id})\``;
 
 		//	a warning gets issued for this command
-		await interaction.channel.send(`Are you sure you want to delete ${course.name}. ` +
+		await interaction.channel.send(`Are you sure you want to delete ${course}. ` +
 		`This action will archive ${channelCount} channels and unenroll ${userCount} users. ` +
 		'Send `yes` in the next 30 seconds to confirm.');
 
@@ -46,17 +45,17 @@ export default class extends Command {
 			await interaction.reply('<a:loading:755121200929439745> working...');
 
 			//	archving the course channels
-			for (const channel of [...category.children.values()]) {
+			for (const channel of [...course.children.values()]) {
 				await channel.setParent(CHANNELS.ARCHIVE, { reason });
 				await channel.lockPermissions();
 				await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
 			}
-			await category.delete();
+			await course.delete();
 
 			//	removing course roles
 			await interaction.guild.members.fetch();
-			const staffRole = await interaction.guild.roles.fetch(course.roles.staff);
-			const studentRole = await interaction.guild.roles.fetch(course.roles.student);
+			const staffRole = await interaction.guild.roles.fetch(`${course} staff`);
+			const studentRole = await interaction.guild.roles.fetch(`CISC ${course}`);
 
 			for (const [, member] of staffRole.members) {
 				if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
@@ -69,12 +68,11 @@ export default class extends Command {
 			studentRole.delete(reason);
 
 			// update and remove from database
-			await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course.name } });
-			await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course.name });
+			await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course } });
+			await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course });
 
-			await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from ${course.name}`);
+			await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from ${course}`);
 		});
-		*/
 	}
 
 	async run(msg: Message, [course]: [Course]): Promise<Message> {
