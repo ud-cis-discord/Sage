@@ -2,10 +2,9 @@ import { BOT } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, MessageReaction } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
-import { VerificationLevels } from 'discord.js/typings/enums';
 
-const QUESTION_CHAR_LIMIT = 1024;
-const EMBED_TITLE_CHAR_LIMIT = 256;
+const QUESTION_CHAR_LIMIT = 256;
+const args = ['Single', 'Multiple'];
 
 export default class extends Command {
 
@@ -32,6 +31,16 @@ export default class extends Command {
 			description: `A poll can have 2-10 choices. Separate choices with '|' (no spaces/quotes).`,
 			type: 'STRING',
 			required: true
+		},
+		{
+			name: 'optiontype',
+			description: `Whether participants can only select one choice or multiple.`,
+			type: 'STRING',
+			required: true,
+			choices: args.map((arg) => ({
+				name: arg,
+				value: arg
+			}))
 		}
 	]
 	runInDM = false;
@@ -93,11 +102,14 @@ export default class extends Command {
 		}
 		choiceText = choiceText.trim();
 
+		let pollFooter = (interaction.options.getString('optiontype') === 'Multiple')
+			? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
+			: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
 		let pollEmbed = new MessageEmbed()
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
-			.setFooter('You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.')
+			.setFooter(pollFooter)
 			.setColor('RANDOM');
 
 		const choiceBtns = []; // first 5 choices
@@ -129,16 +141,27 @@ export default class extends Command {
 
 			const usersChoices = userSelections.get(i.user.id) || [];
 			if (usersChoices && usersChoices.includes(i.customId)) { // user has already selected choice
-				usersChoices.splice(usersChoices.indexOf(i.customId), 1);
-			} else {
+				if (interaction.options.getString('optiontype') === 'Multiple') {
+					usersChoices.splice(usersChoices.indexOf(i.customId), 1);
+					userSelections.set(i.user.id, usersChoices); // set this user's choice
+				} else {
+					userSelections.delete(i.user.id);
+				}
+			} else if (interaction.options.getString('optiontype') === 'Multiple') {
 				usersChoices.push(i.customId);
+				userSelections.set(i.user.id, usersChoices); // set this user's choice
+			} else {
+				userSelections.set(i.user.id, i.customId);
 			}
-			userSelections.set(i.user.id, usersChoices); // set this user's choice
 
 			userSelections.forEach(vote => {
-				vote.forEach(selected => {
-					choiceQuantites[Number(selected) - 1] += 1;
-				});
+				if (interaction.options.getString('optiontype') === 'Multiple') {
+					vote.forEach(selected => {
+						choiceQuantites[Number(selected) - 1] += 1;
+					});
+				} else {
+					choiceQuantites[Number(vote) - 1] += 1;
+				}
 			});
 
 			choiceText = '';
@@ -147,11 +170,14 @@ export default class extends Command {
 			}
 			choiceText = choiceText.trim();
 
+			pollFooter = (interaction.options.getString('optiontype') === 'Multiple')
+				? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
+				: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
 			pollEmbed = new MessageEmbed()
 				.setTitle(question)
 				.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 				.addField('Choices', choiceText)
-				.setFooter('You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.')
+				.setFooter(pollFooter)
 				.setColor('RANDOM');
 
 			if (choiceBtns2.length === 0) {
@@ -164,7 +190,7 @@ export default class extends Command {
 		}).on('end', () => {
 			pollEmbed = new MessageEmbed()
 				.setTitle(question)
-				.setDescription(`This poll was created by ${interaction.user.username} and **has now ended.**`)
+				.setDescription(`This poll was created by ${interaction.user.username} and ended **${mdTimestamp}**`)
 				.addField('Choices', choiceText)
 				.setColor('RANDOM');
 			interaction.editReply({ embeds: [pollEmbed], components: [] });
