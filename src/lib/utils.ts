@@ -41,6 +41,12 @@ export function generateErrorEmbed(msg: string): MessageEmbed {
 	return responseEmbed;
 }
 
+export function getMsgIdFromLink(link: string): string {
+	let msgId: string;
+	if ((msgId = link.split('/').pop()) === undefined) throw 'You must call this function with a message link!';
+	return msgId;
+}
+
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
 	const time = moment().format('M-D-YY_HH-mm');
 	filename = `${filename}${timestamp ? `_${time}` : ''}` || time;

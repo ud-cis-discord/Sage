@@ -1,10 +1,11 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import nodemailer from 'nodemailer';
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, DB, EMAIL, MAINTAINERS } from '@root/config';
 import { Command } from '@root/src/lib/types/Command';
+import { getMsgIdFromLink } from '@root/src/lib/utils';
 
 export default class extends Command {
 
@@ -12,6 +13,57 @@ export default class extends Command {
 	description = 'Warns a user for breaking the rules and deletes the offending message.';
 	extendedHelp = 'This command must be used when replying to a message.';
 	usage = '[reason]';
+
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'msglink',
+			description: 'Link to the offending message',
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'reason',
+			description: 'Reason for warning the user',
+			type: 'STRING',
+			required: false
+		}
+	]
+
+	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+
+	async tempRun(interaction: CommandInteraction): Promise<Message> {
+		const target = await interaction.channel.messages.fetch(getMsgIdFromLink(interaction.options.getString('msglink')));
+		const reason = interaction.options.getString('reason') || 'Breaking server rules';
+		if ('parentId' in interaction.channel) {
+			const course: Course = await interaction.client.mongo.collection(DB.COURSES)
+				.findOne({ 'channels.category': interaction.channel.parentId });
+
+			if (course) {
+				const staffChannel = interaction.guild.channels.cache.get(course.channels.staff) as TextChannel;
+				const embed = new MessageEmbed()
+					.setTitle(`${interaction.user.tag} Warned ${target.author.tag}`)
+					.setFooter(`${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}`)
+					.addFields([{
+						name: 'Reason',
+						value: reason
+					}, {
+						name: 'Message content',
+						value: target.content || '*This message had no text content*'
+					}]);
+				staffChannel.send({ embeds: [embed] });
+			}
+		}
+
+		target.author.send(`Your message was deleted in ${target.channel} by ${interaction.user.tag}. Below is the given reason:\n${reason}`)
+			.catch(async () => {
+				const targetUser: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: target.author.id });
+				if (!targetUser) throw `${target.author.tag} (${target.author.id}) is not in the database`;
+				this.sendEmail(targetUser.email, interaction.user.tag, reason);
+			});
+
+		interaction.reply({ content: `${target.author.username} has been warned.`, ephemeral: true });
+		return target.delete();
+	}
 
 	permissions(msg: Message): boolean {
 		return staffPerms(msg);
