@@ -1,5 +1,5 @@
 import { BOT } from '@root/config';
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, MessageReaction } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 
@@ -10,9 +10,6 @@ export default class extends Command {
 
 	description = `Have ${BOT.NAME} create a poll for you.`;
 
-	// initally I was going to make it so choices were limited to one parameter and were separated with commas.
-	// however, I figured that may cause problems (and might not be user-friendly), so I have done the command options like this.
-	// Please let me know of any objections/change suggestions
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'timespan',
@@ -102,7 +99,7 @@ export default class extends Command {
 		}
 		choiceText = choiceText.trim();
 
-		let pollFooter = (interaction.options.getString('optiontype') === 'Multiple')
+		let pollFooter = interaction.options.getString('optiontype') === 'Multiple'
 			? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
 			: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
 		let pollEmbed = new MessageEmbed()
@@ -170,7 +167,7 @@ export default class extends Command {
 			}
 			choiceText = choiceText.trim();
 
-			pollFooter = (interaction.options.getString('optiontype') === 'Multiple')
+			pollFooter = interaction.options.getString('optiontype') === 'Multiple'
 				? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
 				: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
 			pollEmbed = new MessageEmbed()
