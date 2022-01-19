@@ -4,8 +4,17 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = 'Submit an image to the currently running contest.';
-	extendedHelp = 'Exactly one file must be attached when running this command.';
+	/*
+	TO DO
+	- Message collector for image
+		- (Do we delete the image afterwards? I don't think it matters)
+	- Thank the user for their submission
+
+	AFTER THIS
+	- Convert assign & enroll to role dropdowns
+	- Slashify all question commands
+	*/
+	description = 'Submit an image to the current contest. After using this command upload an image in another message';
 	usage = '[more information]';
 	enabled = false;
 

@@ -14,7 +14,7 @@ export default class extends Command {
 		if (question.type === 'private') {
 			const splitLink = question.messageLink.split('/');
 			const threadId = splitLink[splitLink.length - 2];
-			return msg.channel.send(`\`${PREFIX}reply\` has been depreciated for private questions. Please reply in thread <#${threadId}>.`);
+			return msg.channel.send(`\`${PREFIX}reply\` has been deprecated for private questions. Please reply in thread <#${threadId}>.`);
 		}
 		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
 		const channel = await msg.client.channels.fetch(channelId) as TextChannel;
