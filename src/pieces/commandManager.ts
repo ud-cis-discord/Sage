@@ -1,4 +1,4 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, ApplicationCommandPermissionData } from 'discord.js';
+import { Collection, Client, CommandInteraction, ApplicationCommand, ApplicationCommandPermissionData, GuildMember, MessageSelectMenu } from 'discord.js';
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -13,6 +13,23 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('interactionCreate', interaction => {
 		if (interaction.isCommand()) runCommand(interaction, bot);
+		if (interaction.isSelectMenu()) {
+			const { customId, values, member } = interaction;
+			if (customId === 'auto_roles' && member instanceof GuildMember) {
+				const component = interaction.component as MessageSelectMenu;
+				const removed = component.options.filter((option) => !values.includes(option.value));
+				for (const id of removed) {
+					member.roles.remove(id.value);
+				}
+				for (const id of values) {
+					member.roles.add(id);
+				}
+				interaction.reply({
+					content: 'Roles updated.',
+					ephemeral: true
+				});
+			}
+		}
 	});
 }
 

@@ -32,15 +32,27 @@ export default class extends Command {
 
 		collector.on('collect', async i => {
 			if (i.attachments.size < 1) {
-				interaction.channel.send(`You have to submit an image! Please re-run /submit and try again.`);
+				const responseEmbed = new MessageEmbed()
+					.setColor('#ff0000')
+					.setTitle('Argument error')
+					.setDescription(`You have to submit an image! Please re-run /submit and try again.`);
+				interaction.channel.send({ embeds: [responseEmbed] });
 				return;
 			}
 			if (i.attachments.size > 1) {
-				interaction.channel.send(`You can only submit one image! Please re-run /submit and try again.`);
+				const responseEmbed = new MessageEmbed()
+					.setColor('#ff0000')
+					.setTitle('Argument error')
+					.setDescription(`You can only submit one image! Please re-run /submit and try again.`);
+				interaction.channel.send({ embeds: [responseEmbed] });
 				return;
 			}
 			if (i.attachments.first().url.indexOf('.png') === -1 && i.attachments.first().url.indexOf('.jpg') === -1 && i.attachments.first().url.indexOf('.jpeg') === -1) {
-				interaction.channel.send(`Your submission must be a JPG or PNG. Please re-run /submit and try again.`);
+				const responseEmbed = new MessageEmbed()
+					.setColor('#ff0000')
+					.setTitle('Argument error')
+					.setDescription(`Your submission must be a JPG or PNG. Please re-run /submit and try again.`);
+				interaction.channel.send({ embeds: [responseEmbed] });
 				return;
 			} else {
 				const submissionChannel = await interaction.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
