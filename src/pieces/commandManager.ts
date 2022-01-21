@@ -18,6 +18,7 @@ async function register(bot: Client): Promise<void> {
 		if (interaction.isSelectMenu()) {
 			const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
 			const { customId, values, member } = interaction;
+			let responseContent = `Your roles have been updated.`;
 			if (customId === 'roleselect' && member instanceof GuildMember) {
 				const component = interaction.component as MessageSelectMenu;
 				const removed = component.options.filter((option) => !values.includes(option.value));
@@ -34,11 +35,11 @@ async function register(bot: Client): Promise<void> {
 						member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
 						member.roles.remove(id.value);
 						interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
+						responseContent = `Your enrollments have been updated.`;
 					}
 				}
 				for (const id of values) {
 					const role = interaction.guild.roles.cache.find(r => r.id === id);
-					console.log(role.name.substring(4));
 					if (!role.name.includes('CISC')) {
 						member.roles.add(id);
 						continue;
@@ -49,9 +50,10 @@ async function register(bot: Client): Promise<void> {
 					member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
 					member.roles.add(id);
 					interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
+					responseContent = `Your enrollments have been updated.`;
 				}
 				interaction.reply({
-					content: 'Roles updated.',
+					content: `${responseContent}`,
 					ephemeral: true
 				});
 			}
