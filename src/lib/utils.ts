@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Client, Message, MessageAttachment } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Client, CommandInteraction, MessageAttachment } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
@@ -39,11 +39,11 @@ export async function sendToFile(input: string, filetype = 'txt', filename: stri
 	return new MessageAttachment(Buffer.from(input.trim()), `${filename}.${filetype}`);
 }
 
-export async function generateQuestionId(msg: Message, depth = 1): Promise<string> {
-	const potentialId = `${msg.author.id.slice(msg.author.id.length - depth)}${msg.id.slice(msg.id.length - depth)}`;
+export async function generateQuestionId(interaction: CommandInteraction, depth = 1): Promise<string> {
+	const potentialId = `${interaction.user.id.slice(interaction.user.id.length - depth)}${interaction.id.slice(interaction.id.length - depth)}`;
 
-	if (await msg.client.mongo.collection(DB.PVQ).countDocuments({ questionId: potentialId }) > 0) {
-		return generateQuestionId(msg, depth + 1);
+	if (await interaction.client.mongo.collection(DB.PVQ).countDocuments({ questionId: potentialId }) > 0) {
+		return generateQuestionId(interaction, depth + 1);
 	}
 
 	return potentialId;
