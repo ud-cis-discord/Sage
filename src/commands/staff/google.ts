@@ -7,7 +7,6 @@ export default class extends Command {
 
 	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	aliases = ['lmgt', 'lmg'];
 	description = `Have ${BOT.NAME} google something for someone`;
 	usage = '<query>';
 
@@ -36,19 +35,6 @@ export default class extends Command {
 		return staffPerms(msg);
 	}
 
-	async run(msg: Message, [query]: [string]): Promise<Message> {
-		const formatted = query.replace(new RegExp(' ', 'g'), '+').replace('%', '%25');
-		const link = `https://letmegooglethat.com/?q=${formatted}`;
-		const embed = new MessageEmbed({
-			description: `[Let me Google that for you!](${link})`,
-			color: 'LUMINOUS_VIVID_PINK'
-		});
-		return msg.channel.send({ embeds: [embed] });
-	}
-
-	argParser(_msg: Message, input: string): Array<string> {
-		if (!input) throw `What do you want ${BOT.NAME} to google? (Usage: ${this.usage})`;
-		else return [input];
-	}
+	async run(_msg: Message): Promise<Message> { return; }
 
 }
