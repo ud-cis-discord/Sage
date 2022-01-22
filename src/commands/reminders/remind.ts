@@ -58,37 +58,6 @@ export default class extends Command {
 		return interaction.reply({ content: `I'll remind you about that at ${reminderTime(reminder)}.`, ephemeral: true });
 	}
 
-	run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
-		msg.client.mongo.collection(DB.REMINDERS).insertOne(reminder);
-
-		return msg.channel.send(`I'll remind you about that at ${reminderTime(reminder)}.`);
-	}
-
-	argParser(msg: Message, input: string): [Reminder] {
-		const [content, rawDuration, rawRepeat] = input.split('|').map(part => part.trim());
-		const weekWords = ['w', 'week', 'weekly'];
-		const dayWords = ['d', 'day', 'daily'];
-
-		const duration = parse(rawDuration);
-		if (!duration) throw `**${rawDuration}** is not a valid duration.`;
-
-		const repeat = rawRepeat
-			? weekWords.includes(rawRepeat.toLowerCase())
-				? 'weekly'
-				: dayWords.includes(rawRepeat.toLowerCase())
-					? 'daily'
-					: 'error'
-			: null;
-
-		if (repeat === 'error') throw `**${rawRepeat}** is not a valid repeat value.`;
-
-		return [{
-			owner: msg.author.id,
-			content,
-			mode: msg.channel.type === 'DM' ? 'private' : 'public',
-			expires: new Date(duration + Date.now()),
-			repeat
-		}];
-	}
+	run(_msg: Message): Promise<Message> { return; }
 
 }
