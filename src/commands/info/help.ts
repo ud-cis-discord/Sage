@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, TextChannel, Util } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util } from 'discord.js';
 import { getCommand } from '@lib/utils';
-import { BOT, CHANNELS, PREFIX } from '@root/config';
+import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -22,12 +22,11 @@ export default class extends Command {
 		const cmd = interaction.options.getString('cmd');
 		const { commands } = interaction.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
-		const channel = await interaction.guild.channels.fetch(CHANNELS.SAGE) as TextChannel;
 
 		if (cmd) {
 			const command = getCommand(interaction.client, cmd);
 			if (!command) {
-				return interaction.reply(`**${cmd}** is not a valid command.`);
+				return interaction.reply({ content: `**${cmd}** is not a valid command.`, ephemeral: true });
 			}
 
 			const fields: Array<EmbedField> = [];
@@ -59,8 +58,7 @@ export default class extends Command {
 				.setTimestamp(Date.now())
 				.setColor('RANDOM');
 
-			channel.send({ embeds: [embed] });
-			return interaction.reply({ content: 'Help sent!', ephemeral: true });
+			return interaction.reply({ embeds: [embed] });
 		} else {
 			// if no command given
 			let helpStr = `You can do \`/help <command>\` to get more information about any command, or you can visit our website here:\n<${website}>\n`;
