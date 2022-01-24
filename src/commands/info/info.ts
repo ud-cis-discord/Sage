@@ -1,5 +1,5 @@
 import { CommandInteraction } from 'discord.js';
-import { BOT, MAINTAINERS, PREFIX } from '@root/config';
+import { BOT, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -18,7 +18,7 @@ export default class extends Command {
 		• :man_mage:  Self-assignable roles
 		• :ticket: Question tagging so you can easily find questions others have asked
 		• :ninja: Private and anonymous questions
-		• :fire:  And many more! (use ${PREFIX}help for the full list of commands)
+		• :fire:  And many more! (use /help for the full list of commands)
 	
 	Our friend ${BOT.NAME} was originally created by Ben Segal, Josh Lyon, and Ren Ross and is is actively maintained by ${MAINTAINERS}.
 	 
