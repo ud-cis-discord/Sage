@@ -31,7 +31,13 @@ export default class extends Command {
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
-		if (!user) throw `Something went wrong. Please contact ${MAINTAINERS}`;
+		if (!user) {
+			const responseEmbed = new MessageEmbed()
+				.setTitle(`Error`)
+				.setDescription(`Something went wrong. Please contact ${MAINTAINERS}`)
+				.setColor('#ff0000');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		}
 
 		let course: Course;
 		const question = interaction.options.getString('question');

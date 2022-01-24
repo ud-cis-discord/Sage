@@ -1,19 +1,24 @@
-// import { Command } from '@root/src/lib/types/Command';
-// import { Message, ThreadChannel } from 'discord.js';
+import { Command } from '@root/src/lib/types/Command';
+import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 
-// export default class extends Command {
+export default class extends Command {
 
-// 	description = `Archive a private question thread.`;
-// 	extendedHelp = `This command only works in private question threads.`;
-// 	aliases = ['close'];
+	description = `Archive a private question thread.`;
+	extendedHelp = `This command only works in private question threads.`;
 
-// 	run(msg: Message): Promise<ThreadChannel> {
-// 		if (!msg.channel.isThread()) {
-// 			msg.channel.send(this.extendedHelp);
-// 			return;
-// 		}
+	run(_msg: Message): Promise<void> { return; }
 
-// 		return msg.channel.setArchived(true, `${msg.author.username} archived the question.`);
-// 	}
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		if (!interaction.channel.isThread()) {
+			const responseEmbed = new MessageEmbed()
+				.setTitle('Error')
+				.setDescription('You must run this command in a private question thread.')
+				.setColor('RED');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		}
+		interaction.reply(`Archiving thread...`);
+		await interaction.channel.setArchived(true, `${interaction.user.username} archived the question.`);
+		interaction.editReply(`Thread archived.`);
+	}
 
-// }
+}

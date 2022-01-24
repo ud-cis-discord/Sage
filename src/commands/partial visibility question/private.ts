@@ -1,115 +1,137 @@
-// import { GuildChannel, Message, MessageAttachment, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
-// import { Course } from '@lib/types/Course';
-// import { PVQuestion } from '@lib/types/PVQuestion';
-// import { SageUser } from '@lib/types/SageUser';
-// import { BOT, DB, MAINTAINERS, PREFIX, ROLES } from '@root/config';
-// import { generateQuestionId } from '@lib/utils';
-// import { Command } from '@lib/types/Command';
+import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, Message, MessageAttachment, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { Course } from '@lib/types/Course';
+import { PVQuestion } from '@lib/types/PVQuestion';
+import { SageUser } from '@lib/types/SageUser';
+import { BOT, DB, MAINTAINERS, PREFIX, ROLES } from '@root/config';
+import { generateQuestionId } from '@lib/utils';
+import { Command } from '@lib/types/Command';
 
-// export default class extends Command {
+export default class extends Command {
 
-// 	description = 'Send a question to all course staff privately.';
-// 	usage = '[course] <question>';
-// 	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
-// 	runInGuild = false;
+	description = 'Send a question to all course staff privately.';
+	usage = '[course] <question>';
+	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'question',
+			description: 'What would you like to ask?',
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'course',
+			description: 'What course chat would you like to ask your question in?',
+			type: 'STRING',
+			required: false
+		}
+	]
+	// previously, runInGuild was false, but due to ephemeral commands being a thing, I have set it so it can be run in the guild.
 
-// 	async run(msg: Message, [course, question]: [Course, string]): Promise<Message> {
-// 		const bot = msg.client;
-// 		const questionId = await generateQuestionId(msg);
+	run(_msg: Message): Promise<void> { return; }
 
-// 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
-// 		let privThread: ThreadChannel;
-// 		if (courseGeneral.isText()) {
-// 			privThread = await courseGeneral.threads.create({
-// 				name: `${msg.author.username}‘s private question (${questionId})'`,
-// 				autoArchiveDuration: 4320,
-// 				reason: `${msg.author.username} asked a private question`,
-// 				type: `GUILD_PRIVATE_THREAD`
-// 			});
-// 		} else {
-// 			throw `Something went wrong creating ${msg.author.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
-// 		}
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
-// 		privThread.guild.members.fetch();
-// 		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN) || mem.roles.cache.has(course.roles.staff)
-// 		).forEach(user => {
-// 			privThread.members.add(user);
-// 		});
-// 		privThread.members.add(msg.author.id);
+		if (!user) {
+			const responseEmbed = new MessageEmbed()
+				.setTitle(`Error`)
+				.setDescription(`Something went wrong. Please contact ${MAINTAINERS}`)
+				.setColor('#ff0000');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		}
 
-// 		const embed = new MessageEmbed()
-// 			.setAuthor(`${msg.author.tag} (${msg.author.id}) asked Question ${questionId}`, msg.author.avatarURL())
-// 			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
+		let course: Course;
+		const question = interaction.options.getString('question');
+		const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
 
-// 		const attachments: MessageAttachment[] = [];
-// 		if (msg.attachments) {
-// 			let imageSet = false;
-// 			msg.attachments.forEach(attachment => {
-// 				if (!imageSet && attachment.height) {
-// 					embed.setImage(attachment.url);
-// 					imageSet = true;
-// 				} else {
-// 					attachments.push(attachment);
-// 				}
-// 			});
-// 		}
+		if (user.courses.length === 1) {
+			course = courses.find(c => c.name === user.courses[0]);
+		} else {
+			const inputtedCourse = courses.find(c => c.name === interaction.options.getString('course'));
+			if (!inputtedCourse) {
+				const responseEmbed = new MessageEmbed()
+					.setTitle(`Argument error`)
+					.setDescription('I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
+					`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``)
+					.setColor('#ff0000');
+				return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			}
+			course = inputtedCourse;
+		}
 
-// 		const privateChannel = await msg.client.channels.fetch(course.channels.private) as TextChannel;
-// 		await privateChannel.send({
-// 			embeds: [embed],
-// 			files: attachments
-// 		});
+		if (!question) {
+			const responseEmbed = new MessageEmbed()
+				.setTitle(`Argument error`)
+				.setDescription('Please provide a question.')
+				.setColor('#ff0000');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		}
 
-// 		embed.setDescription(question);
-// 		embed.setTitle(`${msg.author.username}'s Question`);
-// 		embed.setFooter(`When you're done with this question, you can send \`${PREFIX}archive\` to close it`);
-// 		const questionMessage = await privThread.send({
-// 			embeds: [embed],
-// 			files: attachments
-// 		});
-// 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
+		const bot = interaction.client;
+		const questionId = await generateQuestionId(interaction);
 
-// 		const entry: PVQuestion = {
-// 			owner: msg.author.id,
-// 			type: 'private',
-// 			questionId,
-// 			messageLink
-// 		};
+		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
+		let privThread: ThreadChannel;
+		if (courseGeneral.isText()) {
+			privThread = await courseGeneral.threads.create({
+				name: `${interaction.user.username}‘s private question (${questionId})'`,
+				autoArchiveDuration: 4320,
+				reason: `${interaction.user.username} asked a private question`,
+				type: `GUILD_PRIVATE_THREAD`
+			});
+		} else {
+			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
+		}
 
-// 		msg.client.mongo.collection(DB.PVQ).insertOne(entry);
+		privThread.guild.members.fetch();
+		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN) || mem.roles.cache.has(course.roles.staff)
+		).forEach(staff => {
+			privThread.members.add(staff);
+		});
+		privThread.members.add(interaction.user.id);
 
-// 		return msg.channel.send(`Your question has been sent to the staff. Any conversation about it will be had here: <#${privThread.id}>`);
-// 	}
+		const embed = new MessageEmbed()
+			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
+			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
 
-// 	async argParser(msg: Message, input: string): Promise<[Course, string]> {
-// 		const user: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+		// command runs cannot have attachments, so this has been excluded
 
-// 		if (!user) throw `Something went wrong. Please contact ${MAINTAINERS}`;
+		// const attachments: MessageAttachment[] = [];
+		// if (interaction.attachments) {
+		// 	let imageSet = false;
+		// 	msg.attachments.forEach(attachment => {
+		// 		if (!imageSet && attachment.height) {
+		// 			embed.setImage(attachment.url);
+		// 			imageSet = true;
+		// 		} else {
+		// 			attachments.push(attachment);
+		// 		}
+		// 	});
+		// }
 
-// 		let course: Course;
-// 		let question: string;
-// 		const courses: Array<Course> = await msg.client.mongo.collection(DB.COURSES).find().toArray();
+		const privateChannel = await interaction.client.channels.fetch(course.channels.private) as TextChannel;
+		await privateChannel.send({
+			embeds: [embed]
+		});
 
-// 		if (user.courses.length === 1) {
-// 			course = courses.find(c => c.name === user.courses[0]);
-// 			if (input.startsWith(course.name)) {
-// 				question = input.slice(course.name.length).trim();
-// 			} else {
-// 				question = input;
-// 			}
-// 		} else {
-// 			const inputtedCourse = courses.find(c => c.name === input.split(' ')[0].toLowerCase());
-// 			if (!inputtedCourse) {
-// 				throw 'I wasn\'t able to determine your course biased off of your enrollment or your input. ' +
-// 				`Please specify the course at the beginning of your question.\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;
-// 			}
-// 			course = inputtedCourse;
-// 			question = input.slice(course.name.length).trim();
-// 		}
+		embed.setDescription(question);
+		embed.setTitle(`${interaction.user.username}'s Question`);
+		embed.setFooter(`When you're done with this question, you can send \`${PREFIX}archive\` to close it`);
+		const questionMessage = await privThread.send({
+			embeds: [embed]
+		});
+		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
-// 		if (!question) throw 'Please provide a question.';
+		const entry: PVQuestion = {
+			owner: interaction.user.id,
+			type: 'private',
+			questionId,
+			messageLink
+		};
 
-// 		return [course, question];
-// 	}
+		interaction.client.mongo.collection(DB.PVQ).insertOne(entry);
 
-// }
+		return interaction.reply({ content: `Your question has been sent to the staff. Any conversation about it will be had here: <#${privThread.id}>`, ephemeral: true });
+	}
+
+}
