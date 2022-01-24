@@ -6,12 +6,12 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = `Displays the users current message count. Use \`/check here\` to send in the current channel`;
-	usage = '[here]';
+	usage = '[hide]';
 
 	options: ApplicationCommandOptionData[] = [
 		{
-			name: 'here',
-			description: 'determines if you want stats sent here or in DMs',
+			name: 'hide',
+			description: 'determines if you want stats public or private',
 			type: 'BOOLEAN',
 			required: false
 		}
@@ -31,12 +31,10 @@ export default class extends Command {
 			.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, true)
 			.addField('Level Progress', `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
 			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
-		if (interaction.options.getBoolean('here') === true) {
-			interaction.reply({ embeds: [embed] });
+		if (interaction.options.getBoolean('hide') === true) {
+			interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
-			interaction.user.send({ embeds: [embed] })
-				.then(() => { if (interaction.channel.type !== 'DM') interaction.reply({ content: 'Your message count has been sent to your DMs.', ephemeral: true }); })
-				.catch(() => interaction.reply({ content: 'I couldn\'t send you a DM. Please enable DMs and try again.', ephemeral: true }));
+			interaction.reply({ embeds: [embed] });
 		}
 		return;
 	}
