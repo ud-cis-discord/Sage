@@ -1,8 +1,8 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, Message, MessageAttachment, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
-import { BOT, DB, MAINTAINERS, PREFIX, ROLES } from '@root/config';
+import { BOT, DB, MAINTAINERS, ROLES } from '@root/config';
 import { generateQuestionId } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 
@@ -116,7 +116,7 @@ export default class extends Command {
 
 		embed.setDescription(question);
 		embed.setTitle(`${interaction.user.username}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`${PREFIX}archive\` to close it`);
+		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
 		const questionMessage = await privThread.send({
 			embeds: [embed]
 		});

@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { MessageEmbed, Message, TextChannel, MessageAttachment, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, Message, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 
 
 export default class extends Command {
