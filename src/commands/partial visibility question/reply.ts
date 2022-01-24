@@ -1,42 +1,59 @@
-// import { PVQuestion } from '@lib/types/PVQuestion';
-// import { BOT, DB, PREFIX } from '@root/config';
-// import { Command } from '@lib/types/Command';
-// import { MessageEmbed, Message, TextChannel, MessageAttachment } from 'discord.js';
+import { PVQuestion } from '@lib/types/PVQuestion';
+import { BOT, DB } from '@root/config';
+import { Command } from '@lib/types/Command';
+import { MessageEmbed, Message, TextChannel, MessageAttachment, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 
 
-// export default class extends Command {
+export default class extends Command {
 
-// 	description = `Reply to a question you previously asked with ${BOT.NAME}.`;
-// 	usage = '<questionID> <response>';
-// 	runInGuild = false;
+	description = `Reply to a question you previously asked with ${BOT.NAME}.`;
+	usage = '<questionID> <response>';
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'questionid',
+			description: 'The ID of the question you would like to reply to',
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'response',
+			description: 'What would you like to reply with?',
+			type: 'STRING',
+			required: true
+		}
+	]
 
-// 	async run(msg: Message, [question, response]: [PVQuestion, string]): Promise<Message> {
-// 		if (question.type === 'private') {
-// 			const splitLink = question.messageLink.split('/');
-// 			const threadId = splitLink[splitLink.length - 2];
-// 			return msg.channel.send(`\`${PREFIX}reply\` has been deprecated for private questions. Please reply in thread <#${threadId}>.`);
-// 		}
-// 		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
-// 		const channel = await msg.client.channels.fetch(channelId) as TextChannel;
+	run(_msg: Message): Promise<void> { return; }
 
-// 		const embed = new MessageEmbed()
-// 			.setAuthor(`Anonymous responded to ${question.questionId}`, msg.client.user.avatarURL())
-// 			.setDescription(`${response}\n\n[Jump to question](${question.messageLink})`);
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const id = interaction.options.getString('questionid');
+		const question: PVQuestion = await interaction.client.mongo.collection(DB.PVQ).findOne({ questionId: id });
 
-// 		const attachments: MessageAttachment[] = [];
+		if (!question || question.type === 'private') {
+			const responseEmbed = new MessageEmbed()
+				.setTitle(`Error`)
+				.setDescription(`Could not find an *anonymous* question with an ID of **${id}**.`)
+				.setColor('#ff0000');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		}
+		if (question.owner !== interaction.user.id) {
+			const responseEmbed = new MessageEmbed()
+				.setTitle(`Error`)
+				.setDescription(`You are not the owner of question ID ${question.questionId}.`)
+				.setColor('#ff0000');
+			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+		}
 
+		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
+		const channel = await interaction.client.channels.fetch(channelId) as TextChannel;
 
-// 		return channel.send({ embeds: [embed], files: attachments })
-// 			.then(() => msg.channel.send('I\'ve forwarded your message along.'));
-// 	}
+		const embed = new MessageEmbed()
+			.setAuthor(`Anonymous responded to ${question.questionId}`, interaction.client.user.avatarURL())
+			.setDescription(`${interaction.options.getString('response')}\n\n[Jump to question](${question.messageLink})`);
 
-// 	async argParser(msg: Message, input: string): Promise<[PVQuestion, string]> {
-// 		const question: PVQuestion = await msg.client.mongo.collection(DB.PVQ).findOne({ questionId: input.split(' ')[0] });
+		channel.send({ embeds: [embed] });
 
-// 		if (!question) throw `Could not find question with an ID of **${input.split(' ')[0]}**.`;
-// 		if (question.owner !== msg.author.id) throw `You are not the owner of ${question.questionId}.`;
+		interaction.reply({ content: 'I\'ve forwarded your message along.', ephemeral: true });
+	}
 
-// 		return [question, input.slice(question.questionId.length).trim()];
-// 	}
-
-// }
+}
