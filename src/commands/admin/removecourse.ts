@@ -11,7 +11,6 @@ export default class extends Command {
 	'and purge the course from the database. This is the only command with an `are you sure?` warning.';
 	usage = '<course ID>';
 	runInDM = false;
-	aliases = ['deletecourse', 'removec', 'deletec'];
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{

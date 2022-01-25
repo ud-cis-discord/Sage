@@ -5,7 +5,6 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	aliases = ['sd'];
 	description = `Sets ${BOT.NAME}'s activity to 'Playing Shutting Down...' and ends the process.`;
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
