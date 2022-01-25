@@ -4,7 +4,6 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	aliases = ['ls', 'listcmd'];
 	description = 'Show all commands, including disable commands.';
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
