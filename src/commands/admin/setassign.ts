@@ -1,7 +1,7 @@
-import { Message, Role } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, Role } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { roleParser } from '@lib/arguments';
-import { adminPerms } from '@lib/permissions';
+import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -9,11 +9,27 @@ export default class extends Command {
 
 	description = `Adds a role to the assignable collection of the database, or removes it if it's there already`;
 	usage = '<role>';
-	aliases = ['addassign'];
 	runInDM = false;
+	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	options: ApplicationCommandOptionData[] = [{
+		name: 'role',
+		description: 'The role to add to assignables.',
+		type: 'ROLE',
+		required: true
+	}]
 
-	permissions(msg: Message): boolean {
-		return adminPerms(msg);
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const role = interaction.options.getRole('role');
+		const assignables = interaction.client.mongo.collection(DB.ASSIGNABLE);
+		const newRole: AssignableRole = { id: role.id };
+
+		if (await assignables.countDocuments(newRole) > 0) {
+			assignables.findOneAndDelete(newRole);
+			return interaction.reply(`The role \`${role.name}\` has been removed.`);
+		} else {
+			assignables.insertOne(newRole);
+			return interaction.reply(`The role \`${role.name}\` has been added.`);
+		}
 	}
 
 	async run(msg: Message, [cmd]: [Role]): Promise<Message> {
