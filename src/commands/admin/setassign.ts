@@ -4,6 +4,7 @@ import { roleParser } from '@lib/arguments';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
+import { modifyRoleDD } from '@root/src/lib/utils';
 
 export default class extends Command {
 
@@ -19,14 +20,22 @@ export default class extends Command {
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const role = interaction.options.getRole('role');
+		const apiRole = interaction.options.getRole('role');
+		const role = await interaction.guild.roles.fetch(apiRole.id);
+
 		const assignables = interaction.client.mongo.collection(DB.ASSIGNABLE);
 		const newRole: AssignableRole = { id: role.id };
 
 		if (await assignables.countDocuments(newRole) > 0) {
+			/* if (!await modifyRoleDD(interaction, role, false, 'REMOVE')) {
+				return interaction.reply('Unable to remove role from dropdown menu.');
+			}*/
 			assignables.findOneAndDelete(newRole);
 			return interaction.reply(`The role \`${role.name}\` has been removed.`);
 		} else {
+			if (!await modifyRoleDD(interaction, role, false, 'ADD')) {
+				return interaction.reply('Unable to add role to dropdown menu,');
+			}
 			assignables.insertOne(newRole);
 			return interaction.reply(`The role \`${role.name}\` has been added.`);
 		}
