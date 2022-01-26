@@ -2,6 +2,7 @@ import { BOT } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@root/src/lib/utils';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
@@ -57,46 +58,30 @@ export default class extends Command {
 		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
 
 		const userSelections = new Map(); // user ID, their choice(s)
-		const choiceQuantites = []; // number of selections for each choice
-		this.resetArray(choiceQuantites, choices.length);
+		const choiceQuantites = Array.from({ length: choices.length }, () => (0)); // number of selections for each choice
 
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
 		if (!timespan) {
-			const errorEmbed = new MessageEmbed()
-				.setTitle('Error')
-				.setDescription(`${interaction.options.getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', '5h', '5h30m', '7h30m15s'...`)
-				.setColor('RED');
-			return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`${interaction.options.getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', 
+			'5h', '5h30m', '7h30m15s'...`)], ephemeral: true });
 		}
 		if (question.length > QUESTION_CHAR_LIMIT) {
-			const errorEmbed = new MessageEmbed()
-				.setTitle('Error')
-				.setDescription(`Your question is too long. Please keep it under ${QUESTION_CHAR_LIMIT} characters.`)
-				.setColor('RED');
-			return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`Your question is too long. Please keep it under ${QUESTION_CHAR_LIMIT} characters.`)], ephemeral: true });
 		}
 		if (choices.length < 2) {
-			const errorEmbed = new MessageEmbed()
-				.setTitle('Error')
-				.setDescription(`You must supply at least 2 choices to make a poll.`)
-				.setColor('RED');
-			return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`You must supply at least 2 choices to make a poll.`)], ephemeral: true });
 		}
 		if (choices.length > 10) {
-			const errorEmbed = new MessageEmbed()
-				.setTitle('Error')
-				.setDescription(`You cannot supply more than 10 choices.`)
-				.setColor('RED');
-			return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`You cannot supply more than 10 choices.`)], ephemeral: true });
 		}
 
 		const mdTimestamp = `<t:${Math.floor(Date.now() / 1000) + (timespan / 1000)}:R>`;
 
 		let choiceText = '';
-		for (let j = 0; j < choices.length; j++) {
-			choiceText += `${emotes[j]} ${choices[j]}: ${choiceQuantites[j]} vote${choiceQuantites[j] === 1 ? '' : 's'}\n`;
-		}
+		choices.forEach((choice, index) => {
+			choiceText += `${emotes[index]} ${choice}: ${choiceQuantites[index]} vote${choiceQuantites[index] === 1 ? '' : 's'}\n`;
+		});
 		choiceText = choiceText.trim();
 
 		let pollFooter = interaction.options.getString('optiontype') === 'Multiple'
@@ -111,13 +96,13 @@ export default class extends Command {
 
 		const choiceBtns = []; // first 5 choices
 		const choiceBtns2 = []; // next 5
-		for (let i = 0; i < choices.length; i++) {
-			if (i < 5) {
-				choiceBtns.push(new MessageButton({ label: `${choices[i]}`, customId: `${i + 1}`, style: 'SECONDARY', emoji: `${emotes[i]}` }));
+		choices.forEach((choice, index) => {
+			if (index < 5) {
+				choiceBtns.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
 			} else {
-				choiceBtns2.push(new MessageButton({ label: `${choices[i]}`, customId: `${i + 1}`, style: 'SECONDARY', emoji: `${emotes[i]}` }));
+				choiceBtns2.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
 			}
-		}
+		});
 
 		if (choiceBtns2.length === 0) {
 			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns })] });
@@ -134,7 +119,7 @@ export default class extends Command {
 		});
 
 		collector.on('collect', async (i: ButtonInteraction) => {
-			this.resetArray(choiceQuantites, choices.length);
+			choiceQuantites.fill(0);
 
 			const usersChoices = userSelections.get(i.user.id) || [];
 			if (usersChoices && usersChoices.includes(i.customId)) { // user has already selected choice

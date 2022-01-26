@@ -2,8 +2,9 @@ import { ApplicationCommandOptionData, CommandInteraction, EmbedField, Message, 
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
-import { BOT, DB, MAINTAINERS, PREFIX } from '@root/config';
+import { BOT, DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@root/src/lib/utils';
 
 export default class extends Command {
 
@@ -33,11 +34,7 @@ export default class extends Command {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Error`)
-				.setDescription(`Something went wrong. Please contact ${MAINTAINERS}`)
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`Something went wrong. Please contact ${MAINTAINERS}`)], ephemeral: true });
 		}
 
 		let course: Course;
@@ -49,30 +46,24 @@ export default class extends Command {
 		} else {
 			const inputtedCourse = courses.find(c => c.name === interaction.options.getString('course'));
 			if (!inputtedCourse) {
-				const responseEmbed = new MessageEmbed()
-					.setTitle(`Argument error`)
-					.setDescription('I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
-					`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``)
-					.setColor('#ff0000');
-				return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+				const desc = 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
+				`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;
+				return interaction.reply({ embeds: [generateErrorEmbed(desc)], ephemeral: true });
 			}
 			course = inputtedCourse;
 		}
 
 		if (!course.assignments.includes(assignment)) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Argument error`)
-				.setDescription(`I couldn't find an assignment called **${assignment}** for CISC ${course.name}\n` +
-				`Assignments for CISC ${course.name}: ${course.assignments.length > 0 ? `\`${course.assignments.join('`, `')}\``
-					: 'It looks like there aren\'t any yet, ask a staff member to add some.'}`)
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			const desc = `I couldn't find an assignment called **${assignment}** for CISC ${course.name}\n` +
+			`Assignments for CISC ${course.name}: ${course.assignments.length > 0 ? `\`${course.assignments.join('`, `')}\``
+				: 'It looks like there aren\'t any yet, ask a staff member to add some.'}`;
+			return interaction.reply({ embeds: [generateErrorEmbed(desc)], ephemeral: true });
 		}
 
-		const entries: Array<QuestionTag> = await interaction.client.mongo.collection(DB.QTAGS).find({ course: course, assignment: assignment }).toArray();
+		const entries: Array<QuestionTag> = await interaction.client.mongo.collection(DB.QTAGS).find({ course: course.name, assignment: assignment }).toArray();
 		const fields: Array<EmbedField> = [];
 		if (entries.length === 0) {
-			return interaction.reply({ content: `There are no questions for ${course}, ${assignment}.
+			return interaction.reply({ content: `There are no questions for ${course.name}, ${assignment}.
 		To add questions, use the tag command (\`/help tag\`)`.replace('\t', ''), ephemeral: true });
 		}
 		entries.forEach(doc => {

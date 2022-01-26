@@ -3,7 +3,7 @@ import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, DB, MAINTAINERS, ROLES } from '@root/config';
-import { generateQuestionId } from '@lib/utils';
+import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -25,7 +25,6 @@ export default class extends Command {
 			required: false
 		}
 	]
-	// previously, runInGuild was false, but due to ephemeral commands being a thing, I have set it so it can be run in the guild.
 
 	run(_msg: Message): Promise<void> { return; }
 
@@ -33,11 +32,7 @@ export default class extends Command {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Error`)
-				.setDescription(`Something went wrong. Please contact ${MAINTAINERS}`)
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`Something went wrong. Please contact ${MAINTAINERS}`)], ephemeral: true });
 		}
 
 		let course: Course;
@@ -49,22 +44,15 @@ export default class extends Command {
 		} else {
 			const inputtedCourse = courses.find(c => c.name === interaction.options.getString('course'));
 			if (!inputtedCourse) {
-				const responseEmbed = new MessageEmbed()
-					.setTitle(`Argument error`)
-					.setDescription('I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
-					`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``)
-					.setColor('#ff0000');
-				return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+				const desc = 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
+				`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;
+				return interaction.reply({ embeds: [generateErrorEmbed(desc)], ephemeral: true });
 			}
 			course = inputtedCourse;
 		}
 
 		if (!question) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Argument error`)
-				.setDescription('Please provide a question.')
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed('Please provide a question.')], ephemeral: true });
 		}
 
 		const bot = interaction.client;
@@ -93,21 +81,6 @@ export default class extends Command {
 		const embed = new MessageEmbed()
 			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
 			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
-
-		// command runs cannot have attachments, so this has been excluded
-
-		// const attachments: MessageAttachment[] = [];
-		// if (interaction.attachments) {
-		// 	let imageSet = false;
-		// 	msg.attachments.forEach(attachment => {
-		// 		if (!imageSet && attachment.height) {
-		// 			embed.setImage(attachment.url);
-		// 			imageSet = true;
-		// 		} else {
-		// 			attachments.push(attachment);
-		// 		}
-		// 	});
-		// }
 
 		const privateChannel = await interaction.client.channels.fetch(course.channels.private) as TextChannel;
 		await privateChannel.send({

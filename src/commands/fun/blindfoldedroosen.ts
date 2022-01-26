@@ -9,22 +9,20 @@ export default class extends Command {
 	run(_msg: Message): Promise<void> { return; }
 
 	tempRun(interaction: CommandInteraction): Promise<void> {
-		const chosenSword = Math.floor(Math.random() * 6);
 		// 5 is a random number I chose to be the blindfolded Roosen, no other meaning
 		let responseEmbed: MessageEmbed;
-		if (chosenSword === 5) {
+		if (Math.floor(Math.random() * 6) === 5) {
 			responseEmbed = new MessageEmbed()
 				.setColor('#ff0000')
 				.setTitle('Battle results')
 				.setDescription('Ooooooooooooh... ouch! Blindfolded Roosen has killed you! You lose.');
-			return interaction.reply({ embeds: [responseEmbed] });
 		} else {
 			responseEmbed = new MessageEmbed()
 				.setColor('#00ff00')
 				.setTitle('Battle results')
 				.setDescription('You\'ve won the fight against blindfolded Roosen. You live another day!');
-			return interaction.reply({ embeds: [responseEmbed] });
 		}
+		return interaction.reply({ embeds: [responseEmbed] });
 	}
 
 }

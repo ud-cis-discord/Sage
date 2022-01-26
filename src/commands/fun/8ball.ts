@@ -51,7 +51,6 @@ export default class extends Command {
 			.setDescription(response)
 			.setFooter(`${interaction.user.username} asked: ${question}`);
 		return interaction.reply({ embeds: [responseEmbed], files: [{ attachment: `${__dirname}../../../../../assets/images/8-ball.png`, name: '8-ball.png' }] });
-		// if a user doesn't ask a question, should 'The 8-ball only responds to questions smh' be ephemeral?
 	}
 
 }

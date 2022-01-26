@@ -1,5 +1,6 @@
 import { Command } from '@root/src/lib/types/Command';
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { generateErrorEmbed } from '@root/src/lib/utils';
+import { CommandInteraction, Message } from 'discord.js';
 
 export default class extends Command {
 
@@ -10,11 +11,7 @@ export default class extends Command {
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		if (!interaction.channel.isThread()) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle('Error')
-				.setDescription('You must run this command in a private question thread.')
-				.setColor('RED');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed('You must run this command in a private question thread.')], ephemeral: true });
 		}
 		interaction.reply(`Archiving thread...`);
 		await interaction.channel.setArchived(true, `${interaction.user.username} archived the question.`);

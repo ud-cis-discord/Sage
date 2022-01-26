@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
-import { generateQuestionId } from '@lib/utils';
+import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { PVQuestion } from '@lib/types/PVQuestion';
@@ -32,11 +32,7 @@ export default class extends Command {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Error`)
-				.setDescription(`Something went wrong. Please contact ${MAINTAINERS}`)
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`Something went wrong. Please contact ${MAINTAINERS}`)], ephemeral: true });
 		}
 
 		let course: Course;
@@ -48,22 +44,15 @@ export default class extends Command {
 		} else {
 			const inputtedCourse = courses.find(c => c.name === interaction.options.getString('course'));
 			if (!inputtedCourse) {
-				const responseEmbed = new MessageEmbed()
-					.setTitle(`Argument error`)
-					.setDescription('I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
-					`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``)
-					.setColor('#ff0000');
-				return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+				const desc = 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
+				`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;
+				return interaction.reply({ embeds: [generateErrorEmbed(desc)], ephemeral: true });
 			}
 			course = inputtedCourse;
 		}
 
 		if (!question) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Argument error`)
-				.setDescription('Please provide a question.')
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed('Please provide a question.')], ephemeral: true });
 		}
 
 		const questionId = await generateQuestionId(interaction);

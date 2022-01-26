@@ -2,6 +2,7 @@ import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Me
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@root/src/lib/utils';
 
 export default class extends Command {
 
@@ -35,27 +36,18 @@ export default class extends Command {
 			comicNum = latest.num;
 			comic = latest;
 		} else if (!isNaN(Number(comicChoice))) {
-			let errorEmbed: MessageEmbed;
 			if (Number(comicChoice) < 1 || Number(comicChoice) > latest.num || !Number.isInteger(Number(comicChoice))) {
-				errorEmbed = new MessageEmbed()
-					.setTitle('Error')
-					.setDescription(`Comic ${comicChoice} does not exist.`)
-					.setColor('RED');
 				return interaction.reply({
 					ephemeral: true,
-					embeds: [errorEmbed]
+					embeds: [generateErrorEmbed(`Comic ${comicChoice} does not exist.`)]
 				});
 			}
 			comicNum = Number(comicChoice);
 			comic = await fetch(`http://xkcd.com/${comicChoice}/info.0.json`).then(r => r.json());
 		} else {
-			const errorEmbed = new MessageEmbed()
-				.setTitle('Error')
-				.setDescription(`Unknown parameter supplied. Please enter 'latest', 'random', or a number.`)
-				.setColor('RED');
 			return interaction.reply({
 				ephemeral: true,
-				embeds: [errorEmbed]
+				embeds: [generateErrorEmbed(`Unknown parameter supplied. Please enter 'latest', 'random', or a number.`)]
 			});
 		}
 

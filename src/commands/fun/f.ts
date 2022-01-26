@@ -7,7 +7,7 @@ export default class extends Command {
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'target',
-			description: '(Optional) The user to pay respects to',
+			description: 'The user to pay respects to',
 			type: 'USER',
 			required: false
 		}
@@ -17,9 +17,7 @@ export default class extends Command {
 
 	tempRun(interaction: CommandInteraction): Promise<void> {
 		const target = interaction.options.getMember('target') as GuildMember;
-		const replyContent = target
-			? `${interaction.user.username} paid their respects to ${target.user.username}`
-			: `${interaction.user.username} paid their respects`;
+		const replyContent = `${interaction.user.username} paid their respects ${target ? `to ${target.user.username}` : ``}`;
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/f.png`,
 			name: 'pay_respects.png'

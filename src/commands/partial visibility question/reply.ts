@@ -2,6 +2,7 @@ import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { MessageEmbed, Message, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { generateErrorEmbed } from '@root/src/lib/utils';
 
 
 export default class extends Command {
@@ -30,18 +31,10 @@ export default class extends Command {
 		const question: PVQuestion = await interaction.client.mongo.collection(DB.PVQ).findOne({ questionId: id });
 
 		if (!question || question.type === 'private') {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Error`)
-				.setDescription(`Could not find an *anonymous* question with an ID of **${id}**.`)
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`Could not find an *anonymous* question with an ID of **${id}**.`)], ephemeral: true });
 		}
 		if (question.owner !== interaction.user.id) {
-			const responseEmbed = new MessageEmbed()
-				.setTitle(`Error`)
-				.setDescription(`You are not the owner of question ID ${question.questionId}.`)
-				.setColor('#ff0000');
-			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+			return interaction.reply({ embeds: [generateErrorEmbed(`You are not the owner of question ID ${question.questionId}.`)], ephemeral: true });
 		}
 
 		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
