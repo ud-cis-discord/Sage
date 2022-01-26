@@ -42,7 +42,15 @@ async function main() {
 
 	const commandFiles = readdirRecursive(`${__dirname}/../src/commands`).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		const command: Command = await import(file);
+		const commandModule = await import(file);
+
+		if (!(typeof commandModule.default === 'function')) {
+			console.log(`Invalid command ${file}`);
+			continue;
+		}
+
+		// eslint-disable-next-line new-cap
+		const command: Command = new commandModule.default;
 
 		// scrape commands
 		const dirs = file.split('/');
