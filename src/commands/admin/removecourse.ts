@@ -3,6 +3,7 @@ import { Course } from '@lib/types/Course';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CategoryChannel, CommandInteraction, Message } from 'discord.js';
+import { modifyRoleDD } from '@root/src/lib/utils';
 
 export default class extends Command {
 
@@ -55,6 +56,8 @@ export default class extends Command {
 			await interaction.guild.members.fetch();
 			const staffRole = await interaction.guild.roles.fetch(`${course} staff`);
 			const studentRole = await interaction.guild.roles.fetch(`CISC ${course}`);
+
+			if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
 
 			for (const [, member] of staffRole.members) {
 				if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
