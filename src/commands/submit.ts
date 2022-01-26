@@ -1,6 +1,7 @@
 import { CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '../lib/utils';
 
 const SUBMIT_TIMEOUT = 30;
 
@@ -32,27 +33,15 @@ export default class extends Command {
 
 		collector.on('collect', async i => {
 			if (i.attachments.size < 1) {
-				const responseEmbed = new MessageEmbed()
-					.setColor('#ff0000')
-					.setTitle('Argument error')
-					.setDescription(`You have to submit an image! Please re-run /submit and try again.`);
-				interaction.channel.send({ embeds: [responseEmbed] });
+				interaction.channel.send({ embeds: [generateErrorEmbed(`You have to submit an image! Please re-run /submit and try again.`)] });
 				return;
 			}
 			if (i.attachments.size > 1) {
-				const responseEmbed = new MessageEmbed()
-					.setColor('#ff0000')
-					.setTitle('Argument error')
-					.setDescription(`You can only submit one image! Please re-run /submit and try again.`);
-				interaction.channel.send({ embeds: [responseEmbed] });
+				interaction.channel.send({ embeds: [generateErrorEmbed(`You can only submit one image! Please re-run /submit and try again.`)] });
 				return;
 			}
 			if (i.attachments.first().url.indexOf('.png') === -1 && i.attachments.first().url.indexOf('.jpg') === -1 && i.attachments.first().url.indexOf('.jpeg') === -1) {
-				const responseEmbed = new MessageEmbed()
-					.setColor('#ff0000')
-					.setTitle('Argument error')
-					.setDescription(`Your submission must be a JPG or PNG. Please re-run /submit and try again.`);
-				interaction.channel.send({ embeds: [responseEmbed] });
+				interaction.channel.send({ embeds: [generateErrorEmbed(`Your submission must be a JPG or PNG. Please re-run /submit and try again.`)] });
 				return;
 			} else {
 				const submissionChannel = await interaction.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
@@ -77,9 +66,7 @@ export default class extends Command {
 	}
 
 	countdown(interaction: CommandInteraction, timeout: number, embed: MessageEmbed): void {
-		const footerText = timeout > 1
-			? `You have ${timeout} seconds to submit.`
-			: `You have ${timeout} second to submit.`;
+		const footerText = `You have ${timeout} second${timeout !== 1 ? 's' : ''} to submit.`;
 		embed.setFooter(footerText);
 		interaction.editReply({ embeds: [embed] });
 	}
