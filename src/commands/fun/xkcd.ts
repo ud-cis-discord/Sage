@@ -80,30 +80,21 @@ export default class extends Command {
 		});
 
 		collector.on('collect', async (i: ButtonInteraction) => {
+			i.deferUpdate();
 			if (i.customId === 'previous') {
 				if (comicNum - 1 > 0) {
 					comic = await fetch(`http://xkcd.com/${--comicNum}/info.0.json`).then(r => r.json());
 					actionRow = comicNum === 1
 						? new MessageActionRow({ components: [randButton, nextButton] })
 						: new MessageActionRow({ components: [prevButton, randButton, nextButton] });
-					interaction.editReply({
-						embeds: [this.createComicEmbed(comic)],
-						components: [actionRow]
-					});
 				}
-				i.deferUpdate();
 			} else if (i.customId === 'next') {
 				if (comicNum + 1 <= latest.num) {
 					comic = await fetch(`http://xkcd.com/${++comicNum}/info.0.json`).then(r => r.json());
 					actionRow = comicNum === latest.num
 						? new MessageActionRow({ components: [prevButton, randButton] })
 						: new MessageActionRow({ components: [prevButton, randButton, nextButton] });
-					interaction.editReply({
-						embeds: [this.createComicEmbed(comic)],
-						components: [actionRow]
-					});
 				}
-				i.deferUpdate();
 			} else if (i.customId === 'rand') {
 				comicNum = Math.trunc((Math.random() * (latest.num - 1)) + 1);
 				comic = await fetch(`http://xkcd.com/${comicNum}/info.0.json`).then(r => r.json());
@@ -114,12 +105,11 @@ export default class extends Command {
 				} else {
 					actionRow = new MessageActionRow({ components: [prevButton, randButton, nextButton] });
 				}
-				interaction.editReply({
-					embeds: [this.createComicEmbed(comic)],
-					components: [actionRow]
-				});
-				i.deferUpdate();
 			}
+			interaction.editReply({
+				embeds: [this.createComicEmbed(comic)],
+				components: [actionRow]
+			});
 		});
 	}
 

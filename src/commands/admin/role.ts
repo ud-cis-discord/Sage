@@ -1,5 +1,5 @@
 import { TextChannel, Message, ApplicationCommandOptionData, CommandInteraction, MessageEmbed, MessageActionRow,
-	MessageSelectOptionData, MessageSelectMenu, Client, Interaction, GuildMember } from 'discord.js';
+	MessageSelectOptionData, MessageSelectMenu } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { BOT } from '@root/config';
 
@@ -83,9 +83,6 @@ export default class extends Command {
 				.setDescription(`Unknown message, make sure your channel and message ID are correct.`);
 			return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
 		}
-
-		console.log(targetMessage.author.id);
-		console.log(BOT.CLIENT_ID);
 		if (targetMessage.author.id !== BOT.CLIENT_ID) {
 			const responseEmbed = new MessageEmbed()
 				.setColor('#ff0000')
