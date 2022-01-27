@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -67,10 +67,16 @@ export default class extends Command {
 				if (!categories.includes(command.category)) categories.push(command.category);
 			});
 
+			const member = interaction.member as GuildMember;
+			const staff = interaction.guild.roles.cache.find(r => r.name === 'Staff');
 			categories.forEach(cat => {
-				const useableCmds = commands.filter(command =>
+				let useableCmds = commands.filter(command =>
 					command.category === cat
-					&& (command.enabled !== false));
+					&& command.enabled !== false);
+				// check if user isn't staff
+				if (!member.roles.cache.has(staff.id)) {
+					useableCmds = useableCmds.filter(command => command.category !== 'staff' && command.category !== 'admin');
+				}
 				const categoryName = cat === 'commands' ? 'General' : `${cat[0].toUpperCase()}${cat.slice(1)}`;
 				if (useableCmds.size > 0) {
 					helpStr += `\n**${categoryName} Commands**\n`;
