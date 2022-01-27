@@ -1,35 +1,45 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `Displays the users current message count. Use \`/check here\` to send in the current channel`;
-	usage = '[here]';
-	aliases = ['count'];
+	description = 'Displays the users current message count.';
+	usage = '[hide]';
 
-	async run(msg: Message, [here]: [string]): Promise<void> {
-		const user: SageUser = await msg.author.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'hide',
+			description: 'determines if you want stats public or private',
+			type: 'BOOLEAN',
+			required: false
+		}
+	]
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const user: SageUser = await interaction.user.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
-			msg.reply(`I couldn't find you in the database, if you think this is an error please contact ${MAINTAINERS}.`);
+			interaction.reply(`I couldn't find you in the database, if you think this is an error please contact ${MAINTAINERS}.`);
 			return;
 		}
 
 		const embed = new MessageEmbed()
-			.setTitle(`${msg.author.username}'s Progress`)
-			.setThumbnail(msg.author.avatarURL())
+			.setTitle(`${interaction.user.username}'s Progress`)
+			.setThumbnail(interaction.user.avatarURL())
 			.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, true)
 			.addField('Level Progress', `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
 			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
-		if (here === 'here') {
-			msg.channel.send({ embeds: [embed] });
+		if (interaction.options.getBoolean('hide') === true) {
+			interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
-			msg.author.send({ embeds: [embed] })
-				.then(() => { if (msg.channel.type !== 'DM') msg.channel.send('Your message count has been sent to your DMs.'); })
-				.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again.'));
+			interaction.reply({ embeds: [embed] });
 		}
+		return;
+	}
+
+	async run(): Promise<void> {
 		return;
 	}
 

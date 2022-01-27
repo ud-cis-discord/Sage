@@ -1,15 +1,20 @@
 /* eslint-disable camelcase */
-import { Message, MessageEmbed, EmbedField } from 'discord.js';
+import { MessageEmbed, EmbedField, CommandInteraction } from 'discord.js';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	aliases = ['ds', 'discstatus', 'discordstats'];
 	description = 'Check Discord\'s current status.';
 
-	async run(msg: Message): Promise<Message> {
+	// required for export default
+	async run(): Promise<void> {
+		return;
+	}
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		await interaction.deferReply();
 		const url = 'https://srhpyqt94yxb.statuspage.io/api/v2/summary.json';
 		const currentStatus = await fetch(url, { method: 'Get' }).then(r => r.json()) as DiscordStatus;
 
@@ -52,7 +57,7 @@ export default class extends Command {
 			.setFooter(`Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}`)
 			.setColor('BLURPLE');
 
-		return msg.channel.send({ embeds: [embed] });
+		interaction.editReply({ embeds: [embed] });
 	}
 
 }

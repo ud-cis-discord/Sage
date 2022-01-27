@@ -1,31 +1,38 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { BOT, CHANNELS, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = `Provide feedback or bug reports about ${BOT.NAME}.`;
-	usage = '<suggestion>';
-	aliases = ['suggest'];
 
-	async run(msg: Message, [suggestion]: [string]): Promise<Message> {
-		const feedbackChannel = await msg.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'feedback',
+			description: 'feedback to be sent to the admins',
+			type: 'STRING',
+			required: true
+		}
+	]
+
+	async tempRun(interaction:CommandInteraction): Promise<void> {
+		const feedback = interaction.options.getString('feedback');
+		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
 		const embed = new MessageEmbed()
-			.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
+			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))
 			.setTitle('New Feedback')
-			.setDescription(suggestion)
+			.setDescription(feedback)
 			.setColor('DARK_GREEN')
 			.setTimestamp();
 
 		feedbackChannel.send({ embeds: [embed] });
 
-		return msg.channel.send(`Thanks! I've sent your feedback to ${MAINTAINERS}.`);
+		return interaction.reply({ content: `Thanks! I've sent your feedback to ${MAINTAINERS}.`, ephemeral: true });
 	}
 
-	argParser(_msg: Message, input: string): [string] {
-		if (input === '') throw `Usage: ${this.usage}`;
-		return [input];
+	async run(): Promise<void> {
+		return;
 	}
 
 }

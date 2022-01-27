@@ -1,4 +1,4 @@
-import { EmbedField, Message, MessageEmbed, Util } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -8,14 +8,26 @@ export default class extends Command {
 	description = `Provides info about all ${BOT.NAME} commands`;
 	usage = '[command]';
 	extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
-	aliases = ['commands', 'man', 'h'];
 
-	run(msg: Message, [cmd]: [string]): Promise<Message | void> {
-		const { commands } = msg.client;
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'cmd',
+			description: 'command you would like to know more about',
+			type: 'STRING',
+			required: false
+		}
+	]
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const cmd = interaction.options.getString('cmd');
+		const { commands } = interaction.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
+
 		if (cmd) {
-			const command = getCommand(msg.client, cmd);
-			if (!command) return msg.channel.send(`**${cmd}** is not a valid command.`);
+			const command = getCommand(interaction.client, cmd);
+			if (!command) {
+				return interaction.reply({ content: `**${cmd}** is not a valid command.`, ephemeral: true });
+			}
 
 			const fields: Array<EmbedField> = [];
 			fields.push({
@@ -23,13 +35,7 @@ export default class extends Command {
 				value: `${PREFIX}${command.name} ${command.usage ? command.usage : ''}`,
 				inline: true
 			});
-			if (command.aliases) {
-				fields.push({
-					name: 'Aliases',
-					value: command.aliases.join(', '),
-					inline: true
-				});
-			}
+
 			if (command.extendedHelp) {
 				fields.push({
 					name: 'Extended Help',
@@ -37,6 +43,7 @@ export default class extends Command {
 					inline: false
 				});
 			}
+
 			fields.push({
 				name: 'More commands',
 				value: `[Visit our website!](${website})`,
@@ -47,23 +54,34 @@ export default class extends Command {
 				.setTitle(command.name)
 				.setDescription(command.description ? command.description : '')
 				.addFields(fields)
-				.setThumbnail(msg.client.user.avatarURL())
+				.setThumbnail(interaction.client.user.avatarURL())
 				.setTimestamp(Date.now())
 				.setColor('RANDOM');
 
-			return msg.channel.send({ embeds: [embed] });
+			return interaction.reply({ embeds: [embed] });
 		} else {
-			let helpStr = `You can do \`${PREFIX}help <command>\` to get more information about any command, or you can visit our website here:\n<${website}>\n`;
+			// if no command given
+			let helpStr = `You can do \`/help <command>\` to get more information about any command, or you can visit our website here:\n<${website}>\n`;
 			const categories: Array<string> = [];
 			commands.forEach(command => {
 				if (!categories.includes(command.category)) categories.push(command.category);
 			});
 
+			const member = interaction.member as GuildMember;
+			const staff = interaction.guild.roles.cache.find(r => r.name === 'Staff');
+			const admin = interaction.guild.roles.cache.find(r => r.name === 'admin');
 			categories.forEach(cat => {
-				const useableCmds = commands.filter(command =>
+				let useableCmds = commands.filter(command =>
 					command.category === cat
-					&& !(command.permissions && !command.permissions(msg))
 					&& command.enabled !== false);
+				// check if user isn't admin and filter accordingly
+				if (!member.roles.cache.has(admin.id)) {
+					useableCmds = useableCmds.filter(command => command.category !== 'admin');
+				}
+				// check if user isn't staff and filter accordingly
+				if (!member.roles.cache.has(staff.id)) {
+					useableCmds = useableCmds.filter(command => command.category !== 'staff' && command.category !== 'admin');
+				}
 				const categoryName = cat === 'commands' ? 'General' : `${cat[0].toUpperCase()}${cat.slice(1)}`;
 				if (useableCmds.size > 0) {
 					helpStr += `\n**${categoryName} Commands**\n`;
@@ -76,22 +94,29 @@ export default class extends Command {
 			const splitStr = Util.splitMessage(helpStr, { char: '\n' });
 
 			let notified = false;
-			splitStr.forEach(helpMsg => {
-				msg.author.send(helpMsg)
+			splitStr.forEach((helpMsg) => {
+				const embed = new MessageEmbed()
+					.setTitle(`-- Commands --`)
+					.setDescription(helpMsg)
+					.setColor('RANDOM');
+				interaction.user.send({ embeds: [embed] })
 					.then(() => {
 						if (!notified) {
-							if (msg.channel.type !== 'DM') msg.channel.send('I\'ve sent all commands to your DMs');
+							if (interaction.channel.type !== 'DM') interaction.reply({ content: 'I\'ve sent all commands to your DMs.', ephemeral: true });
 							notified = true;
 						}
 					})
 					.catch(() => {
 						if (!notified) {
-							msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again');
+							interaction.reply({ content: 'I couldn\'t send you a DM. Please enable DMs and try again.', ephemeral: true });
 							notified = true;
 						}
 					});
 			});
 		}
+	}
+	async run(): Promise<void> {
+		return;
 	}
 
 }

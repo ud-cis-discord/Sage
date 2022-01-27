@@ -2,7 +2,7 @@ import { SageUser } from '@lib/types/SageUser';
 import { Leaderboard } from '@root/src/lib/enums';
 import { Command } from '@lib/types/Command';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
-import { MessageEmbed, Message } from 'discord.js';
+import { MessageEmbed, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
@@ -10,30 +10,42 @@ export default class extends Command {
 	usage = '[page number]';
 	extendedHelp = 'Enter a page number to look further down the leaderboard';
 	runInDM = false;
-	aliases = ['rank', 'leader'];
 
-	async run(msg: Message, [page]: [number]): Promise<Message> {
-		msg.guild.members.fetch();
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'pagenumber',
+			description: 'leaderboard page to view',
+			type: 'NUMBER',
+			required: false
+		}
+	]
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		interaction.guild.members.fetch();
+		interaction.deferReply();
 
 		// eslint-disable-next-line no-extra-parens
-		const users: Array<SageUser> = (await msg.client.mongo.collection('users').find().toArray() as Array<SageUser>)
-			.filter(user => msg.guild.members.cache.has(user.discordId))
+		const users: Array<SageUser> = (await interaction.client.mongo.collection('users').find().toArray() as Array<SageUser>)
+			.filter(user => interaction.guild.members.cache.has(user.discordId))
 			.sort((ua, ub) => ua.level - ub.level !== 0 ? ua.level > ub.level ? -1 : 1 : ua.curExp < ub.curExp ? -1 : 1); // filter on level first, then remaining xp
 
+		let page = interaction.options.getNumber('pagenumber') ?? 1;
+
 		page = page * 10 > users.length ? Math.floor(users.length / 10) + 1 : page;
+
 		const start = (page * 10) - 10;
 		const end = page * 10 > users.length ? undefined : page * 10;
 
 		const displUsers = users.slice(start, end);
 
-		const dbAuthor = users.find(user => msg.author.id === user.discordId);
+		const dbAuthor = users.find(user => interaction.user.id === user.discordId);
 
 		const canvas = createCanvas(Leaderboard.width, (Leaderboard.userPillHeight + 5) * displUsers.length);
 		const ctx = canvas.getContext('2d');
 
 		for (const user of displUsers) {
 			const i = displUsers.indexOf(user);
-			const discUser = msg.guild.members.cache.get(user.discordId);
+			const discUser = interaction.guild.members.cache.get(user.discordId);
 			const rank = i + 1 + ((page - 1) * 10);
 			const { level } = user;
 			const exp = user.levelExp - user.curExp;
@@ -87,17 +99,19 @@ export default class extends Command {
 		const embed = new MessageEmbed()
 			.setTitle('UD CIS Discord Leaderboard')
 			.setFooter(`Showing page ${page} (${start + 1} - ${end || users.length})`)
-			.setColor(msg.guild.members.cache.get(displUsers[0].discordId).displayHexColor)
+			.setColor(interaction.guild.members.cache.get(displUsers[0].discordId).displayHexColor)
 			.setDescription(content)
 			.setImage('attachment://leaderboard.png');
 
-		return msg.channel.send({
+		interaction.editReply({
 			embeds: [embed],
 			files: [{ name: 'leaderboard.png', attachment: canvas.toBuffer() }]
 		});
+		return;
 	}
-	argParser(_msg: Message, input: string): Array<number | null> {
-		return [parseInt(input) > 1 ? parseInt(input) : 1];
+
+	async run(): Promise<void> {
+		return;
 	}
 
 	roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number): void {
