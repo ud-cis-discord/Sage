@@ -1,10 +1,10 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
-import { BOT, DB, PREFIX } from '@root/config';
+import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
-import { Command } from '@root/src/lib/types/Command';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { Command } from '@lib/types/Command';
+import { Course } from '@lib/types/Course';
 
-// TODO: Test this once private question commands are done
 export default class extends Command {
 
 	description = `Reply to a question asked through ${BOT.NAME}.`;
@@ -29,29 +29,70 @@ export default class extends Command {
 
 	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async tempRun(interaction: CommandInteraction): Promise<Message | void> {
 		const question: PVQuestion = await interaction.client.mongo.collection<PVQuestion>(DB.PVQ)
 			.findOne({ questionId: `${interaction.options.getInteger('questionid')}` });
 		const response = interaction.options.getString('response');
+		const bot = interaction.client;
+
+		if (interaction.channel.type !== 'GUILD_TEXT') {
+			return interaction.reply({
+				content: `Something went wrong. Please contact ${MAINTAINERS} for help.`, ephemeral: true
+			});
+		}
+
+		const channel = interaction.channel as TextChannel;
+
+		const course = await bot.mongo.collection<Course>(DB.COURSES).findOne({ 'channels.category': channel.parentId });
 
 		if (question.type === 'private') {
 			const splitLink = question.messageLink.split('/');
 			const threadId = splitLink[splitLink.length - 2];
 			return interaction.reply({
-				content: `\`${PREFIX}sudoreply\` has been depreciated for private questions. Please reply in thread <#${threadId}>.`,
+				content: `\`/sudoreply\` has been depreciated for private questions. Please reply in thread <#${threadId}>.`,
 				ephemeral: true
 			});
 		}
 
-		const asker = await interaction.client.users.fetch(question.owner);
-		const embed = new MessageEmbed()
-			.setAuthor(`${interaction.user.tag} replied to question ${question.questionId}`, interaction.user.avatarURL())
-			.setDescription(response)
-			.setFooter(`To respond do \n${PREFIX}reply ${question.questionId} <response>`);
+		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
+		let privThread: ThreadChannel;
+		if (courseGeneral.isText()) {
+			privThread = await courseGeneral.threads.create({
+				name: `${interaction.user.username}‘s private question (${question.questionId})'`,
+				autoArchiveDuration: 4320,
+				reason: `${interaction.user.username} asked a private question`,
+				type: `GUILD_PRIVATE_THREAD`
+			});
+		} else {
+			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
+		}
 
-		return asker.send({ embeds: [embed] })
-			.then(() => interaction.reply(`I've sent your response to ${asker.username}.`))
-			.catch(() => interaction.reply(`I couldn't send your response. ${asker.username} may have DMs disabled.`));
+		privThread.guild.members.fetch();
+		privThread.members.add(interaction.user.id);
+		privThread.members.add(question.owner);
+
+		const embed = new MessageEmbed()
+			.setDescription(`I've sent your response to this thread: <#${privThread.id}>\n\n Please have any further conversation there.`);
+
+		await interaction.reply({
+			embeds: [embed]
+		});
+
+		const asker = await interaction.guild.members.fetch(question.owner);
+
+		embed.setDescription(`${question.messageLink}`);
+		embed.setTitle(`${asker.user.tag}'s Question`);
+		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
+		await privThread.send({
+			embeds: [embed]
+		});
+
+		const threadEmbed = new MessageEmbed()
+			.setAuthor(`${interaction.user.tag}`, interaction.user.avatarURL())
+			.setDescription(response)
+			.setFooter(`Please have any further conversation in this thread!`);
+
+		return privThread.send({ embeds: [threadEmbed] });
 	}
 
 	permissions(msg: Message): boolean {
