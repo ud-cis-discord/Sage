@@ -5,7 +5,7 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `Displays the users current message count. Use \`/check here\` to send in the current channel`;
+	description = 'Displays the users current message count.';
 	usage = '[hide]';
 
 	options: ApplicationCommandOptionData[] = [
