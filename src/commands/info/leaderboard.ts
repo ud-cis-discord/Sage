@@ -22,17 +22,14 @@ export default class extends Command {
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		interaction.guild.members.fetch();
+		interaction.deferReply();
 
 		// eslint-disable-next-line no-extra-parens
 		const users: Array<SageUser> = (await interaction.client.mongo.collection('users').find().toArray() as Array<SageUser>)
 			.filter(user => interaction.guild.members.cache.has(user.discordId))
 			.sort((ua, ub) => ua.level - ub.level !== 0 ? ua.level > ub.level ? -1 : 1 : ua.curExp < ub.curExp ? -1 : 1); // filter on level first, then remaining xp
 
-		let page = 1;
-
-		if (interaction.options.getNumber('pagenumber')) {
-			page = interaction.options.getNumber('pagenumber');
-		}
+		let page = interaction.options.getNumber('pagenumber') ?? 1;
 
 		page = page * 10 > users.length ? Math.floor(users.length / 10) + 1 : page;
 
@@ -106,7 +103,7 @@ export default class extends Command {
 			.setDescription(content)
 			.setImage('attachment://leaderboard.png');
 
-		interaction.reply({
+		interaction.editReply({
 			embeds: [embed],
 			files: [{ name: 'leaderboard.png', attachment: canvas.toBuffer() }]
 		});

@@ -69,11 +69,16 @@ export default class extends Command {
 
 			const member = interaction.member as GuildMember;
 			const staff = interaction.guild.roles.cache.find(r => r.name === 'Staff');
+			const admin = interaction.guild.roles.cache.find(r => r.name === 'admin');
 			categories.forEach(cat => {
 				let useableCmds = commands.filter(command =>
 					command.category === cat
 					&& command.enabled !== false);
-				// check if user isn't staff
+				// check if user isn't admin and filter accordingly
+				if (!member.roles.cache.has(admin.id)) {
+					useableCmds = useableCmds.filter(command => command.category !== 'admin');
+				}
+				// check if user isn't staff and filter accordingly
 				if (!member.roles.cache.has(staff.id)) {
 					useableCmds = useableCmds.filter(command => command.category !== 'staff' && command.category !== 'admin');
 				}
@@ -88,18 +93,25 @@ export default class extends Command {
 
 			const splitStr = Util.splitMessage(helpStr, { char: '\n' });
 
-			let part = 1;
-			splitStr.forEach(helpMsg => {
+			let notified = false;
+			splitStr.forEach((helpMsg) => {
 				const embed = new MessageEmbed()
-					.setTitle(`Commands Part ${part}`)
+					.setTitle(`-- Commands --`)
 					.setDescription(helpMsg)
 					.setColor('RANDOM');
-				interaction.user.send({ embeds: [embed] });
-				part++;
-				if (part === 3) {
-					interaction.reply({ content: 'Help sent!', ephemeral: true });
-					return;
-				}
+				interaction.user.send({ embeds: [embed] })
+					.then(() => {
+						if (!notified) {
+							if (interaction.channel.type !== 'DM') interaction.reply({ content: 'I\'ve sent all commands to your DMs.', ephemeral: true });
+							notified = true;
+						}
+					})
+					.catch(() => {
+						if (!notified) {
+							interaction.reply({ content: 'I couldn\'t send you a DM. Please enable DMs and try again.', ephemeral: true });
+							notified = true;
+						}
+					});
 			});
 		}
 	}

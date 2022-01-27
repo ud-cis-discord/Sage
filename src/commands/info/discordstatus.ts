@@ -14,6 +14,7 @@ export default class extends Command {
 	}
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
+		await interaction.deferReply();
 		const url = 'https://srhpyqt94yxb.statuspage.io/api/v2/summary.json';
 		const currentStatus = await fetch(url, { method: 'Get' }).then(r => r.json()) as DiscordStatus;
 
@@ -56,7 +57,7 @@ export default class extends Command {
 			.setFooter(`Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}`)
 			.setColor('BLURPLE');
 
-		return interaction.reply({ embeds: [embed] });
+		interaction.editReply({ embeds: [embed] });
 	}
 
 }
