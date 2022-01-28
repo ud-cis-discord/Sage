@@ -27,8 +27,7 @@ export default class extends Command {
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 
 		if (!entry) {
-			interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
-			return;
+			return interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
 		}
 
 		const embed = new MessageEmbed()
@@ -50,20 +49,12 @@ export default class extends Command {
 
 		if (!entry.pii) {
 			const sender: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
-			interaction.reply({ content: `That user has not opted in to have their information shared over Discord. 
-	An email has been sent to you containing the requested data.`, ephemeral: true });
 			this.sendEmail(sender.email, user.username, entry);
-			return;
+			return interaction.reply({ content: `That user has not opted in to have their information shared over Discord. 
+	An email has been sent to you containing the requested data.`, ephemeral: true });
 		}
 
-		interaction.user.send({ embeds: [embed] }).then(() => interaction.reply({
-			content: 'I\'ve sent the requested info to your DMs',
-			ephemeral: true
-		})).catch(() => interaction.reply({
-			content: 'I couldn\'t send you a DM. Please enable DMs and try again',
-			ephemeral: true
-		}));
-		return;
+		return interaction.reply({ embeds: [embed], ephemeral: true });
 	}
 
 	permissions(msg: Message): boolean {

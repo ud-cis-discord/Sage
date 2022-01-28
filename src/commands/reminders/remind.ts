@@ -27,7 +27,7 @@ export default class extends Command {
 		{
 			name: 'repeat',
 			description: 'How often you want the reminder to repeat',
-			choices: [{ name: 'daily', value: 'daily' }, { name: 'weekly', value: 'weekly' }],
+			choices: [{ name: 'Daily', value: 'daily' }, { name: 'Weekly', value: 'weekly' }],
 			type: 'STRING',
 			required: false
 		}

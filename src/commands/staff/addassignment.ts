@@ -23,7 +23,7 @@ export default class extends Command {
 		},
 		{
 			name: 'newassignments',
-			description: 'A comma separated list of new assignments',
+			description: 'A | separated list of new assignments',
 			type: 'STRING',
 			required: true
 		}
@@ -35,7 +35,7 @@ export default class extends Command {
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		const course = interaction.options.getString('course');
-		const newAssignments = interaction.options.getString('newassignments').split(',').map(assign => assign.trim());
+		const newAssignments = interaction.options.getString('newassignments').split('|').map(assign => assign.trim());
 		const entry: Course = await interaction.client.mongo.collection(DB.COURSES).findOne({ name: course });
 
 		const added: Array<string> = [];

@@ -4,8 +4,8 @@ import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, EMAIL } from '@root/config';
-import { Command } from '@root/src/lib/types/Command';
-import { getMsgIdFromLink } from '@root/src/lib/utils';
+import { Command } from '@lib/types/Command';
+import { getMsgIdFromLink } from '@lib/utils';
 
 export default class extends Command {
 

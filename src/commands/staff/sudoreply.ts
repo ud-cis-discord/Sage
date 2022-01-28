@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = `Reply to a question asked through ${BOT.NAME}.`;
 	usage = '<questionID> <response>';
-	extendedHelp = 'Responses get sent to the askers DMs. This command will tell you it failed if it cannot send the DM.';
+	extendedHelp = 'Responses are put into a private thread between you and the asker.';
 	runInDM = false;
 
 	options: ApplicationCommandOptionData[] = [
@@ -34,10 +34,12 @@ export default class extends Command {
 			.findOne({ questionId: `${interaction.options.getInteger('questionid')}` });
 		const response = interaction.options.getString('response');
 		const bot = interaction.client;
+		const asker = await interaction.guild.members.fetch(question.owner);
 
 		if (interaction.channel.type !== 'GUILD_TEXT') {
 			return interaction.reply({
-				content: `Something went wrong. Please contact ${MAINTAINERS} for help.`, ephemeral: true
+				content: `You must use this command in a regular text channel. If you think there is a problem, please contact ${MAINTAINERS} for help.`,
+				ephemeral: true
 			});
 		}
 
@@ -58,13 +60,13 @@ export default class extends Command {
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({
-				name: `${interaction.user.username}‘s private question (${question.questionId})'`,
+				name: `${interaction.user.username}‘s anonymous question (${question.questionId})'`,
 				autoArchiveDuration: 4320,
-				reason: `${interaction.user.username} asked a private question`,
+				reason: `${interaction.user.username} asked an anonymous question`,
 				type: `GUILD_PRIVATE_THREAD`
 			});
 		} else {
-			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
+			throw `Something went wrong creating ${asker.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
 		}
 
 		privThread.guild.members.fetch();
@@ -77,8 +79,6 @@ export default class extends Command {
 		await interaction.reply({
 			embeds: [embed]
 		});
-
-		const asker = await interaction.guild.members.fetch(question.owner);
 
 		embed.setDescription(`${question.messageLink}`);
 		embed.setTitle(`${asker.user.tag}'s Question`);
@@ -100,13 +100,5 @@ export default class extends Command {
 	}
 
 	async run(_msg: Message): Promise<Message> { return; }
-
-	async argParser(msg: Message, input: string): Promise<[PVQuestion, string]> {
-		const question: PVQuestion = await msg.client.mongo.collection(DB.PVQ).findOne({ questionId: input.split(' ')[0] });
-
-		if (!question) throw `Could not find question with an ID of **${input.split(' ')[0]}**.`;
-
-		return [question, input.slice(question.questionId.length).trim()];
-	}
 
 }

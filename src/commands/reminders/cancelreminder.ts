@@ -14,7 +14,7 @@ export default class extends Command {
 			name: 'remindernumber',
 			type: 'INTEGER',
 			required: true,
-			description: 'Index of the reminder to cancel'
+			description: 'ID of the reminder to cancel'
 		}
 	]
 

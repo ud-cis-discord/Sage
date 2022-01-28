@@ -25,7 +25,10 @@ export default class extends Command {
 		const member = await interaction.guild.members.fetch(user.id);
 
 		if (!member) {
-			interaction.reply({ content: `Something went wrong. Please contact ${MAINTAINERS} for help.`, ephemeral: true });
+			interaction.reply({
+				content: `Something went wrong. Please contact ${MAINTAINERS} for help. You can give the user the <@&${ROLES.MUTED}> role manually as a quick fix.`,
+				ephemeral: true
+			});
 			throw new Error('Could not find member based on passed in user');
 		}
 
