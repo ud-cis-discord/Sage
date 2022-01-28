@@ -14,7 +14,7 @@ export default class extends Command {
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'question',
-			description: 'What would you like to ask?',
+			description: 'What you would like to ask',
 			type: 'STRING',
 			required: true
 		},

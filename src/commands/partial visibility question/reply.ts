@@ -18,7 +18,7 @@ export default class extends Command {
 		},
 		{
 			name: 'response',
-			description: 'What would you like to reply with?',
+			description: 'What you would like to reply with',
 			type: 'STRING',
 			required: true
 		}
