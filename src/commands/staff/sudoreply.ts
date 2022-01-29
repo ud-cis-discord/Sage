@@ -16,7 +16,7 @@ export default class extends Command {
 		{
 			name: 'questionid',
 			description: 'ID of question you are replying to',
-			type: 'INTEGER',
+			type: 'STRING',
 			required: true
 		},
 		{
@@ -30,8 +30,13 @@ export default class extends Command {
 	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
 	async tempRun(interaction: CommandInteraction): Promise<Message | void> {
+		const idArg = interaction.options.getString('questionid');
+		if (isNaN(Number.parseInt(idArg))) return interaction.reply({ content: `**${idArg}** is not a valid question ID`, ephemeral: true });
+
 		const question: PVQuestion = await interaction.client.mongo.collection<PVQuestion>(DB.PVQ)
-			.findOne({ questionId: `${interaction.options.getInteger('questionid')}` });
+			.findOne({ questionId: `${interaction.options.getString('questionid')}` });
+		if (!question) return interaction.reply({ content: `I could not find a question with ID **${idArg}**.`, ephemeral: true });
+
 		const response = interaction.options.getString('response');
 		const bot = interaction.client;
 		const asker = await interaction.guild.members.fetch(question.owner);
