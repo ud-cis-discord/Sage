@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Client, Message, MessageAttachment } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Client, CommandInteraction, MessageAttachment, MessageEmbed } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB } from '@root/config';
@@ -33,17 +33,25 @@ export function isPermissionEqual(perm1: ApplicationCommandPermissionData, perm2
 		&& perm1.type === perm2.type;
 }
 
+export function generateErrorEmbed(msg: string): MessageEmbed {
+	const responseEmbed = new MessageEmbed()
+		.setColor('#ff0000')
+		.setTitle('Error')
+		.setDescription(msg);
+	return responseEmbed;
+}
+
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
 	const time = moment().format('M-D-YY_HH-mm');
 	filename = `${filename}${timestamp ? `_${time}` : ''}` || time;
 	return new MessageAttachment(Buffer.from(input.trim()), `${filename}.${filetype}`);
 }
 
-export async function generateQuestionId(msg: Message, depth = 1): Promise<string> {
-	const potentialId = `${msg.author.id.slice(msg.author.id.length - depth)}${msg.id.slice(msg.id.length - depth)}`;
+export async function generateQuestionId(interaction: CommandInteraction, depth = 1): Promise<string> {
+	const potentialId = `${interaction.user.id.slice(interaction.user.id.length - depth)}${interaction.id.slice(interaction.id.length - depth)}`;
 
-	if (await msg.client.mongo.collection(DB.PVQ).countDocuments({ questionId: potentialId }) > 0) {
-		return generateQuestionId(msg, depth + 1);
+	if (await interaction.client.mongo.collection(DB.PVQ).countDocuments({ questionId: potentialId }) > 0) {
+		return generateQuestionId(interaction, depth + 1);
 	}
 
 	return potentialId;

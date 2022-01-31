@@ -1,20 +1,105 @@
 import { BOT } from '@root/config';
-import { Message } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
+
+const DECISION_TIMEOUT = 10;
+const CHOICES = ['rock', 'paper', 'scissors'];
 
 export default class extends Command {
 
 	description = `The ultimate battle of human vs program. Can you best ${BOT.NAME} in a round of rock paper scissors?`;
-	usage = '<rock|paper|scissors>';
-	aliases = ['rps'];
-	choices = ['rock', 'paper', 'scissors'];
 
-	run(msg: Message, [choice]: [string]): Promise<Message> {
-		const botMove = this.choices[Math.floor(Math.random() * this.choices.length)];
+	run(_msg: Message): Promise<void> { return; }
 
-		const winner = this.checkWinner(this.choices.indexOf(choice), this.choices.indexOf(botMove));
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		let timeout = DECISION_TIMEOUT;
+		const choiceEmbed = new MessageEmbed()
+			.setTitle(`Make your choice, ${interaction.user.username}...`)
+			.setColor('RED')
+			.setFooter(`You have ${timeout} seconds to make up your mind.`);
 
-		return msg.channel.send(`You threw ${choice} and ${BOT.NAME} threw ${botMove}. ${winner} won!`);
+		const confirmBtns = [
+			new MessageButton({ label: 'Rock', customId: 'rock', style: 'PRIMARY', emoji: '👊' }),
+			new MessageButton({ label: 'Paper', customId: 'paper', style: 'PRIMARY', emoji: '✋' }),
+			new MessageButton({ label: 'Scissors', customId: 'scissors', style: 'PRIMARY', emoji: '✌' })
+		];
+
+		await interaction.reply({
+			embeds: [choiceEmbed],
+			components: [new MessageActionRow({ components: confirmBtns })]
+		});
+
+		let replyId;
+		interaction.fetchReply().then(reply => { replyId = reply.id; });
+
+		const collector = interaction.channel.createMessageComponentCollector({
+			max: 1,
+			time: DECISION_TIMEOUT * 1000,
+			filter: i => i.user.id === interaction.user.id && i.message.id === replyId
+		});
+
+		const countdown = setInterval(() => this.countdown(interaction, --timeout, confirmBtns, choiceEmbed), 1000);
+
+		collector.on('collect', async (i: ButtonInteraction) => {
+			if (interaction.user.id !== i.user.id) {
+				await interaction.reply({
+					content: 'You cannot respond to a command you did not execute',
+					ephemeral: true
+				});
+				return;
+			}
+
+			const botMove = CHOICES[Math.floor(Math.random() * CHOICES.length)];
+			const winner = this.checkWinner(CHOICES.indexOf(i.customId), CHOICES.indexOf(botMove));
+
+			clearInterval(countdown);
+			let winEmbed: MessageEmbed;
+
+			if (winner === BOT.NAME) {
+				winEmbed = new MessageEmbed()
+					.setTitle(`${interaction.user.username} threw ${i.customId} and ${BOT.NAME} threw ${botMove}. ${winner} won - the machine triumphs!`)
+					.setColor('RED');
+			} else if (winner === 'Nobody') {
+				winEmbed = new MessageEmbed()
+					.setTitle(`Both ${interaction.user.username} and ${BOT.NAME} threw ${i.customId}. It's a draw!`)
+					.setColor('BLUE');
+			} else {
+				winEmbed = new MessageEmbed()
+					.setTitle(`${interaction.user.username} threw ${i.customId} and ${BOT.NAME} threw ${botMove}. ${interaction.user.username} won - humanity triumphs!`)
+					.setColor('GREEN');
+			}
+			await interaction.editReply({
+				components: [],
+				embeds: [winEmbed]
+			});
+		}).on('end', async collected => {
+			const validCollected = collected.filter(i => i.isButton()
+			&& i.message.id === interaction.id
+			&& i.user.id === interaction.user.id);
+
+			clearInterval(countdown);
+
+			if (timeout === 1 && validCollected.size === 0) { // when clearInterval is used, timeout sticks to 1 second
+				const failEmbed = new MessageEmbed()
+					.setTitle(`${interaction.user.username} couldn't make up their mind! Command timed out.`)
+					.setColor('RED');
+
+				await interaction.editReply({
+					components: [],
+					embeds: [failEmbed]
+				});
+				return;
+			}
+		});
+		return;
+	}
+
+	countdown(interaction: CommandInteraction, timeout: number, btns: MessageButton[], embed: MessageEmbed): void {
+		const footerText = timeout > 1
+			? `You have ${timeout} seconds to make up your mind.`
+			: `You have ${timeout} second to make up your mind.`;
+		embed.setFooter(footerText);
+		interaction.editReply({ embeds: [embed], components: [new MessageActionRow({ components: btns })] });
 	}
 
 	checkWinner(playerNum: number, botNum: number): string {
@@ -24,17 +109,6 @@ export default class extends Command {
 		} else {
 			return BOT.NAME;
 		}
-	}
-
-
-	argParser(msg: Message, input: string): [string] {
-		input = input.trim().toLowerCase();
-
-		if (!input || !this.choices.includes(input)) {
-			throw `Usage: ${this.usage}`;
-		}
-
-		return [input];
 	}
 
 }
