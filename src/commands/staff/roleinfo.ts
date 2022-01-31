@@ -1,5 +1,4 @@
-import { Message, MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, GuildMember, Collection } from 'discord.js';
-import { roleParser } from '@lib/arguments';
+import { Message, MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { sendToFile } from '@lib/utils';
 import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -22,15 +21,9 @@ export default class extends Command {
 	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const role = interaction.options.getRole('role');
-		let memberList: Collection<string, GuildMember>;
-		// eslint-disable-next-line no-extra-parens
-		if ((role as Role).members) {
-			// eslint-disable-next-line no-extra-parens
-			memberList = (role as Role).members;
-		} else {
-			memberList = (await interaction.guild.roles.fetch(role.id)).members;
-		}
+		const role = interaction.options.getRole('role') as Role;
+
+		const memberList = role.members || (await interaction.guild.roles.fetch(role.id)).members;
 
 		const memberStrs = memberList.map(m => m.user.username).sort();
 
