@@ -39,7 +39,16 @@ export default class extends Command {
 		}
 		const reason = `${member.user.username} was muted by ${interaction.user.tag} (${interaction.user.id})`;
 		await member.roles.add(ROLES.MUTED, reason);
-		return interaction.reply({ content: `${member.user.username} has been muted.`, ephemeral: true });
+
+		let muteMsg = `${member.user.username} has been muted.`;
+
+		await member.send(`You have been muted on the UD CIS Discord Server by ${interaction.user.tag}.
+If you believe this to be a problem, please reach out to them directly.`).catch(() => {
+			muteMsg += '\n\nThis user has DMs disabled, please make sure to let them know why this happened.';
+			return;
+		});
+
+		return interaction.reply({ content: muteMsg, ephemeral: true });
 	}
 
 	permissions(msg: Message): boolean {
