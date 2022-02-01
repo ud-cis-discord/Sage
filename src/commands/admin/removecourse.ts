@@ -1,16 +1,16 @@
 import { ADMIN_PERMS } from '@lib/permissions';
-import { Course } from '@lib/types/Course';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CategoryChannel, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, Message, MessageActionRow, MessageButton } from 'discord.js';
 import { modifyRoleDD } from '@root/src/lib/utils';
+
+const DECISION_TIMEOUT = 30;
 
 export default class extends Command {
 
 	description = 'Remove a course';
 	extendedHelp = 'This command will archive all channels in a courses category, remove all course roles,' +
 	'and purge the course from the database. This is the only command with an `are you sure?` warning.';
-	usage = '<course ID>';
 	runInDM = false;
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
@@ -22,115 +22,121 @@ export default class extends Command {
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
+		let timeout = DECISION_TIMEOUT;
 		const course = interaction.options.getChannel('course') as CategoryChannel;
-		//	const category = await interaction.client.channels.fetch(course.channels.category) as CategoryChannel;
 
 		//	 grabbing course data
-		const channelCount = course.children.size;
-		const userCount = await interaction.client.mongo.collection(DB.USERS).countDocuments({ courses: course });
+		let channelCount;
+		try {
+			channelCount = course.children.size;
+		} catch (error) {
+			return interaction.reply('You have to tag a valid course category.');
+		}
+		const courseId = course.name.substring(5);
+		const userCount = await interaction.client.mongo.collection(DB.USERS).countDocuments({ courses: courseId });
 		const reason = `Removing course \`${course}\` as requested by ` +
 		`${interaction.user.tag}\` \`(${interaction.user.id})\``;
 
+		const confirmBtns = [
+			new MessageButton({ label: 'Yes', customId: 'y', style: 'SECONDARY' }),
+			new MessageButton({ label: 'No', customId: 'n', style: 'DANGER' })
+		];
+
 		//	a warning gets issued for this command
-		await interaction.channel.send(`Are you sure you want to delete ${course}. ` +
-		`This action will archive ${channelCount} channels and unenroll ${userCount} users. ` +
-		'Send `yes` in the next 30 seconds to confirm.');
+		const baseText = `Are you sure you want to delete ${course}? ` +
+		`This action will archive ${channelCount} channels and unenroll ${userCount} users. `;
+		await interaction.reply({ content: `${baseText} Press 'yes' in the next 30 seconds to confirm.`, components: [new MessageActionRow({ components: confirmBtns })] });
 
-		return interaction.channel.awaitMessages({
-			filter: (m: Message) => m.author.id === interaction.user.id && m.content === 'yes',
+		let replyId;
+		interaction.fetchReply().then(reply => { replyId = reply.id; });
+
+		const collector = interaction.channel.createMessageComponentCollector({
 			max: 1,
-			time: 30e3,
-			errors: ['time']
-		}).then(async () => {
-			await interaction.reply('<a:loading:755121200929439745> working...');
-
-			//	archving the course channels
-			for (const channel of [...course.children.values()]) {
-				await channel.setParent(CHANNELS.ARCHIVE, { reason });
-				await channel.lockPermissions();
-				await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
-			}
-			await course.delete();
-
-			//	removing course roles
-			await interaction.guild.members.fetch();
-			const staffRole = await interaction.guild.roles.fetch(`${course} staff`);
-			const studentRole = await interaction.guild.roles.fetch(`CISC ${course}`);
-
-			if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
-
-			for (const [, member] of staffRole.members) {
-				if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
-			}
-			for (const [, member] of studentRole.members) {
-				if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
-			}
-
-			staffRole.delete(reason);
-			studentRole.delete(reason);
-
-			// update and remove from database
-			await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course } });
-			await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course });
-
-			await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from ${course}`);
+			time: DECISION_TIMEOUT * 1000,
+			filter: i => i.user.id === interaction.user.id && i.message.id === replyId
 		});
-	}
 
-	async run(msg: Message, [course]: [Course]): Promise<Message> {
-		const category = await msg.client.channels.fetch(course.channels.category) as CategoryChannel;
+		const countdown = setInterval(() => this.countdown(interaction, --timeout, confirmBtns, baseText), 1000);
 
-		const channelCount = category.children.size;
-		const userCount = await msg.client.mongo.collection(DB.USERS).countDocuments({ courses: course.name });
-		const reason = `Removing course ${course.name} as requested by ${msg.author.tag} (${msg.author.id})`;
-
-		await msg.channel.send(`Are you sure you want to delete ${course.name}. ` +
-		`This action will archive ${channelCount} channels and unenroll ${userCount} users. ` +
-		'Send `yes` in the next 30 seconds to confirm.');
-
-		return msg.channel.awaitMessages({
-			filter: (m: Message) => m.author.id === msg.author.id && m.content === 'yes',
-			max: 1,
-			time: 30e3,
-			errors: ['time']
-		}).then(async () => {
-			const loadingMsg = await msg.channel.send('<a:loading:755121200929439745> working...');
-
-			for (const channel of [...category.children.values()]) {
-				await channel.setParent(CHANNELS.ARCHIVE, { reason });
-				await channel.lockPermissions();
-				await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
-			}
-			await category.delete();
-
-			await msg.guild.members.fetch();
-			const staffRole = await msg.guild.roles.fetch(course.roles.staff);
-			const studentRole = await msg.guild.roles.fetch(course.roles.student);
-
-			for (const [, member] of staffRole.members) {
-				if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
-			}
-			for (const [, member] of studentRole.members) {
-				if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
+		collector.on('collect', async (i: ButtonInteraction) => {
+			if (interaction.user.id !== i.user.id) {
+				await interaction.reply({
+					content: 'You cannot respond to a command you did not execute',
+					ephemeral: true
+				});
+				return;
 			}
 
-			staffRole.delete(reason);
-			studentRole.delete(reason);
+			if (i.customId === 'y') {
+				await interaction.editReply('<a:loading:755121200929439745> working...');
 
-			await msg.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: course.name } });
-			await msg.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: course.name });
+				//	removing course roles
+				await interaction.guild.members.fetch();
+				const staffRole = await interaction.guild.roles.cache.find(role => role.name === `${courseId} Staff`);
+				const studentRole = await interaction.guild.roles.cache.find(role => role.name === `CISC ${courseId}`);
+				if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
 
-			return loadingMsg.edit(`${channelCount} channels archived and ${userCount} users unenrolled from ${course.name}`);
-		})
-			.catch(() => msg.channel.send('Time has expired, removal canceled.'));
+				//	archving the course channels
+				for (const channel of [...course.children.values()]) {
+					await channel.setParent(CHANNELS.ARCHIVE, { reason });
+					await channel.lockPermissions();
+					await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
+				}
+				await course.delete();
+
+				for (const [, member] of staffRole.members) {
+					if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
+				}
+				for (const [, member] of studentRole.members) {
+					if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
+				}
+
+				staffRole.delete(reason);
+				studentRole.delete(reason);
+
+				// update and remove from database
+				await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
+				await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
+
+				await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from CISC ${courseId}`);
+			} else {
+				await interaction.editReply({
+					components: [],
+					content: 'Course removal canceled. Nothing has been modified.'
+				});
+				return;
+			}
+
+			await interaction.editReply({
+				components: []
+			});
+		}).on('end', async collected => {
+			const validCollected = collected.filter(i => i.isButton()
+			&& i.message.id === interaction.id
+			&& i.user.id === interaction.user.id);
+
+			clearInterval(countdown);
+
+			if (timeout === 1 && validCollected.size === 0) { // when clearInterval is used, timeout sticks to 1 second
+				await interaction.editReply({
+					components: [],
+					content: 'Command timed out.'
+				});
+				return;
+			}
+		});
+		return;
 	}
 
-	async argParser(msg: Message, input: string): Promise<Array<Course>> {
-		const course: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: input.toLowerCase() });
+	run(_msg: Message): Promise<void> { return; }
 
-		if (!course) throw `Could not find course **${input}**.`;
-
-		return [course];
+	countdown(interaction: CommandInteraction, timeout: number, btns: MessageButton[], baseText: string): void {
+		const extraText = timeout > 1
+			? `Press 'yes' in the next ${timeout} seconds to confirm.`
+			: `Press 'yes' in the next ${timeout} seconds to confirm.`;
+		interaction.editReply({ content: baseText +
+		extraText, components: [new MessageActionRow({ components: btns })] });
 	}
+
 
 }

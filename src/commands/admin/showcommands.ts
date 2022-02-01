@@ -35,14 +35,6 @@ export default class extends Command {
 		return interaction.reply(Formatters.codeBlock('diff', commands));
 	}
 
-	run(msg: Message): Promise<Message> {
-		let commands = '+ Enabled\n- Disabled\n';
-
-		msg.client.commands.forEach(command => {
-			commands += `\n${command.enabled === false ? '-' : '+'} ${command.name}`;
-		});
-
-		return msg.channel.send(Formatters.codeBlock('diff', commands));
-	}
+	run(_msg: Message): Promise<void> { return; }
 
 }

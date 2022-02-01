@@ -123,6 +123,7 @@ function removeRole(interaction: CommandInteraction,
 	menu: MessageSelectMenu,
 	option: MessageSelectOptionData,
 	dropdownRow: MessageActionRow): boolean {
+	let cont = true;
 	if (!menu) {
 		const responseEmbed = new MessageEmbed()
 			.setColor('#ff0000')
@@ -138,8 +139,10 @@ function removeRole(interaction: CommandInteraction,
 		menu.spliceOptions(index, 1);
 		menu.setMaxValues(menu.options.length);
 		rolesMsg.edit({ components: menu.options.length > 0 ? [dropdownRow] : [] });
-		return true;
+		cont = false;
 	});
+
+	if (!cont) return true;
 
 	const responseEmbed = new MessageEmbed()
 		.setColor('#ff0000')
