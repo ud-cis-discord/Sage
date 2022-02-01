@@ -1,5 +1,4 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { channelParser } from '@lib/arguments';
 import { TextChannel, Message, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
