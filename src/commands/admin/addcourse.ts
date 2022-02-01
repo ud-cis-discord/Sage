@@ -115,22 +115,7 @@ export default class extends Command {
 		await interaction.editReply(`Successfully added course with ID ${course}`);
 	}
 
-	async run(msg: Message, [course]: [string]): Promise<Message> {
-		const response = msg.channel.send('<a:loading:755121200929439745> working...');
-		return (await response).edit(`Added course with ID ${course}`);
-	}
-
-	async argParser(msg: Message, input: string): Promise<Array<string>> {
-		if (input === '') {
-			throw `Usage: ${this.usage}`;
-		}
-
-		if (await msg.client.mongo.collection(DB.COURSES).countDocuments({ name: input }) > 0) {
-			throw `${input} has already been registered as a course.`;
-		}
-
-		return [input.toLowerCase()];
-	}
+	run(_msg: Message): Promise<void> { return; }
 
 	async createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {
 		return guild.channels.create(name, {

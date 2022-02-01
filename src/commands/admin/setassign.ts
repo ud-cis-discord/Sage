@@ -41,21 +41,6 @@ export default class extends Command {
 		}
 	}
 
-	async run(msg: Message, [cmd]: [Role]): Promise<Message> {
-		const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
-		const newRole: AssignableRole = { id: cmd.id };
-
-		if (await assignables.countDocuments(newRole) > 0) {
-			assignables.findOneAndDelete(newRole);
-			return msg.channel.send(`The role \`${cmd.name}\` has been removed.`);
-		} else {
-			assignables.insertOne(newRole);
-			return msg.channel.send(`The role \`${cmd.name}\` has been added.`);
-		}
-	}
-
-	async argParser(msg: Message, input: string): Promise<Array<Role>> {
-		return [await roleParser(msg, input)];
-	}
+	run(_msg: Message): Promise<void> { return; }
 
 }
