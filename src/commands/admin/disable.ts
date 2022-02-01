@@ -44,33 +44,6 @@ export default class extends Command {
 		return interaction.reply(Formatters.codeBlock('diff', `->>> ${command.name} Disabled`));
 	}
 
-	async run(msg: Message, [command]: [Command]): Promise<Message> {
-		if (command.enabled === false) return msg.channel.send(`${command.name} is already disabled.`);
-
-		if (command.name === 'enable' || command.name === 'disable') {
-			return msg.channel.send('Sorry fam, you can\'t disable that one.');
-		}
-
-		command.enabled = false;
-		msg.client.commands.set(command.name, command);
-
-		const { commandSettings } = await msg.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: msg.client.user.id }) as SageData;
-		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: false };
-		msg.client.mongo.collection(DB.CLIENT_DATA).updateOne(
-			{ _id: msg.client.user.id },
-			{ $set: { commandSettings } },
-			{ upsert: true }
-		);
-
-		return msg.channel.send(Formatters.codeBlock('diff', `->>> ${command.name} Disabled`));
-	}
-
-	argParser(msg: Message, input: string): Array<Command> {
-		const command = getCommand(msg.client, input);
-
-		if (!command) throw `I couldn't find a command called \`${input}\``;
-
-		return [command];
-	}
+	run(_msg: Message): Promise<void> { return; }
 
 }
