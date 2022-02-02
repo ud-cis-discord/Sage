@@ -74,7 +74,6 @@ export default class extends Command {
 				await interaction.guild.members.fetch();
 				const staffRole = await interaction.guild.roles.cache.find(role => role.name === `${courseId} Staff`);
 				const studentRole = await interaction.guild.roles.cache.find(role => role.name === `CISC ${courseId}`);
-				if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
 
 				//	archving the course channels
 				for (const channel of [...course.children.values()]) {
@@ -90,6 +89,8 @@ export default class extends Command {
 				for (const [, member] of studentRole.members) {
 					if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
 				}
+
+				if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
 
 				staffRole.delete(reason);
 				studentRole.delete(reason);
