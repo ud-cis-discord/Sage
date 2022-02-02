@@ -1,7 +1,6 @@
-import { Message, MessageEmbed, Role, MessageAttachment } from 'discord.js';
-import { roleParser } from '@lib/arguments';
+import { Message, MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { sendToFile } from '@lib/utils';
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -10,19 +9,30 @@ export default class extends Command {
 	usage = '<role>';
 	runInDM = false;
 
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'role',
+			description: 'Role to get the info of',
+			type: 'ROLE',
+			required: true
+		}
+	];
 
-	async run(msg: Message, [role]: [Role]): Promise<Message> {
-		const memberList = role.members.map(m => m.user.username).sort();
+	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-		const members = memberList.join(', ').length > 1000
-			? await sendToFile(memberList.join('\n'), 'txt', 'MemberList', true) : memberList.join(', ');
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const role = interaction.options.getRole('role') as Role;
+
+		const memberList = role.members || (await interaction.guild.roles.fetch(role.id)).members;
+
+		const memberStrs = memberList.map(m => m.user.username).sort();
+
+		const members = memberStrs.join(', ').length > 1000
+			? await sendToFile(memberStrs.join('\n'), 'txt', 'MemberList', true) : memberStrs.join(', ');
 
 		const embed = new MessageEmbed()
-			.setColor(role.hexColor)
-			.setTitle(`${role.name} | ${role.members.size} members`)
+			.setColor(role.color)
+			.setTitle(`${role.name} | ${memberList.size} members`)
 			.setFooter(`Role ID: ${role.id}`);
 
 		const attachments: MessageAttachment[] = [];
@@ -31,13 +41,15 @@ export default class extends Command {
 			embed.addField('Members', 'Too many to display, see attached file.', true);
 			attachments.push(members);
 		} else {
-			embed.addField('Members', role.members.size < 1 ? 'None' : members, true);
+			embed.addField('Members', memberList.size < 1 ? 'None' : members, true);
 		}
-		return msg.channel.send({ embeds: [embed], files: attachments });
+		return interaction.reply({ embeds: [embed], files: attachments });
 	}
 
-	async argParser(msg: Message, input: string): Promise<Array<Role>> {
-		return [await roleParser(msg, input)];
+	permissions(msg: Message): boolean {
+		return staffPerms(msg);
 	}
+
+	async run(_msg: Message): Promise<Message> { return; }
 
 }

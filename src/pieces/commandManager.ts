@@ -165,7 +165,7 @@ async function loadCommands(bot: Client) {
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited) and ${permsUpdated} permission${permsUpdated === 1 ? '' : 's'} updated.`);
 }
 
-async function runCommand(interaction: CommandInteraction, bot: Client): Promise<void> {
+async function runCommand(interaction: CommandInteraction, bot: Client): Promise<unknown> {
 	const command = bot.commands.get(interaction.commandName);
 	if (interaction.channel.type === 'DM' && command.runInDM === false) {
 		return interaction.reply('This command cannot be run in DMs');

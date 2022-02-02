@@ -1,31 +1,40 @@
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { BOT } from '@root/config';
-import { MessageEmbed, Message } from 'discord.js';
+import { MessageEmbed, Message, ApplicationCommandPermissionData, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
-	aliases = ['lmgt', 'lmg'];
+	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+
 	description = `Have ${BOT.NAME} google something for someone`;
 	usage = '<query>';
 
-	async permissions(msg: Message): Promise<boolean> {
-		return staffPerms(msg);
-	}
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'query',
+			type: 'STRING',
+			description: `What you'd like ${BOT.NAME} to Google for someone!`,
+			required: true
+		}
+	];
 
-	async run(msg: Message, [query]: [string]): Promise<Message> {
+	tempRun(interaction: CommandInteraction): Promise<void> {
+		const query = interaction.options.getString('query');
 		const formatted = query.replace(new RegExp(' ', 'g'), '+').replace('%', '%25');
 		const link = `https://letmegooglethat.com/?q=${formatted}`;
 		const embed = new MessageEmbed({
 			description: `[Let me Google that for you!](${link})`,
 			color: 'LUMINOUS_VIVID_PINK'
 		});
-		return msg.channel.send({ embeds: [embed] });
+		return interaction.reply({ embeds: [embed] });
 	}
 
-	argParser(_msg: Message, input: string): Array<string> {
-		if (!input) throw `What do you want ${BOT.NAME} to google? (Usage: ${this.usage})`;
-		else return [input];
+
+	async permissions(msg: Message): Promise<boolean> {
+		return staffPerms(msg);
 	}
+
+	async run(_msg: Message): Promise<Message> { return; }
 
 }

@@ -1,6 +1,5 @@
-import { staffPerms } from '@lib/permissions';
-import { userParser } from '@root/src/lib/arguments';
-import { GuildMember, Message, MessageEmbed } from 'discord.js';
+import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
@@ -9,13 +8,22 @@ export default class extends Command {
 	description = 'Gives an overview of a member\'s info.';
 	usage = '<user>';
 	runInDM = false;
-	aliases = ['member'];
 
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'user',
+			description: 'The user to lookup',
+			type: 'USER',
+			required: true
+		}
+	];
 
-	run(msg: Message, [member]: [GuildMember]): Promise<Message> {
+	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const user = interaction.options.getUser('user');
+		const member = await interaction.guild.members.fetch(user.id);
+
 		const roles = member.roles.cache.size > 1
 			? [...member.roles.cache.filter(r => r.id !== r.guild.id).sort().values()].join(' ')
 			: 'none';
@@ -38,15 +46,13 @@ export default class extends Command {
 				{ name: 'Roles', value: roles, inline: true }
 			]);
 
-		return msg.channel.send({ embeds: [embed] });
+		return interaction.reply({ embeds: [embed] });
 	}
 
-	async argParser(msg: Message, input: string): Promise<Array<GuildMember>> {
-		if (!input) {
-			throw `Usage: ${this.usage}`;
-		}
-
-		return [await userParser(msg, input)];
+	permissions(msg: Message): boolean {
+		return staffPerms(msg);
 	}
+
+	run(_msg: Message): Promise<void> { return; }
 
 }
