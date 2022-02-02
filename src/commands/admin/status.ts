@@ -1,6 +1,6 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, PresenceStatusData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const args = ['online', 'idle', 'dnd', 'invisible'];
@@ -22,9 +22,9 @@ export default class extends Command {
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const status = interaction.options.getString('status');
+		const status = interaction.options.getString('status') as PresenceStatusData;
 		const bot = interaction.client;
-		//	bot.user.setStatus(status);
+		await bot.user.setStatus(status);
 
 		return interaction.reply(`Set ${BOT.NAME}'s status to ${status}`);
 	}
