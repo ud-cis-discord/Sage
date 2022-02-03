@@ -2,10 +2,9 @@ import { Collection, Client, CommandInteraction, ApplicationCommand, Application
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS, MAINTAINERS } from '@root/config';
-import { Course } from '../lib/types/Course';
-import { SageUser } from '../lib/types/SageUser';
-import { CommandError } from '../lib/types/errors';
+import { DB, GUILDS } from '@root/config';
+import { Course } from '@lib/types/Course';
+import { SageUser } from '@lib/types/SageUser';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -135,64 +134,8 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		});
 	}
 
-	if (bot.commands.get(interaction.commandName).tempRun !== undefined) {
-		try {
-			bot.commands.get(interaction.commandName)?.tempRun(interaction)
-				?.catch(async (error: Error) => {
-					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
-					bot.emit('error', new CommandError(error, interaction));
-				});
-		} catch (error) {
-			bot.emit('error', new CommandError(error, interaction));
-		}
-	} else {
-		return interaction.reply('We haven\'t switched that one over yet');
-	}
-	// interaction.reply(interaction.commandName);
-	// if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
-
-	// let commandName: string;
-	// if (msg.channel.type !== 'DM' || msg.content.toLowerCase().startsWith(PREFIX)) {
-	// 	[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
-	// } else {
-	// 	[commandName] = msg.content.split(' ');
-	// }
-	// const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
-
-	// const command = getCommand(msg.client, commandName);
-	// if (!command || command.enabled === false) return;
-
-	// if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
-	// if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
-	// 	await msg.author.send(`<@!${msg.author.id}>, the command you just tried to run is not available in public channels. Try again in DMs.`)
-	// 		.catch(async () => { await msg.reply('That command is not available here, try again in DMs'); });
-	// 	return msg.delete();
-	// }
-
-	// if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
-
-	// let args: Array<unknown>;
-	// if (command.argParser) {
-	// 	try {
-	// 		args = await command.argParser(msg, unparsedArgs);
-	// 	} catch (error) {
-	// 		msg.channel.send(error);
-	// 		return;
-	// 	}
-	// } else {
-	// 	args = [unparsedArgs];
-	// }
-
-	// try {
-	// 	command.run(msg, args)
-	// 		?.catch(async (error: Error) => {
-	// 			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-	// 			msg.client.emit('error', new CommandError(error, msg));
-	// 		});
-	// } catch (error) {
-	// 	msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-	// 	msg.client.emit('error', new CommandError(error, msg));
-	// }
+	if (bot.commands.get(interaction.commandName).tempRun !== undefined) return bot.commands.get(interaction.commandName)?.tempRun(interaction);
+	else return interaction.reply('We haven\'t switched that one over yet');
 }
 
 async function handleDropdown(interaction: SelectMenuInteraction) {
