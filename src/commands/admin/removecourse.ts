@@ -9,8 +9,6 @@ const DECISION_TIMEOUT = 30;
 export default class extends Command {
 
 	description = 'Remove a course';
-	extendedHelp = 'This command will archive all channels in a courses category, remove all course roles,' +
-	'and purge the course from the database. This is the only command with an `are you sure?` warning.';
 	runInDM = false;
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 

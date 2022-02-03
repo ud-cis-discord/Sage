@@ -7,7 +7,6 @@ import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Command
 
 export default class extends Command {
 
-	usage = '<title>|[options]';
 	description = `Creates an issue in ${BOT.NAME}' repository.`;
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 

@@ -8,9 +8,9 @@ import { modifyRoleDD } from '@root/src/lib/utils';
 export default class extends Command {
 
 	description = `Adds a role to the assignable collection of the database, or removes it if it's there already`;
-	usage = '<role>';
 	runInDM = false;
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+
 	options: ApplicationCommandOptionData[] = [{
 		name: 'role',
 		description: 'The role to add to assignables.',

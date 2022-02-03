@@ -8,9 +8,6 @@ import { modifyRoleDD } from '@root/src/lib/utils';
 export default class extends Command {
 
 	description = 'Creates a courses category and adds all necessary channels/roles.';
-	extendedHelp = 'This command will create all channels in a courses category,' +
-	'add all course roles, and add the course to the database. ';
-	usage = '<course ID>';
 	runInDM = false;
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
