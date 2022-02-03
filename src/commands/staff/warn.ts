@@ -69,7 +69,7 @@ export default class extends Command {
 		return staffPerms(msg);
 	}
 
-	async run(_msg: Message): Promise<Message> { return _msg; }
+	async run(_msg: Message): Promise<Message> { return; }
 
 	sendEmail(recipient: string, mod: string, reason: string): void {
 		const mailer = nodemailer.createTransport({
