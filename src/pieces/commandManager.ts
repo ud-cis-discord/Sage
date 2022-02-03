@@ -2,9 +2,10 @@ import { Collection, Client, CommandInteraction, ApplicationCommand, Application
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS } from '@root/config';
+import { DB, GUILDS, MAINTAINERS } from '@root/config';
 import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
+import { CommandError } from '../lib/types/errors';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -151,8 +152,8 @@ async function loadCommands(bot: Client) {
 		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
 		if (botCmd
 			&& (botCmd.tempPermissions.length !== curPerms.length
-			|| !botCmd.tempPermissions.every(perm =>
-				curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
+				|| !botCmd.tempPermissions.every(perm =>
+					curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
 			console.log(`Updating permissions for ${botCmd.name}`);
 			permsUpdated++;
 			return commands.permissions.set({
@@ -178,8 +179,20 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		});
 	}
 
-	if (bot.commands.get(interaction.commandName).tempRun !== undefined) return bot.commands.get(interaction.commandName)?.tempRun(interaction);
-	else return interaction.reply('We haven\'t switched that one over yet');
+	if (bot.commands.get(interaction.commandName).tempRun !== undefined) {
+		try {
+			bot.commands.get(interaction.commandName)?.tempRun(interaction)
+				?.catch(async (error: Error) => {
+					interaction.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
+					bot.emit('error', new CommandError(error, interaction));
+				});
+		} catch (error) {
+			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
+			bot.emit('error', new CommandError(error, interaction));
+		}
+	} else {
+		return interaction.reply('We haven\'t switched that one over yet');
+	}
 	// interaction.reply(interaction.commandName);
 	// if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
 

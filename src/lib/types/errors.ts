@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { ApplicationCommand, CommandInteraction } from 'discord.js';
 
 export class DatabaseError extends Error {
 
@@ -11,16 +11,16 @@ export class DatabaseError extends Error {
 
 export class CommandError extends Error {
 
-	msgLink?: string;
-	msgContent?: string;
+	interaction?: CommandInteraction;
+	command?: ApplicationCommand;
 
-	constructor(error: Error, msg: Message) {
+	constructor(error: Error, interaction: CommandInteraction) {
 		super();
 		this.name = error.name;
 		this.message = error.message;
 		this.stack = error.stack;
-		this.msgLink = msg.url;
-		this.msgContent = msg.content;
+		this.interaction = interaction;
+		this.command = interaction?.command;
 	}
 
 }

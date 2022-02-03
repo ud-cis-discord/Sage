@@ -39,11 +39,20 @@ async function generateLogEmbed(error: CommandError): Promise<Array<MessageEmbed
 	embed.setTimestamp();
 	embed.setColor('RED');
 
-	if (error.msgContent) {
-		embed.addField('Message content', `\`\`\`${error.msgContent}\`\`\``);
+	if (error.command) {
+		embed.addField('Command run', `\`\`\`
+${error.interaction.command.name} (${error.interaction.command.id})
+Type: ${error.interaction.command.type}
+\`\`\``);
 	}
-	if (error.msgLink) {
-		embed.addField('Original message', `[Check for flies](${error.msgLink})`);
+	if (error.interaction) {
+		embed.addField('Original interaction', `[Check for flies]
+\`\`\`
+Date: ${error.interaction.createdAt}
+Channel: ${error.interaction.channel.id}
+Created By: ${error.interaction.member.user.username} (${error.interaction.member.user.id})
+\`\`\`
+`);
 	}
 
 	return [embed, attachments];
