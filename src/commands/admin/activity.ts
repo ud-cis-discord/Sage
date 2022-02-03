@@ -3,18 +3,17 @@ import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
-const args = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
+const args = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
 
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to the given status and content`;
-	usage = '<status>|<content>';
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'status',
-			description: 'The activity status (ex: Playing).',
+			description: 'The activity status.',
 			type: 'STRING',
 			required: true,
 			choices: args.map((arg) => ({
@@ -43,9 +42,7 @@ export default class extends Command {
 			{ $set: { status: { type, content } } },
 			{ upsert: true });
 
-		//	this is just formatting the reply string
-		const replyType = type[0] + type.slice(1).toLowerCase();
-		interaction.reply(`Set ${BOT.NAME}'s activity to *${replyType} ${content}*`);
+		interaction.reply(`Set ${BOT.NAME}'s activity to *${type} ${content}*`);
 	}
 
 	run(_msg: Message): Promise<void> { return; }

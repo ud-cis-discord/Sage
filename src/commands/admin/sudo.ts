@@ -5,9 +5,8 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = 'Allows you always to run other commands.';
-	extendedHelp = 'Sudo bypasses permission checks, disabled command checks and command location checks.';
-	usage = '<command> [args]';
+	description = 'Allows you always to run other commands by overriding permission, ' +
+	'disabled command, and command location checks.';
 	enabled = false;
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 

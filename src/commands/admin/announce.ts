@@ -6,7 +6,6 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Sends an announcement from Sage to a specified channel or announcements if no channel is given.';
-	usage = '[channel] | <content>';
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
