@@ -1,7 +1,7 @@
 import { Command } from '@lib/types/Command';
 import { ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandPermissionData, CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandPermissionData, ButtonInteraction, CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 
 const PRUNE_TIMEOUT = 30;
 
@@ -39,15 +39,14 @@ export default class extends Command {
 
 		const countdown = setInterval(() => this.countdown(confirmMsg, --timeout, confirmBtns, confirmEmbed), 1000);
 
-		collector.on('collect', async btnClick => {
-			if (!btnClick.isButton()) return;
+		collector.on('collect', async (btnClick: ButtonInteraction) => {
 			if (btnClick.user.id !== interaction.user.id) {
-				return await btnClick.reply({
+				return await interaction.reply({
 					content: 'You cannot respond to a command you did not execute.',
 					ephemeral: true
 				});
 			}
-			btnClick.deferReply({ ephemeral: true });
+			interaction.deferReply({ ephemeral: true });
 			clearInterval(countdown);
 
 			confirmBtns.forEach(btn => btn.setDisabled(true));
