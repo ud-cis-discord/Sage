@@ -23,7 +23,7 @@ export default class extends Command {
 		const command = getCommand(interaction.client, commandInput);
 
 		//	check if command exists or is already enabled
-		if (!command) return interaction.reply(`I couldn't find a command called \`${command}\``);
+		if (!command) return interaction.reply({ content: `I couldn't find a command called \`${command}\``, ephemeral: true });
 		if (command.enabled) return interaction.reply(`${command.name} is already enabled.`);
 
 		command.enabled = true;

@@ -18,7 +18,7 @@ export default class extends Command {
 	},
 	{
 		name: 'labels',
-		description: 'The issue labels',
+		description: 'The issue labels, in a comma-separated list (if multiple).',
 		type: 'STRING',
 		required: false
 	},
@@ -49,9 +49,9 @@ export default class extends Command {
 			errors.forEach(error => {
 				errormsg += `Value ${error.code} for field ${error.field}.\n`;
 			});
-			interaction.channel.send(`Issue creation failed. (HTTP Error ${response.status})
-	\`\`\`diff
-	-${errormsg}\`\`\``);
+			interaction.reply({ content: `Issue creation failed. (HTTP Error ${response.status})
+			\`\`\`diff
+			-${errormsg}\`\`\``, ephemeral: true });
 		});
 		if (newIssue) {
 			return interaction.reply(`I've created your issue at <${newIssue.data.html_url}>`);
