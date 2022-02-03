@@ -29,9 +29,6 @@ export default class extends Command {
 		const command = getCommand(interaction.client, commandName);
 		if (!command) throw `Invalid command name: \`${commandName}\``;
 
-		//	const arg = interaction.options.getString('args');
-		//	const args = arg ? arg.split(', ') : [];
-
 		return command.tempRun(interaction);
 	}
 
