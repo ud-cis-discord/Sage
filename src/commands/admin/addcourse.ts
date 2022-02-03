@@ -13,7 +13,7 @@ export default class extends Command {
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
-		description: 'The course ID of the course to be added (ex: 108).',
+		description: 'The three-digit course ID of the course to be added (ex: 108).',
 		type: 'STRING',
 		required: true
 	}]
