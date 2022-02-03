@@ -2,9 +2,10 @@ import { Collection, Client, CommandInteraction, ApplicationCommand, Application
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS } from '@root/config';
-import { Course } from '@lib/types/Course';
-import { SageUser } from '@lib/types/SageUser';
+import { DB, GUILDS, MAINTAINERS } from '@root/config';
+import { Course } from '../lib/types/Course';
+import { SageUser } from '../lib/types/SageUser';
+import { CommandError } from '../lib/types/errors';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -17,6 +18,50 @@ async function register(bot: Client): Promise<void> {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
 	});
+}
+
+async function handleDropdown(interaction: SelectMenuInteraction) {
+	const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
+	const { customId, values, member } = interaction;
+	let responseContent = `Your roles have been updated.`;
+	if (customId === 'roleselect' && member instanceof GuildMember) {
+		const component = interaction.component as MessageSelectMenu;
+		const removed = component.options.filter((option) => !values.includes(option.value));
+		for (const id of removed) {
+			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
+			if (!role.name.includes('CISC')) {
+				member.roles.remove(id.value);
+				continue;
+			}
+			if (member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
+				const course = courses.find(c => c.name === role.name.substring(5));
+				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+				user.courses = user.courses.filter(c => c !== course.name);
+				member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
+				member.roles.remove(id.value);
+				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
+				responseContent = `Your enrollments have been updated.`;
+			}
+		}
+		for (const id of values) {
+			const role = interaction.guild.roles.cache.find(r => r.id === id);
+			if (!role.name.includes('CISC')) {
+				member.roles.add(id);
+				continue;
+			}
+			const course = courses.find(c => c.name === role.name.substring(5));
+			const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+			user.courses.push(course.name);
+			member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
+			member.roles.add(id);
+			interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
+			responseContent = `Your enrollments have been updated.`;
+		}
+		interaction.reply({
+			content: `${responseContent}`,
+			ephemeral: true
+		});
+	}
 }
 
 async function loadCommands(bot: Client) {
@@ -134,52 +179,18 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		});
 	}
 
-	if (bot.commands.get(interaction.commandName).tempRun !== undefined) return bot.commands.get(interaction.commandName)?.tempRun(interaction);
-	else return interaction.reply('We haven\'t switched that one over yet');
-}
-
-async function handleDropdown(interaction: SelectMenuInteraction) {
-	const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
-	const { customId, values, member } = interaction;
-	let responseContent = `Your roles have been updated.`;
-	if (customId === 'roleselect' && member instanceof GuildMember) {
-		const component = interaction.component as MessageSelectMenu;
-		const removed = component.options.filter((option) => !values.includes(option.value));
-		for (const id of removed) {
-			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
-			if (!role.name.includes('CISC')) {
-				member.roles.remove(id.value);
-				continue;
-			}
-			if (member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
-				const course = courses.find(c => c.name === role.name.substring(5));
-				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-				user.courses = user.courses.filter(c => c !== course.name);
-				member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
-				member.roles.remove(id.value);
-				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-				responseContent = `Your enrollments have been updated.`;
-			}
+	if (bot.commands.get(interaction.commandName).tempRun !== undefined) {
+		try {
+			bot.commands.get(interaction.commandName)?.tempRun(interaction)
+				?.catch(async (error: Error) => {
+					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
+					bot.emit('error', new CommandError(error, interaction));
+				});
+		} catch (error) {
+			bot.emit('error', new CommandError(error, interaction));
 		}
-		for (const id of values) {
-			const role = interaction.guild.roles.cache.find(r => r.id === id);
-			if (!role.name.includes('CISC')) {
-				member.roles.add(id);
-				continue;
-			}
-			const course = courses.find(c => c.name === role.name.substring(5));
-			const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-			if (user.courses.includes(course.name)) continue;
-			user.courses.push(course.name);
-			member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
-			member.roles.add(id);
-			interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-			responseContent = `Your enrollments have been updated.`;
-		}
-		interaction.reply({
-			content: `${responseContent}`,
-			ephemeral: true
-		});
+	} else {
+		return interaction.reply('We haven\'t switched that one over yet');
 	}
 }
 
