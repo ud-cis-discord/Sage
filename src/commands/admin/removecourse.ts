@@ -2,7 +2,7 @@ import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, Message, MessageActionRow, MessageButton } from 'discord.js';
-import { modifyRoleDD } from '@root/src/lib/utils';
+import { modifyRoleDD } from '@lib/utils';
 
 const DECISION_TIMEOUT = 30;
 
