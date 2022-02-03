@@ -6,7 +6,7 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to 'Playing Restart...' and ends the process.`;
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		const bot = interaction.client;

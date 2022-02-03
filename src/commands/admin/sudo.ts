@@ -8,7 +8,7 @@ export default class extends Command {
 	description = 'Allows you always to run other commands by overriding permission, ' +
 	'disabled command, and command location checks.';
 	enabled = false;
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'command',

@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { ADMIN_PERMS } from '@lib/permissions';
 import { RequestError } from '@octokit/types';
 import { BOT, GITHUB_PROJECT } from '@root/config';

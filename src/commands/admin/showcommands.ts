@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Formatters, Message } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Formatters, Message } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Show all commands, including disable commands.';
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		let commands = '+ Enabled\n- Disabled\n';

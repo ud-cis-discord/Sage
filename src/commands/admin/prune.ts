@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = `Prunes all members who don't have the <@&${ROLES.VERIFIED}> role`;
 	runInDM = false;
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		let timeout = PRUNE_TIMEOUT;

@@ -8,7 +8,7 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Disable a command';
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'command',

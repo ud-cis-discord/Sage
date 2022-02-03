@@ -109,7 +109,7 @@ export default class extends Command {
 		};
 		await interaction.client.mongo.collection(DB.COURSES).insertOne(newCourse);
 
-		await interaction.editReply(`Successfully added course with ID ${course}`);
+		interaction.editReply(`Successfully added course with ID ${course}`);
 	}
 
 	run(_msg: Message): Promise<void> { return; }

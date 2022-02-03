@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = 'Resets every user in the guild\'s level to 1';
 	enabled = false;
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		await interaction.reply('loading... <a:loading:928003042954059888>');

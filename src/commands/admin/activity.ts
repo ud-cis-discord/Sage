@@ -8,7 +8,7 @@ const ACTIVITIES = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to the given status and content`;
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [
 		{

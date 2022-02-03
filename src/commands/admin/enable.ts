@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = 'Enable a command.';
 	usage = '<command>';
-	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'command',
@@ -24,7 +24,7 @@ export default class extends Command {
 
 		//	check if command exists or is already enabled
 		if (!command) return interaction.reply({ content: `I couldn't find a command called \`${command}\``, ephemeral: true });
-		if (command.enabled) return interaction.reply(`${command.name} is already enabled.`);
+		if (command.enabled) return interaction.reply({ content: `${command.name} is already enabled.`, ephemeral: true });
 
 		command.enabled = true;
 		interaction.client.commands.set(command.name, command);
