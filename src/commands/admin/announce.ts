@@ -9,22 +9,31 @@ export default class extends Command {
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
+		name: 'channel',
+		description: 'The channel to send the announcement in.',
+		type: 'CHANNEL',
+		required: true
+	},
+	{
 		name: 'content',
-		description: 'announcement content',
+		description: 'The announcement content',
 		type: 'STRING',
 		required: true
 	},
 	{
 		name: 'image',
-		description: 'announcement image url',
+		description: 'The announcement image url',
 		type: 'STRING',
 		required: false
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const channel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS) as TextChannel;
+		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
+		const channelOption = interaction.options.getChannel('channel');
 		const content = interaction.options.getString('content');
 		const image = interaction.options.getString('image');
+
+		const channel = (channelOption || announceChannel) as TextChannel;
 		await channel.send({
 			content: content,
 			allowedMentions: { parse: ['everyone', 'roles'] }
