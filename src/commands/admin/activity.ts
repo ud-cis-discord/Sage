@@ -42,7 +42,7 @@ export default class extends Command {
 			{ $set: { status: { type, content } } },
 			{ upsert: true });
 
-		interaction.reply(`Set ${BOT.NAME}'s activity to *${type} ${content}*`);
+		interaction.reply({ content: `Set ${BOT.NAME}'s activity to *${type} ${content}*`, ephemeral: true });
 	}
 
 	run(_msg: Message): Promise<void> { return; }
