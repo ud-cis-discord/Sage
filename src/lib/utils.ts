@@ -141,7 +141,7 @@ function removeRole(interaction: CommandInteraction,
 		const responseEmbed = new MessageEmbed()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
-			.setDescription(`This message does not have a role dropdown menu. You will need to create one using the /role command with 'Add' mode instead of 'Remove' mode.`);
+			.setDescription(`This message does not have a role dropdown menu.`);
 		interaction.channel.send({ embeds: [responseEmbed] });
 		return false;
 	}
