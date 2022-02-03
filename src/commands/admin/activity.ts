@@ -3,7 +3,7 @@ import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
-const args = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
+const ACTIVITIES = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
 
 export default class extends Command {
 
@@ -16,9 +16,9 @@ export default class extends Command {
 			description: 'The activity status.',
 			type: 'STRING',
 			required: true,
-			choices: args.map((arg) => ({
-				name: arg,
-				value: arg
+			choices: ACTIVITIES.map((activity) => ({
+				name: activity,
+				value: activity
 			}))
 		},
 		{
