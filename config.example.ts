@@ -4,6 +4,8 @@ export const BOT = {
 	NAME: 'Sage'				// Bot Name
 };
 
+export const MONGO = '';
+
 export const DB = {
 	CONNECTION: '', 			// Mongo connection string here
 	USERS: 'users',
@@ -38,7 +40,7 @@ export const EMAIL = {
 	]
 };
 
-export const CHANNELS = {			// Channel IDs
+export const CHANNELS = { // Channel IDs
 	ERROR_LOG: '',
 	SERVER_LOG: '',
 	MEMBER_LOG: '',
@@ -46,7 +48,13 @@ export const CHANNELS = {			// Channel IDs
 	FEEDBACK: '',
 	SAGE: '',
 	ANNOUNCEMENTS: '',
-	ARCHIVE: ''
+	ARCHIVE: '',
+	ROLE_SELECT: ''
+};
+
+export const ROLE_DROPDOWNS = {
+	COURSE_ROLES: '', // course roles
+	ASSIGN_ROLES: '' // assign roles
 };
 
 export const LEVEL_TIER_ROLES = [
