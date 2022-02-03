@@ -53,8 +53,8 @@ export const CHANNELS = { // Channel IDs
 };
 
 export const ROLE_DROPDOWNS = {
-	COURSE_ROLES: '', // course roles
-	ASSIGN_ROLES: '' // assign roles
+	COURSE_ROLES: '',
+	ASSIGN_ROLES: ''
 };
 
 export const LEVEL_TIER_ROLES = [
