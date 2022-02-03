@@ -7,12 +7,12 @@ import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Command
 
 export default class extends Command {
 
-	description = `Creates an issue in ${BOT.NAME}' repository.`;
+	description = `Creates an issue in ${BOT.NAME}'s repository.`;
 	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'title',
-		description: 'What\'s the issue?.',
+		description: 'What\'s the issue?',
 		type: 'STRING',
 		required: true
 	},
@@ -60,8 +60,6 @@ export default class extends Command {
 		}
 	}
 
-	async run(msg: Message): Promise<Message | void> {
-		return msg;
-	}
+	async run(msg: Message): Promise<void> { return; }
 
 }
