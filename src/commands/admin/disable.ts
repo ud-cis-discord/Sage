@@ -22,11 +22,11 @@ export default class extends Command {
 		const command = getCommand(interaction.client, commandInput);
 
 		//	check if command exists or is already disabled
-		if (!command) return interaction.reply(`I couldn't find a command called \`${command}\``);
-		if (command.enabled === false) return interaction.reply(`${command.name} is already disabled.`);
+		if (!command) return interaction.reply({ content: `I couldn't find a command called \`${command}\``, ephemeral: true });
+		if (command.enabled === false) return interaction.reply({ content: `${command.name} is already disabled.`, ephemeral: true });
 
 		if (command.name === 'enable' || command.name === 'disable') {
-			return interaction.reply('Sorry fam, you can\'t disable that one.');
+			return interaction.reply({ content: 'Sorry fam, you can\'t disable that one.', ephemeral: true });
 		}
 
 		command.enabled = false;
