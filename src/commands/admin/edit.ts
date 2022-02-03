@@ -38,7 +38,7 @@ export default class extends Command {
 			.catch(() => { throw 'I can\'t seem to find that message'; });
 
 		// check if the message can be edited
-		if (!message.editable) throw 'It seems I can\'t edit that message.';
+		if (!message.editable) throw `It seems I can't edit that message. You'll need to tag a message that was sent by me, ${BOT.NAME}`;
 
 		await message.edit(content);
 		return interaction.reply('I\'ve updated that message.');
