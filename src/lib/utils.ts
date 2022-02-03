@@ -110,8 +110,7 @@ function addRole(interaction: CommandInteraction,
 				const responseEmbed = new MessageEmbed()
 					.setColor('#ff0000')
 					.setTitle('Argument error')
-					.setDescription(`${option.label} is in this message's role select menu already.\nTrying to remove this role from the dropdown? Use /role with the 'Remove' mode 
-					instead of 'Add' mode.`);
+					.setDescription(`${option.label} is in this message's role select menu already.`);
 				interaction.channel.send({ embeds: [responseEmbed] });
 				return false;
 			}
