@@ -192,51 +192,6 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 	} else {
 		return interaction.reply('We haven\'t switched that one over yet');
 	}
-	// interaction.reply(interaction.commandName);
-	// if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
-
-	// let commandName: string;
-	// if (msg.channel.type !== 'DM' || msg.content.toLowerCase().startsWith(PREFIX)) {
-	// 	[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
-	// } else {
-	// 	[commandName] = msg.content.split(' ');
-	// }
-	// const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
-
-	// const command = getCommand(msg.client, commandName);
-	// if (!command || command.enabled === false) return;
-
-	// if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
-	// if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
-	// 	await msg.author.send(`<@!${msg.author.id}>, the command you just tried to run is not available in public channels. Try again in DMs.`)
-	// 		.catch(async () => { await msg.reply('That command is not available here, try again in DMs'); });
-	// 	return msg.delete();
-	// }
-
-	// if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
-
-	// let args: Array<unknown>;
-	// if (command.argParser) {
-	// 	try {
-	// 		args = await command.argParser(msg, unparsedArgs);
-	// 	} catch (error) {
-	// 		msg.channel.send(error);
-	// 		return;
-	// 	}
-	// } else {
-	// 	args = [unparsedArgs];
-	// }
-
-	// try {
-	// 	command.run(msg, args)
-	// 		?.catch(async (error: Error) => {
-	// 			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-	// 			msg.client.emit('error', new CommandError(error, msg));
-	// 		});
-	// } catch (error) {
-	// 	msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-	// 	msg.client.emit('error', new CommandError(error, msg));
-	// }
 }
 
 export default register;

@@ -1,15 +1,31 @@
 import { BOT } from '@root/config';
-import { botMasterPerms } from '@lib/permissions';
-import { Message } from 'discord.js';
+import { BOTMASTER_PERMS } from '@lib/permissions';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, PresenceStatusData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
+const STATUSES = ['online', 'idle', 'dnd', 'invisible'];
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s status.`;
-	usage = '<online|idle|dnd|invisible>';
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	async permissions(msg: Message): Promise<boolean> {
-		return await botMasterPerms(msg);
+	options: ApplicationCommandOptionData[] = [{
+		name: 'status',
+		description: 'The status to give the bot (online, idle, dnd, invis).',
+		type: 'STRING',
+		required: true,
+		choices: STATUSES.map((status) => ({
+			name: status,
+			value: status
+		}))
+	}]
+
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const status = interaction.options.getString('status') as PresenceStatusData;
+		const bot = interaction.client;
+		await bot.user.setStatus(status);
+
+		return interaction.reply(`Set ${BOT.NAME}'s status to ${status}`);
 	}
 
 	async run(msg: Message, [status]: ['online' | 'idle' | 'dnd' | 'invisible']): Promise<Message> {

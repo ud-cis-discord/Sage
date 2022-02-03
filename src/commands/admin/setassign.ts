@@ -1,36 +1,42 @@
-import { Message, Role } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
-import { roleParser } from '@lib/arguments';
-import { adminPerms } from '@lib/permissions';
+import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
+import { modifyRoleDD } from '@lib/utils';
 
 export default class extends Command {
 
 	description = `Adds a role to the assignable collection of the database, or removes it if it's there already`;
-	usage = '<role>';
-	aliases = ['addassign'];
 	runInDM = false;
+	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	permissions(msg: Message): boolean {
-		return adminPerms(msg);
-	}
+	options: ApplicationCommandOptionData[] = [{
+		name: 'role',
+		description: 'The role to add to the list of self-assignable roles.',
+		type: 'ROLE',
+		required: true
+	}]
 
-	async run(msg: Message, [cmd]: [Role]): Promise<Message> {
-		const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
-		const newRole: AssignableRole = { id: cmd.id };
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		const apiRole = interaction.options.getRole('role');
+		const role = await interaction.guild.roles.fetch(apiRole.id);
+
+		const assignables = interaction.client.mongo.collection(DB.ASSIGNABLE);
+		const newRole: AssignableRole = { id: role.id };
 
 		if (await assignables.countDocuments(newRole) > 0) {
 			assignables.findOneAndDelete(newRole);
-			return msg.channel.send(`The role \`${cmd.name}\` has been removed.`);
+			return interaction.reply(`The role \`${role.name}\` has been removed.`);
 		} else {
+			if (!await modifyRoleDD(interaction, role, false, 'ADD')) {
+				return interaction.reply('Unable to add role to dropdown menu,');
+			}
 			assignables.insertOne(newRole);
-			return msg.channel.send(`The role \`${cmd.name}\` has been added.`);
+			return interaction.reply(`The role \`${role.name}\` has been added.`);
 		}
 	}
 
-	async argParser(msg: Message, input: string): Promise<Array<Role>> {
-		return [await roleParser(msg, input)];
-	}
+	run(_msg: Message): Promise<void> { return; }
 
 }

@@ -1,26 +1,22 @@
 import { DB, FIRST_LEVEL, LEVEL_TIER_ROLES, ROLES } from '@root/config';
-import { botMasterPerms } from '@lib/permissions';
+import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { Message } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 
 export default class extends Command {
 
 	description = 'Resets every user in the guild\'s level to 1';
-
 	enabled = false;
+	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	permissions(msg: Message): Promise<boolean> {
-		return botMasterPerms(msg);
-	}
+	async tempRun(interaction: CommandInteraction): Promise<void> {
+		await interaction.reply('loading... <a:loading:928003042954059888>');
+		await interaction.guild.roles.fetch();
+		const lvl1 = interaction.guild.roles.cache.find(role => role.id === ROLES.LEVEL_ONE);
 
-	async run(msg: Message): Promise<Message> {
-		const loadingMsg = await msg.channel.send('loading... <a:loading:928003042954059888>');
-		await msg.guild.roles.fetch();
-		const lvl1 = msg.guild.roles.cache.find(role => role.id === ROLES.LEVEL_ONE);
-
-		await msg.guild.members.fetch();
-		msg.guild.members.cache.forEach(member => {
+		await interaction.guild.members.fetch();
+		interaction.guild.members.cache.forEach(member => {
 			if (member.user.bot || !member.roles.cache.has(ROLES.VERIFIED)) return;
 			let level: number;
 			let lvlTier = -1;
@@ -46,7 +42,7 @@ export default class extends Command {
 			}
 		});
 
-		msg.client.mongo.collection<SageUser>(DB.USERS).updateMany(
+		interaction.client.mongo.collection<SageUser>(DB.USERS).updateMany(
 			{ roles: { $all: [ROLES.VERIFIED] } }, {
 				$set: {
 					count: 0,
@@ -56,7 +52,10 @@ export default class extends Command {
 				}
 			});
 
-		return loadingMsg.edit('I\'ve reset all levels in the guild.');
+		interaction.editReply('I\'ve reset all levels in the guild.');
+		return;
 	}
+
+	run(_msg: Message): Promise<void> { return; }
 
 }
