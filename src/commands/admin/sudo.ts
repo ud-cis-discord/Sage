@@ -8,6 +8,7 @@ export default class extends Command {
 	description = 'Allows you always to run other commands.';
 	extendedHelp = 'Sudo bypasses permission checks, disabled command checks and command location checks.';
 	usage = '<command> [args]';
+	enabled = false;
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
@@ -15,17 +16,22 @@ export default class extends Command {
 		description: 'The command you would like to sudo run.',
 		type: 'STRING',
 		required: true
+	},
+	{
+		name: 'args',
+		description: 'The args for the sudo-run command, ' +
+		'it can be a comma separated list of args or a single arg.',
+		type: 'STRING',
+		required: true
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
-		const sudoArg = interaction.options.getString('command');
-		const commandName = sudoArg.split(' ')[0];
+		const commandName = interaction.options.getString('command');
 		const command = getCommand(interaction.client, commandName);
-		//	const args = sudoArg.slice(commandName.length, sudoArg.length).trim();
+		if (!command) throw `Invalid command name: \`${commandName}\``;
 
-		if (!command) {
-			throw `Invalid command name: \`${commandName}\``;
-		}
+		//	const arg = interaction.options.getString('args');
+		//	const args = arg ? arg.split(', ') : [];
 
 		return command.tempRun(interaction);
 	}
