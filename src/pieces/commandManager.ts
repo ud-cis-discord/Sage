@@ -19,50 +19,6 @@ async function register(bot: Client): Promise<void> {
 	});
 }
 
-async function handleDropdown(interaction: SelectMenuInteraction) {
-	const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
-	const { customId, values, member } = interaction;
-	let responseContent = `Your roles have been updated.`;
-	if (customId === 'roleselect' && member instanceof GuildMember) {
-		const component = interaction.component as MessageSelectMenu;
-		const removed = component.options.filter((option) => !values.includes(option.value));
-		for (const id of removed) {
-			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
-			if (!role.name.includes('CISC')) {
-				member.roles.remove(id.value);
-				continue;
-			}
-			if (member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
-				const course = courses.find(c => c.name === role.name.substring(5));
-				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-				user.courses = user.courses.filter(c => c !== course.name);
-				member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
-				member.roles.remove(id.value);
-				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-				responseContent = `Your enrollments have been updated.`;
-			}
-		}
-		for (const id of values) {
-			const role = interaction.guild.roles.cache.find(r => r.id === id);
-			if (!role.name.includes('CISC')) {
-				member.roles.add(id);
-				continue;
-			}
-			const course = courses.find(c => c.name === role.name.substring(5));
-			const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-			user.courses.push(course.name);
-			member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
-			member.roles.add(id);
-			interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-			responseContent = `Your enrollments have been updated.`;
-		}
-		interaction.reply({
-			content: `${responseContent}`,
-			ephemeral: true
-		});
-	}
-}
-
 async function loadCommands(bot: Client) {
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
@@ -180,51 +136,6 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 
 	if (bot.commands.get(interaction.commandName).tempRun !== undefined) return bot.commands.get(interaction.commandName)?.tempRun(interaction);
 	else return interaction.reply('We haven\'t switched that one over yet');
-	// interaction.reply(interaction.commandName);
-	// if ((!msg.content.toLowerCase().startsWith(PREFIX) && msg.channel.type !== 'DM') || msg.author.bot) return;
-
-	// let commandName: string;
-	// if (msg.channel.type !== 'DM' || msg.content.toLowerCase().startsWith(PREFIX)) {
-	// 	[commandName] = msg.content.slice(PREFIX.length).trim().split(' ');
-	// } else {
-	// 	[commandName] = msg.content.split(' ');
-	// }
-	// const unparsedArgs = msg.content.slice(msg.content.indexOf(commandName) + commandName.length, msg.content.length).trim();
-
-	// const command = getCommand(msg.client, commandName);
-	// if (!command || command.enabled === false) return;
-
-	// if (msg.channel.type === 'DM' && command.runInDM === false) return msg.reply(`${command.name} is not available in DMs.`);
-	// if (msg.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
-	// 	await msg.author.send(`<@!${msg.author.id}>, the command you just tried to run is not available in public channels. Try again in DMs.`)
-	// 		.catch(async () => { await msg.reply('That command is not available here, try again in DMs'); });
-	// 	return msg.delete();
-	// }
-
-	// if (command.permissions && !await command.permissions(msg)) return msg.reply('Missing permissions');
-
-	// let args: Array<unknown>;
-	// if (command.argParser) {
-	// 	try {
-	// 		args = await command.argParser(msg, unparsedArgs);
-	// 	} catch (error) {
-	// 		msg.channel.send(error);
-	// 		return;
-	// 	}
-	// } else {
-	// 	args = [unparsedArgs];
-	// }
-
-	// try {
-	// 	command.run(msg, args)
-	// 		?.catch(async (error: Error) => {
-	// 			msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-	// 			msg.client.emit('error', new CommandError(error, msg));
-	// 		});
-	// } catch (error) {
-	// 	msg.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
-	// 	msg.client.emit('error', new CommandError(error, msg));
-	// }
 }
 
 async function handleDropdown(interaction: SelectMenuInteraction) {
