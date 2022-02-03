@@ -3,7 +3,7 @@ import { BOTMASTER_PERMS } from '@lib/permissions';
 import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, PresenceStatusData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
-const args = ['online', 'idle', 'dnd', 'invisible'];
+const STATUSES = ['online', 'idle', 'dnd', 'invisible'];
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s status.`;
@@ -14,9 +14,9 @@ export default class extends Command {
 		description: 'The status to give the bot (online, idle, dnd, invis).',
 		type: 'STRING',
 		required: true,
-		choices: args.map((arg) => ({
-			name: arg,
-			value: arg
+		choices: STATUSES.map((status) => ({
+			name: status,
+			value: status
 		}))
 	}]
 
