@@ -15,13 +15,6 @@ export default class extends Command {
 		description: 'The command you would like to sudo run.',
 		type: 'STRING',
 		required: true
-	},
-	{
-		name: 'args',
-		description: 'The args for the sudo-run command, ' +
-		'it can be a comma separated list of args or a single arg.',
-		type: 'STRING',
-		required: true
 	}]
 
 	async tempRun(interaction: CommandInteraction): Promise<unknown> {
