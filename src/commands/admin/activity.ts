@@ -23,7 +23,7 @@ export default class extends Command {
 		},
 		{
 			name: 'content',
-			description: 'The activity itself (ex: s;help).',
+			description: 'The activity itself (ex: /help).',
 			type: 'STRING',
 			required: true
 		}
