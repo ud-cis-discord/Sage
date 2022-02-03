@@ -5,27 +5,19 @@ import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = `Sets ${BOT.NAME}'s activity to 'Playing Shutting Down...' and ends the process.`;
+	description = `Sets ${BOT.NAME}'s activity to 'Playing Restart...' and ends the process.`;
 	tempPermissions: ApplicationCommandPermissionData[] = [BOTMASTER_PERMS];
 
 	async tempRun(interaction: CommandInteraction): Promise<void> {
 		const bot = interaction.client;
-		bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
-		interaction.reply(`Shutting down ${BOT.NAME}`)
+		bot.user.setActivity(`Restarting...`, { type: 'PLAYING' });
+		interaction.reply(`Restarting ${BOT.NAME}`)
 			.then(() => {
 				bot.destroy();
 				process.exit(0);
 			});
 	}
 
-	async run(msg: Message): Promise<void> {
-		const bot = msg.client;
-		bot.user.setActivity(`Shutting Down...`, { type: 'PLAYING' });
-		msg.channel.send(`Shutting down ${BOT.NAME}`)
-			.then(() => {
-				bot.destroy();
-				process.exit(0);
-			});
-	}
+	async run(msg: Message): Promise<void> { return; }
 
 }
