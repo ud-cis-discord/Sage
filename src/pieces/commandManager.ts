@@ -183,11 +183,10 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		try {
 			bot.commands.get(interaction.commandName)?.tempRun(interaction)
 				?.catch(async (error: Error) => {
-					interaction.reply(`An error occurred. ${MAINTAINERS} have been notified.`);
+					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 					bot.emit('error', new CommandError(error, interaction));
 				});
 		} catch (error) {
-			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 			bot.emit('error', new CommandError(error, interaction));
 		}
 	} else {

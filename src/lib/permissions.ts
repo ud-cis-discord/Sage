@@ -26,3 +26,9 @@ export const ADMIN_PERMS: ApplicationCommandPermissionData = {
 	permission: true,
 	type: 'ROLE'
 };
+
+export let BOTMASTER_PERMS: ApplicationCommandPermissionData[];
+
+export function setBotmasterPerms(data: ApplicationCommandPermissionData[]): void {
+	BOTMASTER_PERMS = data;
+}

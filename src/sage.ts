@@ -1,13 +1,14 @@
 import 'module-alias/register';
 import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
-import { Client, Intents, PartialTypes } from 'discord.js';
+import { ApplicationCommandPermissionData, Client, Intents, PartialTypes, Team } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
 import { Octokit } from '@octokit/rest';
 import { version as sageVersion } from '@root/package.json';
 import { registerFont } from 'canvas';
 import { SageData } from '@lib/types/SageData';
+import { setBotmasterPerms } from './lib/permissions';
 
 const BOT_INTENTS = [
 	Intents.FLAGS.DIRECT_MESSAGES,
@@ -51,6 +52,17 @@ async function main() {
 	registerFont(`${__dirname}/../../assets/Roboto-Regular.ttf`, { family: 'Roboto' });
 
 	bot.once('ready', async () => {
+		// I'm mad about this - Josh </3
+		const team = (await bot.application.fetch()).owner as Team;
+		setBotmasterPerms(team.members.map(value => {
+			const permData: ApplicationCommandPermissionData = {
+				id: value.id,
+				permission: true,
+				type: 'USER'
+			};
+			return permData;
+		}));
+
 		const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
 		for (const file of pieceFiles) {
 			const piece = await import(file);
