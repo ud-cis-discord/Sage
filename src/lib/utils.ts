@@ -37,6 +37,20 @@ export function isPermissionEqual(perm1: ApplicationCommandPermissionData, perm2
 		&& perm1.type === perm2.type;
 }
 
+export function generateErrorEmbed(msg: string): MessageEmbed {
+	const responseEmbed = new MessageEmbed()
+		.setColor('#ff0000')
+		.setTitle('Error')
+		.setDescription(msg);
+	return responseEmbed;
+}
+
+export function getMsgIdFromLink(link: string): string {
+	let msgId: string;
+	if ((msgId = link.split('/').pop()) === undefined) throw 'You must call this function with a message link!';
+	return msgId;
+}
+
 export async function modifyRoleDD(interaction: CommandInteraction, role: Role, isCourse: boolean, dropdownAction: 'ADD' | 'REMOVE'): Promise<boolean> {
 	let rolesMsg: Message;
 	const channel = await interaction.guild.channels.fetch(CHANNELS.ROLE_SELECT) as TextChannel;

@@ -25,7 +25,7 @@ export default class extends Command {
 		required: true
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async tempRun(interaction: CommandInteraction): Promise<unknown> {
 		const commandName = interaction.options.getString('command');
 		const command = getCommand(interaction.client, commandName);
 		if (!command) throw `Invalid command name: \`${commandName}\``;
