@@ -52,7 +52,8 @@ export default class extends Command {
 				}
 			});
 
-		await interaction.editReply('I\'ve reset all levels in the guild.');
+		interaction.editReply('I\'ve reset all levels in the guild.');
+		return;
 	}
 
 	run(_msg: Message): Promise<void> { return; }
