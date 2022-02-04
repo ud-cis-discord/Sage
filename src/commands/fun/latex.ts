@@ -21,7 +21,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
@@ -78,10 +78,6 @@ export default class extends Command {
 			.setURL(requestURL);
 
 		interaction.editReply({ embeds: [embed], files: [file] });
-	}
-
-	async run(): Promise<void> {
-		return;
 	}
 
 }

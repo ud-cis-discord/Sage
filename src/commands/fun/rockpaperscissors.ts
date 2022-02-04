@@ -1,5 +1,5 @@
 import { BOT } from '@root/config';
-import { ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const DECISION_TIMEOUT = 10;
@@ -9,9 +9,7 @@ export default class extends Command {
 
 	description = `The ultimate battle of human vs program. Can you best ${BOT.NAME} in a round of rock paper scissors?`;
 
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		let timeout = DECISION_TIMEOUT;
 		const choiceEmbed = new MessageEmbed()
 			.setTitle(`Make your choice, ${interaction.user.username}...`)

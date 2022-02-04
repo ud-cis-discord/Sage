@@ -9,9 +9,7 @@ export default class extends Command {
 
 	description = 'Submit an image to the current contest. After using this command upload an image in another message'; // lol thanks 100 char limit
 
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const submitEmbed = new MessageEmbed()
 			.setTitle(`${interaction.user.username}, send your image submission for the contest in a separate message, along with an optional description in the same message.`)
 			.setDescription(`Your file must be a JPG or PNG. You must attach the image to the message, image links will not work.`)

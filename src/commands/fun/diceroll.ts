@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
@@ -8,7 +8,6 @@ export default class extends Command {
 
 	description = `Get \`numdice\` random integers between \`minimum\` and \`maximum\`.`;
 	extendedHelp = `User specified minimum and maximum are inclusive. If no range is specified, defaults to one number ranging from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;
-	usage = '[min #] | [max #] | [numdice]';
 
 	options: ApplicationCommandOptionData[] = [
 		{
@@ -31,9 +30,7 @@ export default class extends Command {
 		}
 	]
 
-	run(_msg: Message): Promise<void> { return; }
-
-	tempRun(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		let min = interaction.options.getNumber('minimum');
 		let max = interaction.options.getNumber('maximum');
 		const numRolls = interaction.options.getNumber('numdice') || DEFAULT_ROLLS;

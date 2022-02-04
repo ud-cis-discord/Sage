@@ -1,4 +1,4 @@
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -6,9 +6,7 @@ export default class extends Command {
 	description = 'Challenge a blindfolded Prof. Roosen to a sword fight!';
 	extendedHelp = 'You\'ve been challenged to a sword fight. However, your opponent, Professor Roosen, has decided to wear a blindfold. Feeling lucky?';
 
-	run(_msg: Message): Promise<void> { return; }
-
-	tempRun(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		// 5 is a random number I chose to be the blindfolded Roosen, no other meaning
 		let responseEmbed: MessageEmbed;
 		if (Math.floor(Math.random() * 6) === 5) {

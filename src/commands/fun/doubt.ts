@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildMember, Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, GuildMember } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -13,9 +13,7 @@ export default class extends Command {
 		}
 	]
 
-	run(_msg: Message): Promise<void> { return; }
-
-	tempRun(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		const target = interaction.options.getMember('target') as GuildMember;
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/doubt.jpg`,

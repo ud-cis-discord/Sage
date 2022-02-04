@@ -1,13 +1,11 @@
-import { CommandInteraction, Message } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Everything is fine... probably.';
 
-	run(_msg: Message): Promise<void> { return; }
-
-	tempRun(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/thisisfine.png`, //	aliases don't work for file uploads
 			name: `this_is_fine.png`

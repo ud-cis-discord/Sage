@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
@@ -16,9 +16,7 @@ export default class extends Command {
 		}
 	]
 
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const latest: XkcdComic = await await fetch('http://xkcd.com/info.0.json').then(r => r.json());
 		const comicChoice = interaction.options.getString('comic');
 

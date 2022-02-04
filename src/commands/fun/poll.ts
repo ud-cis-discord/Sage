@@ -1,5 +1,5 @@
 import { BOT } from '@root/config';
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
@@ -43,8 +43,6 @@ export default class extends Command {
 	]
 	runInDM = false;
 
-	run(_msg: Message): Promise<void> { return; }
-
 	resetArray(array: number[], len: number): number[] {
 		for (let i = 0; i < len; i++) {
 			array[i] = 0;
@@ -52,13 +50,13 @@ export default class extends Command {
 		return array;
 	}
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const timespan = parse(interaction.options.getString('timespan'));
 		const question = interaction.options.getString('question');
 		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
 
 		const userSelections = new Map(); // user ID, their choice(s)
-		const choiceQuantites = Array.from({ length: choices.length }, () => (0)); // number of selections for each choice
+		const choiceQuantites = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
 
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
