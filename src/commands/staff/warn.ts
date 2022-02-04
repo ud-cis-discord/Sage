@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import nodemailer from 'nodemailer';
-import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, EMAIL } from '@root/config';
@@ -12,8 +12,6 @@ export default class extends Command {
 	runInDM = false;
 	description = 'Warns a user for breaking the rules and deletes the offending message.';
 	extendedHelp = 'This command must be used when replying to a message.';
-	usage = '[reason]';
-
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'msglink',
@@ -28,10 +26,9 @@ export default class extends Command {
 			required: false
 		}
 	]
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-
-	async tempRun(interaction: CommandInteraction): Promise<Message> {
+	async run(interaction: CommandInteraction): Promise<Message> {
 		const target = await interaction.channel.messages.fetch(getMsgIdFromLink(interaction.options.getString('msglink')));
 		const reason = interaction.options.getString('reason') || 'Breaking server rules';
 		if ('parentId' in interaction.channel) {
@@ -64,12 +61,6 @@ export default class extends Command {
 		interaction.reply({ content: `${target.author.username} has been warned.`, ephemeral: true });
 		return target.delete();
 	}
-
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(_msg: Message): Promise<void> { return; }
 
 	sendEmail(recipient: string, mod: string, reason: string): void {
 		const mailer = nodemailer.createTransport({

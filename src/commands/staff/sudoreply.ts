@@ -1,6 +1,6 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
-import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
@@ -8,10 +8,8 @@ import { Course } from '@lib/types/Course';
 export default class extends Command {
 
 	description = `Reply to a question asked through ${BOT.NAME}.`;
-	usage = '<questionID> <response>';
 	extendedHelp = 'Responses are put into a private thread between you and the asker.';
 	runInDM = false;
-
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'questionid',
@@ -26,10 +24,9 @@ export default class extends Command {
 			required: true
 		}
 	]
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-
-	async tempRun(interaction: CommandInteraction): Promise<Message | void> {
+	async run(interaction: CommandInteraction): Promise<Message | void> {
 		const idArg = interaction.options.getString('questionid');
 		if (isNaN(Number.parseInt(idArg))) return interaction.reply({ content: `**${idArg}** is not a valid question ID`, ephemeral: true });
 
@@ -99,11 +96,5 @@ export default class extends Command {
 
 		return privThread.send({ embeds: [threadEmbed] });
 	}
-
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(_msg: Message): Promise<Message> { return; }
 
 }

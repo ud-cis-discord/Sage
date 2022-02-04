@@ -1,14 +1,12 @@
-import { Message, MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { sendToFile } from '@lib/utils';
-import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives information about a role, including a list of the members who have it.';
-	usage = '<role>';
 	runInDM = false;
-
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'role',
@@ -17,10 +15,9 @@ export default class extends Command {
 			required: true
 		}
 	];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const role = interaction.options.getRole('role') as Role;
 
 		const memberList = role.members || (await interaction.guild.roles.fetch(role.id)).members;
@@ -45,11 +42,5 @@ export default class extends Command {
 		}
 		return interaction.reply({ embeds: [embed], files: attachments });
 	}
-
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(_msg: Message): Promise<Message> { return; }
 
 }

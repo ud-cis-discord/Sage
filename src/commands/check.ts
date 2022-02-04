@@ -6,8 +6,6 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Displays the users current message count.';
-	usage = '[hide]';
-
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'hide',
@@ -17,7 +15,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user: SageUser = await interaction.user.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -36,10 +34,6 @@ export default class extends Command {
 		} else {
 			interaction.reply({ embeds: [embed] });
 		}
-		return;
-	}
-
-	async run(): Promise<void> {
 		return;
 	}
 

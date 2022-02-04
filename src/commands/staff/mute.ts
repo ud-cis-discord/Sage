@@ -1,16 +1,13 @@
-import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { MAINTAINERS, ROLES } from '@root/config';
-import { Message, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives the muted role to the given user.';
-	usage = '<user>';
 	runInDM = false;
-
-	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
@@ -20,7 +17,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user = interaction.options.getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 
@@ -50,11 +47,5 @@ If you believe this to be a problem, please reach out to them directly.`).catch(
 
 		return interaction.reply({ content: muteMsg, ephemeral: true });
 	}
-
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(_msg: Message): Promise<Message> { return; }
 
 }

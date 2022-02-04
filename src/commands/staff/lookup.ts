@@ -1,17 +1,14 @@
 import { DB, EMAIL } from '@root/config';
-import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { Message, MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-
-
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Looks up information about a given user';
-	usage = '<user>';
 	runInDM = false;
 	options: ApplicationCommandOptionData[] = [
 		{
@@ -22,7 +19,7 @@ export default class extends Command {
 		}
 	];
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user = interaction.options.getUser('user');
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 
@@ -56,12 +53,6 @@ export default class extends Command {
 
 		return interaction.reply({ embeds: [embed], ephemeral: true });
 	}
-
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(_msg: Message): Promise<void> { return; }
 
 	sendEmail(recipient: string, username: string, entry: SageUser): void {
 		const mailer = nodemailer.createTransport({

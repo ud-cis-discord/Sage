@@ -1,14 +1,12 @@
-import { ADMIN_PERMS, staffPerms, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageEmbed } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives an overview of a member\'s info.';
-	usage = '<user>';
 	runInDM = false;
-
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
@@ -17,10 +15,9 @@ export default class extends Command {
 			required: true
 		}
 	];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	tempPermissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user = interaction.options.getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 
@@ -48,11 +45,5 @@ export default class extends Command {
 
 		return interaction.reply({ embeds: [embed] });
 	}
-
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 }
