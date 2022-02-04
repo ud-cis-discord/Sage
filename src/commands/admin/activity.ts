@@ -1,4 +1,4 @@
-import { ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
+import { ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -8,7 +8,7 @@ const ACTIVITIES = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to the given status and content`;
-	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [
 		{
@@ -29,7 +29,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const bot = interaction.client;
 		const content = interaction.options.getString('content');
 		const type = interaction.options.getString('status').toUpperCase() as ActivityType;
@@ -44,7 +44,5 @@ export default class extends Command {
 
 		interaction.reply({ content: `Set ${BOT.NAME}'s activity to *${type} ${content}*`, ephemeral: true });
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 }

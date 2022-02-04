@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Formatters, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Formatters } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { getCommand } from '@lib/utils';
 import { DB } from '@root/config';
@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = 'Enable a command.';
 	usage = '<command>';
-	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'command',
@@ -18,7 +18,7 @@ export default class extends Command {
 		required: true
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const commandInput = interaction.options.getString('command');
 		const command = getCommand(interaction.client, commandInput);
 
@@ -39,7 +39,5 @@ export default class extends Command {
 
 		return interaction.reply(Formatters.codeBlock('diff', `+>>> ${command.name} Enabled`));
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 }

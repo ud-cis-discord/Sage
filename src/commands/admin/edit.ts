@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, TextChannel } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -7,7 +7,7 @@ export default class extends Command {
 
 	description = `Edits a message sent by ${BOT.NAME}.`;
 	usage = '<messageLink>|<content>';
-	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'msg_link',
@@ -22,7 +22,7 @@ export default class extends Command {
 		required: true
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const link = interaction.options.getString('msg_link');
 		const content = interaction.options.getString('msg_content');
 
@@ -46,7 +46,5 @@ export default class extends Command {
 		await message.edit(content);
 		return interaction.reply('I\'ve updated that message.');
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 }

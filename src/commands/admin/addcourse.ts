@@ -1,4 +1,4 @@
-import { Message, OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = 'Creates a courses category and adds all necessary channels/roles.';
 	runInDM = false;
-	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
@@ -18,7 +18,7 @@ export default class extends Command {
 		required: true
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		interaction.reply('<a:loading:755121200929439745> working...');
 
 		const course = interaction.options.getString('course');
@@ -111,8 +111,6 @@ export default class extends Command {
 
 		interaction.editReply(`Successfully added course with ID ${course}`);
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 	async createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {
 		return guild.channels.create(name, {

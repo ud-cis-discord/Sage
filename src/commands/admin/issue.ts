@@ -2,12 +2,12 @@ import { ADMIN_PERMS } from '@lib/permissions';
 import { RequestError } from '@octokit/types';
 import { BOT, GITHUB_PROJECT } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
 	description = `Creates an issue in ${BOT.NAME}'s repository.`;
-	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'title',
@@ -28,7 +28,7 @@ export default class extends Command {
 		required: false
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const title = interaction.options.getString('title');
 		const label = interaction.options.getString('labels');
 		const body = interaction.options.getString('body');
@@ -58,7 +58,5 @@ export default class extends Command {
 			return interaction.reply('Something went horribly wrong with issue creation! Blame Josh.');
 		}
 	}
-
-	async run(msg: Message): Promise<void> { return; }
 
 }

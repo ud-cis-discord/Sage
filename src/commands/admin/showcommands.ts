@@ -1,13 +1,13 @@
-import { ApplicationCommandPermissionData, CommandInteraction, Formatters, Message } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Formatters } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Show all commands, including disable commands.';
-	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		let commands = '+ Enabled\n- Disabled\n';
 
 		interaction.client.commands.forEach(command => {
@@ -16,7 +16,5 @@ export default class extends Command {
 
 		return interaction.reply(Formatters.codeBlock('diff', commands));
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 }

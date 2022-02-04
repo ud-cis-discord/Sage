@@ -1,12 +1,12 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, Message, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Sends an announcement from Sage to a specified channel or announcements if no channel is given.';
-	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'channel',
@@ -27,7 +27,7 @@ export default class extends Command {
 		required: false
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
 		const channelOption = interaction.options.getChannel('channel');
 		const content = interaction.options.getString('content');
@@ -46,7 +46,5 @@ export default class extends Command {
 
 		return interaction.reply(`Your announcement has been sent in ${channel}`);
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 }

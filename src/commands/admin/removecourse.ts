@@ -1,7 +1,7 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, Message, MessageActionRow, MessageButton } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
 import { modifyRoleDD } from '@lib/utils';
 
 const DECISION_TIMEOUT = 30;
@@ -10,7 +10,7 @@ export default class extends Command {
 
 	description = 'Remove a course';
 	runInDM = false;
-	tempPermissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
@@ -19,7 +19,7 @@ export default class extends Command {
 		required: true
 	}]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		let timeout = DECISION_TIMEOUT;
 		const course = interaction.options.getChannel('course') as CategoryChannel;
 
@@ -126,8 +126,6 @@ export default class extends Command {
 		});
 		return;
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 	countdown(interaction: CommandInteraction, timeout: number, btns: MessageButton[], baseText: string): void {
 		const extraText = timeout > 1

@@ -9,9 +9,9 @@ export default class extends Command {
 
 	description = `Prunes all members who don't have the <@&${ROLES.VERIFIED}> role`;
 	runInDM = false;
-	tempPermissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		let timeout = PRUNE_TIMEOUT;
 
 		await interaction.guild.members.fetch();
@@ -94,8 +94,6 @@ export default class extends Command {
 
 		return;
 	}
-
-	run(_msg: Message): Promise<void> { return; }
 
 	countdown(msg: Message, timeout: number, confirmBtns: MessageButton[], confirmEmbed: MessageEmbed): void {
 		confirmEmbed.setFooter(`This command will expire in ${timeout}s`);
