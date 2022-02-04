@@ -1,34 +1,44 @@
 import { Reminder } from '@lib/types/Reminder';
 import { DB } from '@root/config';
-import { Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Cancel any pending reminders you may have.';
-	usage = '<reminder number>';
 	extendedHelp = 'You can only cancel one reminder at a time';
-	aliases = ['cr', 'removereminder'];
 
-	run(msg: Message, [reminder]: [Reminder]): Promise<Message> {
-		msg.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'remindernumber',
+			type: 'INTEGER',
+			required: true,
+			description: 'ID of the reminder to cancel'
+		}
+	]
 
-		const hidden = reminder.mode === 'private' && msg.channel.type !== 'DM';
-		return msg.channel.send(`Canceled reminder: **${hidden ? 'Private reminder.' : reminder.content}**`);
-	}
+	async run(interaction: CommandInteraction): Promise<unknown> {
+		const remindNum = interaction.options.getInteger('remindernumber') - 1;
 
-	async argParser(msg: Message, input: string): Promise<Array<Reminder>> {
-		const remindNum = parseInt(input) - 1;
-
-		if (isNaN(remindNum)) throw 'Please provide a valid number.';
-
-		const reminders: Array<Reminder> = await msg.client.mongo.collection(DB.REMINDERS).find({ owner: msg.author.id }).toArray();
+		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)
+			.find({ owner: interaction.user.id }).toArray();
 		reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());
 		const reminder = reminders[remindNum];
 
-		if (!reminder) throw `I couldn't find reminder **${input}**. Use the \`viewremind\` command to see your current reminders.`;
+		if (!reminder) {
+			interaction.reply({
+				content: `I couldn't find reminder **${remindNum}**. Use the \`viewremind\` command to see your current reminders.`,
+				ephemeral: true
+			});
+		}
 
-		return [reminder];
+		interaction.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
+
+		const hidden = reminder.mode === 'private' && interaction.channel.type !== 'DM';
+		return interaction.reply({
+			content: `Canceled reminder: **${reminder.content}**`,
+			ephemeral: hidden
+		});
 	}
 
 }

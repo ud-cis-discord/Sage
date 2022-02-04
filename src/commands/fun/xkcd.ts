@@ -1,47 +1,106 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@root/src/lib/utils';
 
 export default class extends Command {
 
 	description = 'Find a comic from xkcd.';
-	usage = '[latest | comicNumber]';
-	extendedHelp = 'If given no parameters, sends a random comic. You can also specify a comic by its number or get the latest comic with `latest`.';
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'comic',
+			description: `The comic to send. Can be 'latest', 'random', or a number.`,
+			type: 'STRING',
+			required: true
+		}
+	]
 
-	async run(msg: Message, [comicId]: [number | 'latest' | 'random']): Promise<Message> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const latest: XkcdComic = await await fetch('http://xkcd.com/info.0.json').then(r => r.json());
+		const comicChoice = interaction.options.getString('comic');
 
 		let comic: XkcdComic;
 
-		if (comicId === 'latest') {
+		const prevButton = new MessageButton({ label: 'Previous Comic', customId: 'previous', style: 'SECONDARY', emoji: '◀' });
+		const randButton = new MessageButton({ label: 'Random', customId: 'rand', style: 'SECONDARY', emoji: '🔀' });
+		const nextButton = new MessageButton({ label: 'Next Comic', customId: 'next', style: 'SECONDARY', emoji: '▶' });
+		let comicNum = 0;
+
+		if (comicChoice.toLowerCase() === 'random') {
+			comicNum = Math.trunc((Math.random() * (latest.num - 1)) + 1);
+			comic = await fetch(`http://xkcd.com/${comicNum}/info.0.json`).then(r => r.json());
+		} else if (comicChoice.toLowerCase() === 'latest') {
+			comicNum = latest.num;
 			comic = latest;
-		} else if (comicId === 'random') {
-			comic = await fetch(`http://xkcd.com/${Math.trunc((Math.random() * (latest.num - 1)) + 1)}/info.0.json`).then(r => r.json());
-		} else {
-			if (comicId < 1 || comicId > latest.num) {
-				return msg.channel.send(`Comic ${comicId} does not exists.`);
+		} else if (!isNaN(Number(comicChoice))) {
+			if (Number(comicChoice) < 1 || Number(comicChoice) > latest.num || !Number.isInteger(Number(comicChoice))) {
+				return interaction.reply({
+					ephemeral: true,
+					embeds: [generateErrorEmbed(`Comic ${comicChoice} does not exist.`)]
+				});
 			}
-			comic = await fetch(`http://xkcd.com/${comicId}/info.0.json`).then(r => r.json());
+			comicNum = Number(comicChoice);
+			comic = await fetch(`http://xkcd.com/${comicChoice}/info.0.json`).then(r => r.json());
+		} else {
+			return interaction.reply({
+				ephemeral: true,
+				embeds: [generateErrorEmbed(`Unknown parameter supplied. Please enter 'latest', 'random', or a number.`)]
+			});
 		}
 
-		return msg.channel.send({ embeds: [this.createComicEmbed(comic)] });
-	}
-
-	argParser(_msg: Message, input: string): Array<string | number> {
-		if (!input) {
-			return ['random'];
+		let actionRow;
+		if (comicNum === 1) {
+			actionRow = new MessageActionRow({ components: [randButton, nextButton] });
+		} else if (comicNum === latest.num) {
+			actionRow = new MessageActionRow({ components: [prevButton, randButton] });
+		} else {
+			actionRow = new MessageActionRow({ components: [prevButton, randButton, nextButton] });
 		}
+		interaction.reply({
+			embeds: [this.createComicEmbed(comic)],
+			components: [actionRow]
+		});
 
-		if (input.toLowerCase() === 'latest') {
-			return [input.toLowerCase()];
-		}
+		let replyId;
+		interaction.fetchReply().then(reply => { replyId = reply.id; });
 
-		if (isNaN(parseInt(input))) {
-			throw `Usage: ${this.usage}`;
-		}
+		const collector = interaction.channel.createMessageComponentCollector({
+			filter: i => i.message.id === replyId
+		});
 
-		return [parseInt(input)];
+		collector.on('collect', async (i: ButtonInteraction) => {
+			i.deferUpdate();
+			if (i.customId === 'previous') {
+				if (comicNum - 1 > 0) {
+					comic = await fetch(`http://xkcd.com/${--comicNum}/info.0.json`).then(r => r.json());
+					actionRow = comicNum === 1
+						? new MessageActionRow({ components: [randButton, nextButton] })
+						: new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+				}
+			} else if (i.customId === 'next') {
+				if (comicNum + 1 <= latest.num) {
+					comic = await fetch(`http://xkcd.com/${++comicNum}/info.0.json`).then(r => r.json());
+					actionRow = comicNum === latest.num
+						? new MessageActionRow({ components: [prevButton, randButton] })
+						: new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+				}
+			} else if (i.customId === 'rand') {
+				comicNum = Math.trunc((Math.random() * (latest.num - 1)) + 1);
+				comic = await fetch(`http://xkcd.com/${comicNum}/info.0.json`).then(r => r.json());
+				if (comicNum === 1) {
+					actionRow = new MessageActionRow({ components: [randButton, nextButton] });
+				} else if (comicNum === latest.num) {
+					actionRow = new MessageActionRow({ components: [prevButton, randButton] });
+				} else {
+					actionRow = new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+				}
+			}
+			interaction.editReply({
+				embeds: [this.createComicEmbed(comic)],
+				components: [actionRow]
+			});
+		});
 	}
 
 	createComicEmbed(comic: XkcdComic): MessageEmbed {

@@ -1,7 +1,7 @@
 import { Client, GuildMember, PartialGuildMember } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
-import { DB, FIRST_LEVEL, GUILDS, ROLES } from '@root/config';
+import { DB, FIRST_LEVEL, GUILDS, MAINTAINERS, ROLES } from '@root/config';
 
 async function memberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
@@ -10,6 +10,9 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	const entry: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
 	if (!entry) {
+		await member.send(`We couldn't find you in our database, you likely used the invite link with a different account than the one you verified with.
+Please join the server with the account you used to send your hash, or contact ${MAINTAINERS} if you think this is an error.`);
+		await member.kick('This person wasn\'t in the database, they probably used a different account to verify than they used the invite with');
 		throw new DatabaseError(`User ${member.user.tag} (${member.id}) does not exist in the database.`);
 	}
 	if (!entry.isVerified) {

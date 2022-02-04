@@ -1,42 +1,50 @@
-import { botMasterPerms } from '@lib/permissions';
-import { channelParser } from '@lib/arguments';
-import { TextChannel, Message } from 'discord.js';
+import { BOTMASTER_PERMS } from '@lib/permissions';
+import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Sends an announcement from Sage to a specified channel or announcements if no channel is given.';
-	usage = '[channel] | <content>';
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	async permissions(msg: Message): Promise<boolean> {
-		return await botMasterPerms(msg);
-	}
+	options: ApplicationCommandOptionData[] = [{
+		name: 'channel',
+		description: 'The channel to send the announcement in.',
+		type: 'CHANNEL',
+		required: true
+	},
+	{
+		name: 'content',
+		description: 'The announcement content',
+		type: 'STRING',
+		required: true
+	},
+	{
+		name: 'image',
+		description: 'The announcement image url',
+		type: 'STRING',
+		required: false
+	}]
 
-	async run(msg: Message, [channel, content]: [TextChannel, string]): Promise<Message> {
+	async run(interaction: CommandInteraction): Promise<void> {
+		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
+		const channelOption = interaction.options.getChannel('channel');
+		const content = interaction.options.getString('content');
+		const image = interaction.options.getString('image');
+
+		const channel = (channelOption || announceChannel) as TextChannel;
 		await channel.send({
 			content: content,
-			files: [...msg.attachments.values()],
 			allowedMentions: { parse: ['everyone', 'roles'] }
 		});
-
-		return msg.channel.send(`Your announcement has been sent in ${channel}`);
-	}
-
-	async argParser(msg: Message, input: string): Promise<[TextChannel, string]> {
-		const args = input.trim().split('|');
-
-		if (!args[0] && msg.attachments.size === 0) {
-			throw `Usage: ${this.usage}`;
+		if (image) {
+			await channel.send({
+				content: image
+			});
 		}
 
-		const channel = args.length > 1 ? args.shift() : null;
-		const content = args.join('|');
-
-		const retChannel = channel
-			? channelParser(msg, channel) : msg.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS) as TextChannel;
-
-		return [retChannel, content];
+		return interaction.reply(`Your announcement has been sent in ${channel}`);
 	}
 
 }

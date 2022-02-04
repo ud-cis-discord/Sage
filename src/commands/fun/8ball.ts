@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const MAGIC8BALL_RESPONSES = [
@@ -26,18 +26,29 @@ const MAGIC8BALL_RESPONSES = [
 
 export default class extends Command {
 
-	description = 'Ask the 8ball a question and you shall get an answer.';
-	extendedHelp = 'This command requires you to put a question mark at the end of your question.';
-	usage = '[question]';
+	description = `Ask the 8-ball a question and you shall get an answer.`;
+	extendedHelp = `This command requires you to put a question mark ('?') at the end of your message.`;
 
-
-	run(msg: Message, question: string[]): Promise<Message> {
-		if (question.length !== 0 && question[question.length - 1].endsWith('?')) {
-			return msg.channel.send(MAGIC8BALL_RESPONSES[
-				Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]);
-		} else {
-			return msg.channel.send('The 8ball only responds to questions smh');
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'question',
+			description: 'The question you want to ask',
+			type: 'STRING',
+			required: true
 		}
+	]
+
+	run(interaction: CommandInteraction): Promise<void> {
+		const question = interaction.options.getString('question');
+		const response = question.length !== 0 && question[question.length - 1].endsWith('?')
+			?	MAGIC8BALL_RESPONSES[Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]
+			:	'The 8-ball only responds to questions smh';
+		const responseEmbed = new MessageEmbed()
+			.setColor('#000000')
+			.setTitle('The magic 8-ball says...')
+			.setDescription(response)
+			.setFooter(`${interaction.user.username} asked: ${question}`);
+		return interaction.reply({ embeds: [responseEmbed], files: [{ attachment: `${__dirname}../../../../../assets/images/8-ball.png`, name: '8-ball.png' }] });
 	}
 
 }

@@ -1,33 +1,36 @@
 import { DB, EMAIL } from '@root/config';
-import { userParser } from '@lib/arguments';
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { Message, GuildMember, MessageEmbed } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Looks up information about a given user';
-	usage = '<user>';
 	runInDM = false;
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'user',
+			type: 'USER',
+			description: 'The member to look up',
+			required: true
+		}
+	];
 
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(msg: Message, [member]: [GuildMember]): Promise<void> {
-		const entry: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: member.user.id });
+	async run(interaction: CommandInteraction): Promise<void> {
+		const user = interaction.options.getUser('user');
+		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 
 		if (!entry) {
-			msg.channel.send(`User ${member.user.tag} has not verified.`);
-			return;
+			return interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
 		}
 
 		const embed = new MessageEmbed()
 			.setColor('GREEN')
-			.setAuthor(member.user.username, member.user.avatarURL())
-			.setFooter(`ID: ${member.user.id}`)
+			.setAuthor(user.username, user.avatarURL())
+			.setFooter(`ID: ${user.id}`)
 			.addFields([
 				{
 					name: 'Email:',
@@ -42,16 +45,13 @@ export default class extends Command {
 			]);
 
 		if (!entry.pii) {
-			const sender: SageUser = await msg.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
-			msg.channel.send(`That user has not opted in to have their information shared over Discord. 
-	An email has been sent to you containing the requested data.`);
-			this.sendEmail(sender.email, member.user.username, entry);
-			return;
+			const sender: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
+			this.sendEmail(sender.email, user.username, entry);
+			return interaction.reply({ content: `That user has not opted in to have their information shared over Discord. 
+	An email has been sent to you containing the requested data.`, ephemeral: true });
 		}
 
-		msg.author.send({ embeds: [embed] }).then(() => msg.channel.send('I\'ve sent the requested info to your DMs'))
-			.catch(() => msg.channel.send('I couldn\'t send you a DM. Please enable DMs and try again'));
-		return;
+		return interaction.reply({ embeds: [embed], ephemeral: true });
 	}
 
 	sendEmail(recipient: string, username: string, entry: SageUser): void {
@@ -85,10 +85,6 @@ export default class extends Command {
 
 	</html>`
 		});
-	}
-
-	async argParser(msg: Message, input: string): Promise<Array<GuildMember>> {
-		return [await userParser(msg, input)];
 	}
 
 }

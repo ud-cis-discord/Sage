@@ -22,7 +22,10 @@ async function handleCron(bot: Client): Promise<void> {
 		if (reminder.mode === 'public') {
 			pubChan.send(message);
 		} else {
-			bot.users.fetch(reminder.owner).then(user => user.send(message));
+			bot.users.fetch(reminder.owner).then(user => user.send(message).catch(() => {
+				pubChan.send(`<@${reminder.owner}>, I tried to send you a DM about your private reminder but it looks like you have
+DMs closed. Please enable DMs in the future if you'd like to get private reminders.`);
+			}));
 		}
 
 		// copied value by value for several reasons, change it and I take no responsibility for it breaking.

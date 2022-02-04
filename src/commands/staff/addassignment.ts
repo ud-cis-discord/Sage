@@ -1,6 +1,6 @@
-import { EmbedField, Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
-import { staffPerms } from '@lib/permissions';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -8,17 +8,28 @@ export default class extends Command {
 
 	// Never assume staff are not dumb (the reason this is so long)
 
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Adds an assignment to a given course ID\'s assignment list';
-	usage = '<course ID>|<assignmentID(s)>';
 	runInDM = false;
-	aliases = ['adda'];
+	options: ApplicationCommandOptionData[] =[
+		{
+			name: 'course',
+			description: 'The course ID to add an assignment to',
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'newassignments',
+			description: 'A | separated list of new assignments',
+			type: 'STRING',
+			required: true
+		}
+	]
 
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
-
-	async run(msg: Message, [course, newAssignments]: [string, Array<string>]): Promise<Message> {
-		const entry: Course = await msg.client.mongo.collection(DB.COURSES).findOne({ name: course });
+	async run(interaction: CommandInteraction): Promise<void> {
+		const course = interaction.options.getString('course');
+		const newAssignments = interaction.options.getString('newassignments').split('|').map(assign => assign.trim());
+		const entry: Course = await interaction.client.mongo.collection(DB.COURSES).findOne({ name: course });
 
 		const added: Array<string> = [];
 		const failed: Array<string> = [];
@@ -31,7 +42,7 @@ export default class extends Command {
 			}
 		});
 
-		msg.client.mongo.collection(DB.COURSES).updateOne({ name: course }, { $set: { ...entry } });
+		interaction.client.mongo.collection(DB.COURSES).updateOne({ name: course }, { $set: { ...entry } });
 
 		const fields: Array<EmbedField> = [];
 		if (added.length > 0) {
@@ -53,22 +64,7 @@ export default class extends Command {
 			.addFields(fields)
 			.setColor('GOLD');
 
-		return msg.channel.send({ embeds: [embed] });
-	}
-
-	async argParser(msg: Message, input: string): Promise<[string, Array<string>]> {
-		if (input === '' || input.split('|').length <= 1) {
-			throw `Usage: ${this.usage}`;
-		}
-
-		const assignments = input.split('|').map(assignment => assignment.trim());
-		const course = assignments.shift().toLowerCase();
-
-		if (await msg.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) !== 1) {
-			throw `Could not find course: ${course}`;
-		}
-
-		return [course, assignments];
+		return interaction.reply({ embeds: [embed] });
 	}
 
 }
