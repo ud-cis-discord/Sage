@@ -1,6 +1,6 @@
 import { Client, Message, Guild } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
-import { DB, GUILDS, MAINTAINERS, PREFIX, ROLES } from '@root/config';
+import { CHANNELS, DB, GUILDS, MAINTAINERS, ROLES } from '@root/config';
 
 async function verify(msg: Message, bot: Client, guild: Guild) {
 	if (msg.channel.type !== 'DM' || msg.content.trim().length !== 44 || msg.content.includes(' ')) return;
@@ -20,7 +20,7 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 
 		const enrollStr = entry.courses.length > 0
 			? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or unenroll from your current course,` +
-			` send \`${PREFIX}enroll <courseCode>\`.`
+			` go to <#${CHANNELS.ROLE_SELECT}> and select your courses.`
 			: '';
 
 		bot.mongo.collection(DB.USERS).updateOne(
@@ -45,8 +45,9 @@ async function verify(msg: Message, bot: Client, guild: Guild) {
 	} else {
 		const member = guild.members.cache.get(msg.author.id);
 		if (member) {
-			return msg.reply('It would seem you are already verified and a member of the UD CIS Discord server. ' +
-				`Contact ${MAINTAINERS} if you think this is an error.`);
+			return msg.reply(`It would seem you are already verified and a member of the UD CIS Discord server.
+To enroll in a course, go to <#${CHANNELS.ROLE_SELECT}> and select your course(s) for this semester.
+Contact ${MAINTAINERS} if you think this is an error.`);
 		}
 
 		const invite = await guild.systemChannel.createInvite({

@@ -2,7 +2,7 @@ import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, Message
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils';
+import { generateErrorEmbed } from '@lib/utils';
 
 const BACKGROUND_COLOR = `rgb(${255 - 47}, ${255 - 49}, ${255 - 54})`;
 const PADDING = 4;
