@@ -151,14 +151,14 @@ async function loadCommands(bot: Client) {
 
 		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
 		if (botCmd
-			&& (botCmd.tempPermissions.length !== curPerms.length
-				|| !botCmd.tempPermissions.every(perm =>
+			&& (botCmd.permissions.length !== curPerms.length
+				|| !botCmd.permissions.every(perm =>
 					curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
 			console.log(`Updating permissions for ${botCmd.name}`);
 			permsUpdated++;
 			return commands.permissions.set({
 				command: command.id,
-				permissions: botCmd.tempPermissions
+				permissions: botCmd.permissions
 			});
 		}
 	}));
@@ -179,9 +179,9 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		});
 	}
 
-	if (bot.commands.get(interaction.commandName).tempRun !== undefined) {
+	if (bot.commands.get(interaction.commandName).run !== undefined) {
 		try {
-			bot.commands.get(interaction.commandName)?.tempRun(interaction)
+			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => {
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 					bot.emit('error', new CommandError(error, interaction));

@@ -27,7 +27,6 @@ export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2:
 			&& list2Option.required === list1Option.required
 			&& list2Option.type === list1Option.type
 	));
-	if (!valid) console.log('options list not quite right');
 	return valid;
 }
 
