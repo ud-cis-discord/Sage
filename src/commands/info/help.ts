@@ -6,7 +6,6 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = `Provides info about all ${BOT.NAME} commands`;
-	usage = '[command]';
 	extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
 
 	options: ApplicationCommandOptionData[] = [
@@ -30,11 +29,6 @@ export default class extends Command {
 			}
 
 			const fields: Array<EmbedField> = [];
-			fields.push({
-				name: 'Usage',
-				value: `${PREFIX}${command.name} ${command.usage ? command.usage : ''}`,
-				inline: true
-			});
 
 			if (command.extendedHelp) {
 				fields.push({
