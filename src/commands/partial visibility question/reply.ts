@@ -1,14 +1,13 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { MessageEmbed, Message, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
 
 export default class extends Command {
 
 	description = `Reply to a question you previously asked with ${BOT.NAME}.`;
-	usage = '<questionID> <response>';
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'questionid',
@@ -24,9 +23,7 @@ export default class extends Command {
 		}
 	]
 
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const id = interaction.options.getString('questionid');
 		const question: PVQuestion = await interaction.client.mongo.collection(DB.PVQ).findOne({ questionId: id });
 

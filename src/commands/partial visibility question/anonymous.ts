@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
 import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
@@ -9,7 +9,6 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Send an anonymous question in your classes general channel.';
-	usage = '[course] <question>';
 	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
 	options: ApplicationCommandOptionData[] = [
 		{
@@ -26,9 +25,7 @@ export default class extends Command {
 		}
 	]
 
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
