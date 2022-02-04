@@ -1,5 +1,5 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
 import { reminderTime } from '@lib/utils';
@@ -9,7 +9,6 @@ export default class extends Command {
 
 
 	description = `Have ${BOT.NAME} give you a reminder.`;
-	usage = '<reminder> | <duration> | [repeat]';
 	extendedHelp = 'Reminders can be set to repeat daily or weekly.';
 	options: ApplicationCommandOptionData[] = [
 		{
@@ -33,7 +32,7 @@ export default class extends Command {
 		}
 	]
 
-	tempRun(interaction: CommandInteraction): Promise<unknown> {
+	run(interaction: CommandInteraction): Promise<unknown> {
 		const content = interaction.options.getString('content');
 		const rawDuration = interaction.options.getString('duration');
 		const duration = parse(rawDuration);
@@ -57,7 +56,5 @@ export default class extends Command {
 
 		return interaction.reply({ content: `I'll remind you about that at ${reminderTime(reminder)}.`, ephemeral: true });
 	}
-
-	run(_msg: Message): Promise<Message> { return; }
 
 }

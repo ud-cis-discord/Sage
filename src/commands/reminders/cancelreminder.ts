@@ -1,12 +1,11 @@
 import { Reminder } from '@lib/types/Reminder';
 import { DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction, Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Cancel any pending reminders you may have.';
-	usage = '<reminder number>';
 	extendedHelp = 'You can only cancel one reminder at a time';
 
 	options: ApplicationCommandOptionData[] = [
@@ -18,7 +17,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<unknown> {
+	async run(interaction: CommandInteraction): Promise<unknown> {
 		const remindNum = interaction.options.getInteger('remindernumber') - 1;
 
 		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)
@@ -41,7 +40,5 @@ export default class extends Command {
 			ephemeral: hidden
 		});
 	}
-
-	run(_msg: Message): Promise<Message> { return; }
 
 }

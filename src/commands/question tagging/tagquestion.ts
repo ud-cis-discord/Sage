@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, Message, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@root/src/lib/types/QuestionTag';
 import { DB } from '@root/config';
@@ -8,7 +8,6 @@ import { generateErrorEmbed } from '@root/src/lib/utils';
 export default class extends Command {
 
 	description = 'Tags a message with a given course/assignment ID. Must be run in a class-specific channel.';
-	usage = '<assignmentID>';
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'message',
@@ -25,9 +24,7 @@ export default class extends Command {
 	]
 
 	// never assume that students are not dumb
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const msgLink = interaction.options.getString('message');
 		const assignmentId = interaction.options.getString('assignmentid');
 

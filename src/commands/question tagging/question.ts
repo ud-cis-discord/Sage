@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
@@ -10,7 +10,6 @@ export default class extends Command {
 
 	description = 'Filters the questionTags collection for a given class and assignment';
 	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
-	usage = '[courseID] <assignmentID>';
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'assignment',
@@ -28,9 +27,7 @@ export default class extends Command {
 
 	// never assume that students are not dumb
 
-	run(_msg: Message): Promise<void> { return; }
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
