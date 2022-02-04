@@ -66,7 +66,7 @@ export default class extends Command {
 		interaction.fetchReply().then(reply => { replyId = reply.id; });
 
 		const collector = interaction.channel.createMessageComponentCollector({
-			filter: i => i.message.id === replyId
+			filter: i => i.message.id === replyId && i.user.id === interaction.user.id
 		});
 
 		collector.on('collect', async (i: ButtonInteraction) => {
