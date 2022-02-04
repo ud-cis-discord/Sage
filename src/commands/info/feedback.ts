@@ -15,7 +15,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction:CommandInteraction): Promise<void> {
+	async run(interaction:CommandInteraction): Promise<void> {
 		const feedback = interaction.options.getString('feedback');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
@@ -29,10 +29,6 @@ export default class extends Command {
 		feedbackChannel.send({ embeds: [embed] });
 
 		return interaction.reply({ content: `Thanks! I've sent your feedback to ${MAINTAINERS}.`, ephemeral: true });
-	}
-
-	async run(): Promise<void> {
-		return;
 	}
 
 }

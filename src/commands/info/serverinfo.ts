@@ -6,11 +6,7 @@ export default class extends Command {
 	description = 'Provides information about the UDCIS discord server.';
 	runInDM = false;
 
-	async run(): Promise<void> {
-		return;
-	}
-
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const membersWithRoles = interaction.guild.members.cache.filter(m => m.roles.cache.size > 1).size;
 		const percentage = Math.floor((interaction.guild.members.cache.filter(m => m.roles.cache.size > 1).size / interaction.guild.memberCount) * 100);
 

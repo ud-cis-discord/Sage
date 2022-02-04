@@ -8,11 +8,7 @@ export default class extends Command {
 
 	description = 'Displays info about Sage\'s current status';
 
-	run(): Promise<void> {
-		return;
-	}
-
-	async tempRun(interaction:CommandInteraction): Promise<void> {
+	async run(interaction:CommandInteraction): Promise<void> {
 		const fields: Array<EmbedField> = [];
 		const bot = interaction.client;
 

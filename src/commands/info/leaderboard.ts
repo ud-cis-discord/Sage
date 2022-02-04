@@ -7,7 +7,6 @@ import { MessageEmbed, ApplicationCommandOptionData, CommandInteraction } from '
 export default class extends Command {
 
 	description = 'Gives the top 10 users in the guild';
-	usage = '[page number]';
 	extendedHelp = 'Enter a page number to look further down the leaderboard';
 	runInDM = false;
 
@@ -20,7 +19,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		interaction.guild.members.fetch();
 		interaction.deferReply();
 
@@ -107,10 +106,6 @@ export default class extends Command {
 			embeds: [embed],
 			files: [{ name: 'leaderboard.png', attachment: canvas.toBuffer() }]
 		});
-		return;
-	}
-
-	async run(): Promise<void> {
 		return;
 	}
 

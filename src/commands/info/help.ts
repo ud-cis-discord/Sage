@@ -18,7 +18,7 @@ export default class extends Command {
 		}
 	]
 
-	async tempRun(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const cmd = interaction.options.getString('cmd');
 		const { commands } = interaction.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
@@ -114,9 +114,6 @@ export default class extends Command {
 					});
 			});
 		}
-	}
-	async run(): Promise<void> {
-		return;
 	}
 
 }
