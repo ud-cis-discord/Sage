@@ -2,6 +2,7 @@ import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, Message
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@lib/utils';
 
 const BACKGROUND_COLOR = `rgb(${255 - 47}, ${255 - 49}, ${255 - 54})`;
 const PADDING = 4;
@@ -21,7 +22,7 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<unknown> {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
@@ -34,8 +35,7 @@ export default class extends Command {
 			const imageAsBase64JSON = await response.json();
 			imageAsBase64 = Buffer.from(imageAsBase64JSON.latex.base64, 'base64');
 		} catch (error) {
-			interaction.editReply({ content: errorResponse });
-			throw error;
+			return interaction.followUp({ embeds: [generateErrorEmbed(errorResponse)] });
 		}
 
 		const image = await loadImage(imageAsBase64);
@@ -67,8 +67,7 @@ export default class extends Command {
 			}
 			ctx.putImageData(canvasData, 0, 0);
 		} catch (error) {
-			interaction.editReply({ content: errorResponse });
-			throw error;
+			return interaction.followUp({ embeds: [generateErrorEmbed(errorResponse)] });
 		}
 
 		const file = new MessageAttachment(canvas.toBuffer(), 'tex.png');
@@ -81,4 +80,3 @@ export default class extends Command {
 	}
 
 }
-
