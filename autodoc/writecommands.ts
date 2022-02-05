@@ -12,7 +12,7 @@ layout: page
 title: Commands
 permalink: pages/commands
 ---
-Here is a list of all of the commands available for Sage, usable with \`/command\`.
+Here is a list of all of the commands available for Sage, usable with \`/<command name here>\`.
 <br>
 Note, any arguments to the commands will be shown with descriptions when you select the command you want to run.
 `;
@@ -32,7 +32,7 @@ permalink: staff_pages/staff%20commands
 ## Running Commands
 
 As staff, you have access to some commands not listed in the general [commands page][29]. You run them the same as the
-other commands, using \`/command\`in any channel that Sage is in, although we recommend running staff
+other commands, using \`/<command name here>\`in any channel that Sage is in, although we recommend running staff
 commands in staff-only channels.
 
 `;
