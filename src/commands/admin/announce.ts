@@ -34,7 +34,7 @@ export default class extends Command {
 		let content = interaction.options.getString('content');
 
 		const tempMessage = content.split(`\\n`);
-		content = tempMessage.join(`\n\n`);
+		content = tempMessage.join(`\n`);
 
 		const channel = (channelOption || announceChannel) as TextChannel;
 		await channel.send({
