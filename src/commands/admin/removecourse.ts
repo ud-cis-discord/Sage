@@ -49,16 +49,15 @@ export default class extends Command {
 		interaction.fetchReply().then(reply => { replyId = reply.id; });
 
 		const collector = interaction.channel.createMessageComponentCollector({
-			max: 1,
 			time: DECISION_TIMEOUT * 1000,
-			filter: i => i.user.id === interaction.user.id && i.message.id === replyId
+			filter: i => i.message.id === replyId
 		});
 
 		const countdown = setInterval(() => this.countdown(interaction, --timeout, confirmBtns, baseText), 1000);
 
 		collector.on('collect', async (i: ButtonInteraction) => {
 			if (interaction.user.id !== i.user.id) {
-				await interaction.reply({
+				await i.reply({
 					content: 'You cannot respond to a command you did not execute',
 					ephemeral: true
 				});

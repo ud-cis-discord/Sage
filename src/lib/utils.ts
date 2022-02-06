@@ -116,6 +116,7 @@ function addRole(interaction: CommandInteraction,
 		});
 		menu.addOptions([option]);
 		menu.setMaxValues(menu.options.length);
+		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
 	} else {
 		dropdownRow.addComponents(
 			new MessageSelectMenu()
@@ -150,6 +151,7 @@ function removeRole(interaction: CommandInteraction,
 
 		menu.spliceOptions(index, 1);
 		menu.setMaxValues(menu.options.length);
+		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
 		rolesMsg.edit({ components: menu.options.length > 0 ? [dropdownRow] : [] });
 		cont = false;
 	});

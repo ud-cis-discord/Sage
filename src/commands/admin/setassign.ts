@@ -26,6 +26,9 @@ export default class extends Command {
 		const newRole: AssignableRole = { id: role.id };
 
 		if (await assignables.countDocuments(newRole) > 0) {
+			if (!await modifyRoleDD(interaction, role, false, 'REMOVE')) {
+				return interaction.reply('Unable to remove role from dropdown menu,');
+			}
 			assignables.findOneAndDelete(newRole);
 			return interaction.reply(`The role \`${role.name}\` has been removed.`);
 		} else {

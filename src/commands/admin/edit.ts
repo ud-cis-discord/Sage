@@ -17,14 +17,14 @@ export default class extends Command {
 	},
 	{
 		name: 'msg_content',
-		description: 'The updated message content.',
+		description: 'The updated message content. Adding in \n will add in a line break.',
 		type: 'STRING',
 		required: true
 	}]
 
 	async run(interaction: CommandInteraction): Promise<void> {
 		const link = interaction.options.getString('msg_link');
-		const content = interaction.options.getString('msg_content');
+		let content = interaction.options.getString('msg_content');
 
 		//	for discord canary users, links are different
 		const newLink = link.replace('canary.', '');
@@ -43,6 +43,10 @@ export default class extends Command {
 				{ content: `It seems I can't edit that message. You'll need to tag a message that was sent by me, ${BOT.NAME}`,
 					ephemeral: true });
 		}
+
+		const tempMessage = content.split(`\\n`);
+		content = tempMessage.join(`\n`);
+
 		await message.edit(content);
 		return interaction.reply('I\'ve updated that message.');
 	}

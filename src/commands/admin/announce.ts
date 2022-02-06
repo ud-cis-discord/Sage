@@ -16,7 +16,7 @@ export default class extends Command {
 	},
 	{
 		name: 'content',
-		description: 'The announcement content',
+		description: `The announcement content. Adding in \n will add in a line break.`,
 		type: 'STRING',
 		required: true
 	},
@@ -30,8 +30,11 @@ export default class extends Command {
 	async run(interaction: CommandInteraction): Promise<void> {
 		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
 		const channelOption = interaction.options.getChannel('channel');
-		const content = interaction.options.getString('content');
 		const image = interaction.options.getString('image');
+		let content = interaction.options.getString('content');
+
+		const tempMessage = content.split(`\\n`);
+		content = tempMessage.join(`\n`);
 
 		const channel = (channelOption || announceChannel) as TextChannel;
 		await channel.send({
