@@ -66,10 +66,17 @@ export default class extends Command {
 		interaction.fetchReply().then(reply => { replyId = reply.id; });
 
 		const collector = interaction.channel.createMessageComponentCollector({
-			filter: i => i.message.id === replyId && i.user.id === interaction.user.id
+			filter: i => i.message.id === replyId
 		});
 
 		collector.on('collect', async (i: ButtonInteraction) => {
+			if (interaction.user.id !== i.user.id) {
+				await i.reply({
+					content: 'You cannot respond to a command you did not execute',
+					ephemeral: true
+				});
+				return;
+			}
 			i.deferUpdate();
 			if (i.customId === 'previous') {
 				if (comicNum - 1 > 0) {
