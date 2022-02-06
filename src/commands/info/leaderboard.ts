@@ -102,7 +102,7 @@ export default class extends Command {
 			.setDescription(content)
 			.setImage('attachment://leaderboard.png');
 
-		interaction.editReply({
+		interaction.followUp({
 			embeds: [embed],
 			files: [{ name: 'leaderboard.png', attachment: canvas.toBuffer() }]
 		});
