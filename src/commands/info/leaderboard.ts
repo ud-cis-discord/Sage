@@ -20,8 +20,8 @@ export default class extends Command {
 	]
 
 	async run(interaction: CommandInteraction): Promise<void> {
-		interaction.guild.members.fetch();
-		interaction.deferReply();
+		await interaction.deferReply();
+		await interaction.guild.members.fetch();
 
 		// eslint-disable-next-line no-extra-parens
 		const users: Array<SageUser> = (await interaction.client.mongo.collection('users').find().toArray() as Array<SageUser>)
