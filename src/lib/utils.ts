@@ -161,7 +161,7 @@ function removeRole(interaction: CommandInteraction,
 	const responseEmbed = new MessageEmbed()
 		.setColor('#ff0000')
 		.setTitle('Argument error')
-		.setDescription(`${option.label} was not found in that message's role select menu.`);
+		.setDescription(`${option.label} was not found in that message's role select menu. The role, however, has still been removed.`);
 	interaction.editReply({ embeds: [responseEmbed] });
 	return false;
 }
