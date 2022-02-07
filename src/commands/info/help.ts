@@ -38,6 +38,18 @@ export default class extends Command {
 				});
 			}
 
+			if (command.options) {
+				let concatOptions = '';
+				command.options.forEach(param => {
+					concatOptions += `**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}\n`;
+				});
+				fields.push({
+					name: 'Parameters',
+					value: concatOptions,
+					inline: false
+				});
+			}
+
 			fields.push({
 				name: 'More commands',
 				value: `[Visit our website!](${website})`,
