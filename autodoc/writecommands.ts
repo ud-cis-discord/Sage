@@ -72,6 +72,12 @@ async function main() {
 
 		newCatText += command.description ? `\n- Description: ${command.description}\n` : ``;
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
+		if (command.options) {
+			newCatText += '\n- Parameters:\n';
+			newCatText += command.options.map(param =>
+				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
+			).join('\n');
+		}
 		categories.set(command.category, newCatText);
 	}
 

@@ -38,6 +38,16 @@ export default class extends Command {
 				});
 			}
 
+			if (command.options) {
+				fields.push({
+					name: 'Parameters',
+					value: command.options.map(param =>
+						`**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}`
+					).join('\n'),
+					inline: false
+				});
+			}
+
 			fields.push({
 				name: 'More commands',
 				value: `[Visit our website!](${website})`,
