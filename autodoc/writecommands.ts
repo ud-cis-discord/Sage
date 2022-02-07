@@ -73,11 +73,10 @@ async function main() {
 		newCatText += command.description ? `\n- Description: ${command.description}\n` : ``;
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
 		if (command.options) {
-			let concatOptions = '\n- Parameters:';
-			command.options.forEach(param => {
-				concatOptions += `\n  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}\n`;
-			});
-			newCatText += concatOptions;
+			newCatText += '\n- Parameters:\n';
+			newCatText += command.options.map(param =>
+				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
+			).join('\n');
 		}
 		categories.set(command.category, newCatText);
 	}

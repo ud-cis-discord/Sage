@@ -39,13 +39,11 @@ export default class extends Command {
 			}
 
 			if (command.options) {
-				let concatOptions = '';
-				command.options.forEach(param => {
-					concatOptions += `**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}\n`;
-				});
 				fields.push({
 					name: 'Parameters',
-					value: concatOptions,
+					value: command.options.map(param =>
+						`**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}`
+					).join('\n'),
 					inline: false
 				});
 			}
