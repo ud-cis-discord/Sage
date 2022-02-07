@@ -49,13 +49,15 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 				member.roles.add(id);
 				continue;
 			}
-			const course = courses.find(c => c.name === role.name.substring(5));
-			const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-			user.courses.push(course.name);
-			member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
-			member.roles.add(id);
-			interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-			responseContent = `Your enrollments have been updated.`;
+			if (!member.roles.cache.some(r => r.id === id)) { // does user have this role?
+				const course = courses.find(c => c.name === role.name.substring(5));
+				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+				user.courses.push(course.name);
+				member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
+				member.roles.add(id);
+				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
+				responseContent = `Your enrollments have been updated.`;
+			}
 		}
 		interaction.reply({
 			content: `${responseContent}`,
