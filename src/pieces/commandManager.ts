@@ -14,6 +14,13 @@ async function register(bot: Client): Promise<void> {
 		bot.emit('error', error);
 	}
 
+	bot.on('messageCreate', async msg => {
+		if (msg.content.substring(0, 8).includes('s;enroll')) {
+			msg.reply('Please use the dropdowns in #role-select instead!');
+			await msg.delete();
+		}
+	});
+
 	bot.on('interactionCreate', async interaction => {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
