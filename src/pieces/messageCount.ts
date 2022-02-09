@@ -112,7 +112,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setDescription(embedText)
 		.addField('XP to next level:', user.levelExp.toString(), true)
 		.setColor(createLevelRgb(user.level))
-		.setFooter(`You can turn the messages off by sending \`${PREFIX}lp\``)
+		.setFooter(`You can turn the messages off by sending /togglelevelpings`)
 		.setTimestamp();
 
 	// eslint-disable-next-line no-extra-parens
