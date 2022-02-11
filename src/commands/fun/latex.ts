@@ -26,19 +26,27 @@ export default class extends Command {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
-		const tex = interaction.options.getString('input');
-		const requestURL = `https://latex.codecogs.com/svg.json?${encodeURIComponent(tex)}`;
+		const tex = encodeURIComponent(interaction.options.getString('input'));
 		const errorResponse = "Sorry, I couldn't render that LaTeX expression.";
-		let imageAsBase64: Buffer;
+		let usingBackup = false;
+		let image;
 		try {
-			const response = await fetch(requestURL, { method: 'Get' });
-			const imageAsBase64JSON = await response.json();
-			imageAsBase64 = Buffer.from(imageAsBase64JSON.latex.base64, 'base64');
+			const response = await fetch(`https://latex.codecogs.com/svg.json?${tex}`, { method: 'Get' });
+			if (response.ok) {
+				const imageAsBase64JSON = await response.json();
+				image = await loadImage(Buffer.from(imageAsBase64JSON.latex.base64, 'base64'));
+			} else {
+				usingBackup = true;
+				const backupResponse = await fetch(`http://chart.apis.google.com/chart?cht=tx&chl=${tex}`, { method: 'Get' });
+				if (!backupResponse.ok) {
+					// Both of these breaking is very unlikely
+					throw new Error(errorResponse);
+				}
+				image = await loadImage(await backupResponse.buffer(), 'png');
+			}
 		} catch (error) {
 			return interaction.followUp({ embeds: [generateErrorEmbed(errorResponse)] });
 		}
-
-		const image = await loadImage(imageAsBase64);
 
 		// Image will have 4 pixels of padding on all sides
 		const canvasWidth = image.width + (PADDING * 2);
@@ -58,23 +66,25 @@ export default class extends Command {
 		try {
 			const canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
 
-			// https://stackoverflow.com/a/70097101/7545722
-			// no other solution works here? this is a bit slower than the other methods but barely noticeable,
-			// especially considering the size of the average image is very small
-			// and this keeps transparency
-			for (let i = 0; i < canvasData.data.length; i += i % 4 === 2 ? 2 : 1) {
-				canvasData.data[i] = 255 - canvasData.data[i];
+			for (let i = 0; i < canvasData.data.length; i += 4) {
+				if (usingBackup && canvasData.data[i] > 0xE8 && canvasData.data[i + 1] > 0xE8 && canvasData.data[i + 2] > 0xE8) {
+					canvasData.data[i] = 47;
+					canvasData.data[i + 1] = 49;
+					canvasData.data[i + 2] = 54;
+				} else {
+					canvasData.data[i] = 0xFF - canvasData.data[i];
+					canvasData.data[i + 1] = 0xFF - canvasData.data[i + 1];
+					canvasData.data[i + 2] = 0xFF - canvasData.data[i + 2];
+				}
 			}
+
 			ctx.putImageData(canvasData, 0, 0);
 		} catch (error) {
 			return interaction.followUp({ embeds: [generateErrorEmbed(errorResponse)] });
 		}
 
 		const file = new MessageAttachment(canvas.toBuffer(), 'tex.png');
-
-		const embed = new MessageEmbed()
-			.setImage('attachment://tex.png')
-			.setURL(requestURL);
+		const embed = new MessageEmbed().setImage('attachment://tex.png');
 
 		interaction.editReply({ embeds: [embed], files: [file] });
 	}
