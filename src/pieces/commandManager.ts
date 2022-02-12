@@ -18,6 +18,15 @@ async function register(bot: Client): Promise<void> {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
 	});
+
+	bot.on('messageCreate', async msg => {
+		const lcMessage = msg.content.toLowerCase();
+		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes('sage');
+
+		if (thankCheck) {
+			msg.react('<:steve_peace:883541149032267816>');
+		}
+	});
 }
 
 async function handleDropdown(interaction: SelectMenuInteraction) {
