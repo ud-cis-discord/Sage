@@ -1,16 +1,48 @@
 import { CHANNELS, DB } from '@root/config';
-import { Client, TextChannel } from 'discord.js';
+import { BitField, Client, MessageEmbed, TextChannel } from 'discord.js';
 import { schedule } from 'node-cron';
 import { Reminder } from '@lib/types/Reminder';
+import { Poll } from '@lib/types/Poll';
 
 async function register(bot: Client): Promise<void> {
-	schedule('* * * * *', () => {
+	schedule('0/30 * * * * *', () => {
 		handleCron(bot)
 			.catch(async error => bot.emit('error', error));
 	});
 }
 
 async function handleCron(bot: Client): Promise<void> {
+	checkPolls(bot);
+	checkReminders(bot);
+}
+
+async function checkPolls(bot: Client): Promise<void> {
+	const polls: Array<Poll> = await bot.mongo.collection<Poll>(DB.POLLS).find({
+		expires: { $lte: new Date() }
+	}).toArray();
+	const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+
+	polls.forEach(async poll => {
+		const mdTimestamp = `<t:${Math.floor(Date.now() / 1000)}:R>`;
+		let choiceText = '';
+		poll.results.forEach((choice, index) => {
+			choiceText += `${emotes[index]} ${choice[0]}: ${choice[1]} vote${choice[1] === 1 ? '' : 's'}\n`;
+		});
+		choiceText = choiceText.trim();
+		const pollEmbed = new MessageEmbed()
+			.setTitle(poll.question)
+			.setDescription(`This poll was created by ${(await bot.users.fetch(poll.owner)).username} and ended **${mdTimestamp}**`)
+			.addField('Choices', choiceText)
+			.setColor('RANDOM');
+		const pollMsg = await ((await bot.channels.fetch(poll.channel)) as TextChannel).messages.fetch(poll.message);
+
+		pollMsg.edit({ embeds: [pollEmbed], components: [] });
+
+		bot.mongo.collection<Poll>(DB.POLLS).findOneAndDelete(poll);
+	});
+}
+
+async function checkReminders(bot: Client): Promise<void> {
 	const reminders: Array<Reminder> = await bot.mongo.collection(DB.REMINDERS).find({
 		expires: { $lte: new Date() }
 	}).toArray();

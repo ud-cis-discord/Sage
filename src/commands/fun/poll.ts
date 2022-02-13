@@ -1,8 +1,10 @@
-import { BOT } from '@root/config';
+import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
+import { Poll } from '@root/src/lib/types/Poll';
+import { botMasterPerms } from '@root/src/lib/permissions';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
@@ -56,7 +58,7 @@ export default class extends Command {
 		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
 
 		const userSelections = new Map(); // user ID, their choice(s)
-		const choiceQuantites = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
+		const choiceQuantities = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
 
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
@@ -78,7 +80,7 @@ export default class extends Command {
 
 		let choiceText = '';
 		choices.forEach((choice, index) => {
-			choiceText += `${emotes[index]} ${choice}: ${choiceQuantites[index]} vote${choiceQuantites[index] === 1 ? '' : 's'}\n`;
+			choiceText += `${emotes[index]} ${choice}: ${choiceQuantities[index]} vote${choiceQuantities[index] === 1 ? '' : 's'}\n`;
 		});
 		choiceText = choiceText.trim();
 
@@ -108,16 +110,24 @@ export default class extends Command {
 			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
 		}
 
-		let replyId;
-		interaction.fetchReply().then(reply => { replyId = reply.id; });
+		let replyId: string;
+		await interaction.fetchReply().then(reply => { replyId = reply.id; });
+
+		const dbPoll = await interaction.client.mongo.collection<Poll>(DB.POLLS).insertOne({
+			owner: interaction.member.user.id,
+			message: replyId,
+			expires: new Date(Date.now() + timespan),
+			results: choices.map(choice => [choice, 0]),
+			question: question,
+			channel: interaction.channelId
+		});
 
 		const collector = interaction.channel.createMessageComponentCollector({
-			time: timespan,
 			filter: i => i.message.id === replyId
 		});
 
 		collector.on('collect', async (i: ButtonInteraction) => {
-			choiceQuantites.fill(0);
+			choiceQuantities.fill(0);
 
 			const usersChoices = userSelections.get(i.user.id) || [];
 			if (usersChoices && usersChoices.includes(i.customId)) { // user has already selected choice
@@ -137,16 +147,16 @@ export default class extends Command {
 			userSelections.forEach(vote => {
 				if (interaction.options.getString('optiontype') === 'Multiple') {
 					vote.forEach(selected => {
-						choiceQuantites[Number(selected) - 1] += 1;
+						choiceQuantities[Number(selected) - 1] += 1;
 					});
 				} else {
-					choiceQuantites[Number(vote) - 1] += 1;
+					choiceQuantities[Number(vote) - 1] += 1;
 				}
 			});
 
 			choiceText = '';
 			for (let j = 0; j < choices.length; j++) {
-				choiceText += `${emotes[j]} ${choices[j]}: ${choiceQuantites[j]} vote${choiceQuantites[j] === 1 ? '' : 's'}\n`;
+				choiceText += `${emotes[j]} ${choices[j]}: ${choiceQuantities[j]} vote${choiceQuantities[j] === 1 ? '' : 's'}\n`;
 			}
 			choiceText = choiceText.trim();
 
@@ -166,14 +176,12 @@ export default class extends Command {
 				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
 			}
 
+			console.log(choices, choiceQuantities);
+			await interaction.client.mongo.collection<Poll>(DB.POLLS).findOneAndUpdate({ _id: dbPoll.insertedId }, {
+				$set: { results: choices.map((choice, index) => [choice, choiceQuantities[index]]) }
+			});
+
 			i.deferUpdate(); // this makes it so "This interaction failed" does not appear when pressing buttons (since we don't reply again)
-		}).on('end', () => {
-			pollEmbed = new MessageEmbed()
-				.setTitle(question)
-				.setDescription(`This poll was created by ${interaction.user.username} and ended **${mdTimestamp}**`)
-				.addField('Choices', choiceText)
-				.setColor('RANDOM');
-			interaction.editReply({ embeds: [pollEmbed], components: [] });
 		});
 	}
 
