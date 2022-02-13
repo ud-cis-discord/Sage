@@ -49,7 +49,8 @@ export const CHANNELS = { // Channel IDs
 	SAGE: '',
 	ANNOUNCEMENTS: '',
 	ARCHIVE: '',
-	ROLE_SELECT: ''
+	ROLE_SELECT: '',
+	COUNTING_CHANNEL: ''
 };
 
 export const ROLE_DROPDOWNS = {
@@ -72,3 +73,4 @@ export const PREFIX = 's;';
 export const MAINTAINERS = '';	// The current maintainers of this bot
 export const SEMESTER_ID = '';	// The current semester ID. i.e. s21
 export const BLACKLIST = [];
+export const CURRENT_COUNT = 0;
