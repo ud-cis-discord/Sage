@@ -1,18 +1,44 @@
 import { Client, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
+import fs from 'fs';
 
 async function register(bot: Client): Promise<void> {
 	let counter = 0;
 	let lastSendId = '';
 	let startDate = Date.now();
 	const countingChannel = bot.channels.cache.get(CHANNELS.COUNTING_CHANNEL) as TextChannel;
+	const uniqueParticipants = [];
+
+	bot.on('messageUpdate', async msg => {
+		if (msg.channel.id !== CHANNELS.COUNTING_CHANNEL) return;
+		if (msg.author.bot) return;
+
+		countingChannel.send(`${msg.partial ? 'Someone' : msg.author.username} edited a message and broke the count!`);
+
+		if (counter > 0) {
+			const endDate = Date.now();
+			countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}. With ${counter} counts and ${uniqueParticipants.length} participants, that's an average of one count every ${msToHMS((endDate - startDate) / counter)}`);
+
+			counter = 0;
+			lastSendId = '';
+			startDate = endDate;
+			countingChannel.send('Restarting the counter...\n\n0');
+		}
+	});
 
 	bot.on('messageDelete', async msg => {
+		if (msg.channel.id !== CHANNELS.COUNTING_CHANNEL) return;
+		if (msg.author.bot) return;
+
 		countingChannel.send(`${msg.partial ? 'Someone' : msg.author.username} deleted a message and broke the count!`);
 
 		if (counter > 0) {
+			const endDate = Date.now();
+			countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}. With ${counter} counts and ${uniqueParticipants.length} participants, that's an average of one count every ${msToHMS((endDate - startDate) / counter)}`);
+
 			counter = 0;
 			lastSendId = '';
+			startDate = endDate;
 			countingChannel.send('Restarting the counter...\n\n0');
 		}
 	});
@@ -48,6 +74,9 @@ async function register(bot: Client): Promise<void> {
 			}
 
 			if (msg.content === (counter + 1).toString()) {
+				if (!uniqueParticipants.includes(msg.author.id)) {
+					uniqueParticipants.push(msg.author.id);
+				} 
 				counter++;
 				if (counter === 69 || counter === 420) {
 					msg.reply('nice');
@@ -56,7 +85,7 @@ async function register(bot: Client): Promise<void> {
 
 			if (gameOver) {
 				const endDate = Date.now();
-				countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}`);
+				countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}. With ${counter} counts and ${uniqueParticipants.length} participants, that's an average of one count every ${msToHMS((endDate - startDate) / counter)}`);
 
 				counter = 0;
 				lastSendId = '';
@@ -65,6 +94,10 @@ async function register(bot: Client): Promise<void> {
 			}
 		}
 	});
+}
+
+function endGame() {
+	
 }
 
 function msToHMS(ms: number) {
@@ -93,11 +126,9 @@ export default register;
 
 /*
 TO DO:
-- display average time between counts
-- track participants of counting session
-- convert final messages to embeds
 - save the counting data to config in case bot dies
 - stats for counting?
 	most counts
 	least counts
+- convert final messages to embeds
 */
