@@ -4,7 +4,6 @@ import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 import { Poll } from '@root/src/lib/types/Poll';
-import { botMasterPerms } from '@root/src/lib/permissions';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
