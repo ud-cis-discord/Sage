@@ -2,7 +2,7 @@ import { Collection, Client, CommandInteraction, ApplicationCommand, Application
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
+import { DB, GUILDS, MAINTAINERS, CHANNELS, DELETE_DELAY } from '@root/config';
 import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
 import { CommandError } from '../lib/types/errors';
@@ -20,7 +20,7 @@ async function register(bot: Client): Promise<void> {
 			msg.reply(`If you're trying to run a Sage command, we've moved over to using slash commands. If you're trying to enroll in a course, please use the dropdowns in <#${CHANNELS.ROLE_SELECT}> instead!`)
 				.then(reply => {
 					// delete reply after 10 seconds
-					setTimeout(() => { reply.delete(); }, 10000);
+					setTimeout(() => { reply.delete(); }, DELETE_DELAY);
 				});
 			msg.delete();
 		}
