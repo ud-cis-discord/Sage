@@ -1,45 +1,35 @@
-import { Client, TextChannel } from 'discord.js';
-import { CHANNELS } from '@root/config';
-import fs from 'fs';
+import { Client, MessageEmbed, TextChannel } from 'discord.js';
+import { DB, CHANNELS } from '@root/config';
+import { Counter } from '../lib/types/Counter';
+
+let countingDB: Counter;
+let countingChannel;
 
 async function register(bot: Client): Promise<void> {
-	let counter = 0;
-	let lastSendId = '';
-	let startDate = Date.now();
-	const countingChannel = bot.channels.cache.get(CHANNELS.COUNTING_CHANNEL) as TextChannel;
-	const uniqueParticipants = [];
+	countingDB = await bot.mongo.collection(DB.COUNTING).findOne({ piece: 'counting' });
+	countingChannel = bot.channels.cache.get(CHANNELS.COUNTING_CHANNEL) as TextChannel;
 
 	bot.on('messageUpdate', async msg => {
 		if (msg.channel.id !== CHANNELS.COUNTING_CHANNEL) return;
-		if (msg.author.bot) return;
+		if (msg.author.bot && !msg.partial) return; // sage will crash if it hits this line and the message is a partial
+		if (msg.createdTimestamp <= countingDB.startDate) return;
 
-		countingChannel.send(`${msg.partial ? 'Someone' : msg.author.username} edited a message and broke the count!`);
+		const endMsg = (`${msg.partial ? 'Someone' : msg.author.username} edited a message and broke the count!`);
 
-		if (counter > 0) {
-			const endDate = Date.now();
-			countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}. With ${counter} counts and ${uniqueParticipants.length} participants, that's an average of one count every ${msToHMS((endDate - startDate) / counter)}`);
-
-			counter = 0;
-			lastSendId = '';
-			startDate = endDate;
-			countingChannel.send('Restarting the counter...\n\n0');
+		if (countingDB.count > 0) {
+			await endGame(endMsg, bot);
 		}
 	});
 
 	bot.on('messageDelete', async msg => {
 		if (msg.channel.id !== CHANNELS.COUNTING_CHANNEL) return;
-		if (msg.author.bot) return;
+		if (msg.author.bot && !msg.partial) return; // sage will crash if it hits this line and the message is a partial
+		if (msg.createdTimestamp <= countingDB.startDate) return;
 
-		countingChannel.send(`${msg.partial ? 'Someone' : msg.author.username} deleted a message and broke the count!`);
+		const endMsg = (`${msg.partial ? 'Someone' : msg.author.username} deleted a message and broke the count!`);
 
-		if (counter > 0) {
-			const endDate = Date.now();
-			countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}. With ${counter} counts and ${uniqueParticipants.length} participants, that's an average of one count every ${msToHMS((endDate - startDate) / counter)}`);
-
-			counter = 0;
-			lastSendId = '';
-			startDate = endDate;
-			countingChannel.send('Restarting the counter...\n\n0');
+		if (countingDB.count > 0) {
+			await endGame(endMsg, bot);
 		}
 	});
 
@@ -49,55 +39,67 @@ async function register(bot: Client): Promise<void> {
 		if (msg.channel.id === CHANNELS.COUNTING_CHANNEL) {
 			let gameOver = false;
 
-			if (msg.author.id === lastSendId) {
+			if (msg.author.id === countingDB.lastSendId) {
 				gameOver = true;
 				msg.reply(`${msg.author.username}, you aren't allowed to count twice in a row!`);
 			}
 
-			lastSendId = msg.author.id;
+			countingDB.lastSendId = msg.author.id;
 
-			if (Number.isNaN(parseInt(msg.content))) {
+			let endMsg = '';
+			if (msg.stickers.size > 0) {
 				gameOver = true;
-				msg.reply(`Really ${msg.author.username}? **${msg.content}** isn't a number!`);
-			} else if (parseInt(msg.content) > counter + 1) {
-				gameOver = true;
-				msg.reply(`Come on ${msg.author.username}, **${msg.content}** doesn't come after **${counter}**!`);
-			} else if (parseInt(msg.content) < counter) {
-				gameOver = true;
-				msg.reply(`Believe it or not ${msg.author.username}, **${msg.content}** is less than **${counter}**.`);
+				endMsg = (`${msg.author.username}, that's a nice sticker mate but we're supposed to be counting here.`);
 			} else if (msg.attachments.size > 0) {
 				gameOver = true;
-				msg.reply(`${msg.author.username}, you can't send attachments here. This is a counting channel.`);
-			} else if (msg.stickers.size > 0) {
+				endMsg = (`${msg.author.username}, you can't send attachments here. This is a counting channel.`);
+			} else if (Number.isNaN(parseInt(msg.content))) {
 				gameOver = true;
-				msg.reply(`${msg.author.username}, that's a nice sticker mate but we're supposed to be counting here.`);
+				endMsg = (`Really ${msg.author.username}? ${msg.content} isn't a number!`);
+			} else if (parseInt(msg.content) > countingDB.count + 1) {
+				gameOver = true;
+				endMsg = (`Come on ${msg.author.username}, ${msg.content} doesn't come after **${countingDB.count}**!`);
+			} else if (parseInt(msg.content) < countingDB.count) {
+				gameOver = true;
+				endMsg = (`Believe it or not ${msg.author.username}, ${msg.content} is less than **${countingDB.count}**.`);
+			} else if (parseInt(msg.content) === countingDB.count) {
+				gameOver = true;
+				endMsg = (`My dude that is literally the number we were on.`);
 			}
 
-			if (msg.content === (counter + 1).toString()) {
-				if (!uniqueParticipants.includes(msg.author.id)) {
-					uniqueParticipants.push(msg.author.id);
-				} 
-				counter++;
-				if (counter === 69 || counter === 420) {
+			if (msg.content === (countingDB.count + 1).toString()) {
+				if (!countingDB.uniqueParticipants.includes(msg.author.id)) {
+					await bot.mongo.collection(DB.COUNTING).findOneAndUpdate({ piece: 'counting' }, { $push: { uniqueParticipants: msg.author.id } });
+				}
+
+				await bot.mongo.collection(DB.COUNTING).findOneAndUpdate({ piece: 'counting' }, { $inc: { count: +1 } });
+				await bot.mongo.collection(DB.COUNTING).findOneAndUpdate({ piece: 'counting' }, { $set: { lastSendId: msg.author.id } });
+				countingDB = await bot.mongo.collection(DB.COUNTING).findOne({ piece: 'counting' }); // update the counter data
+
+				if (countingDB.count === 69 || countingDB.count === 420) {
 					msg.reply('nice');
 				}
 			}
 
 			if (gameOver) {
-				const endDate = Date.now();
-				countingChannel.send(`The count lasted for ${msToHMS(endDate - startDate)}. With ${counter} counts and ${uniqueParticipants.length} participants, that's an average of one count every ${msToHMS((endDate - startDate) / counter)}`);
-
-				counter = 0;
-				lastSendId = '';
-				startDate = endDate;
-				countingChannel.send('Restarting the counter...\n\n0');
+				await endGame(endMsg, bot);
 			}
 		}
 	});
 }
 
-function endGame() {
-	
+async function endGame(message: string, bot: Client) {
+	const endDate = Date.now();
+	const resultEmbed = new MessageEmbed()
+		.setTitle(message)
+		.setDescription(`The count lasted for **${msToHMS(endDate - countingDB.startDate)}**. With **${countingDB.count}** counts and **${countingDB.uniqueParticipants.length}** participants ` +
+		`that's an average of one count every **${msToHMS((endDate - countingDB.startDate) / countingDB.count)}**`)
+		.setColor('BLURPLE'); // haha nice one discord
+	countingChannel.send({ embeds: [resultEmbed] });
+
+	await bot.mongo.collection(DB.COUNTING).findOneAndUpdate({ piece: 'counting' }, { $set: { count: 0, lastSendId: '', startDate: endDate, uniqueParticipants: [] } });
+	countingChannel.send('Restarting the counter...\n\n0');
+	countingDB = await bot.mongo.collection(DB.COUNTING).findOne({ piece: 'counting' }); // update the counter data
 }
 
 function msToHMS(ms: number) {
@@ -108,27 +110,18 @@ function msToHMS(ms: number) {
 	const minutes = seconds / 60;
 	seconds %= 60;
 
-	let returnString = `${Math.floor(seconds)} seconds`;
+	let returnString = `${Math.round(seconds * 10) / 10} seconds`;
 	if (minutes >= 1) {
-		returnString = `${Math.floor(minutes)} minutes, ${returnString}`;
+		returnString = `${Math.floor(minutes)} minute${Math.floor(minutes) === 1 ? '' : 's'}, ${returnString}`;
 	}
 	if (hours >= 1) {
-		returnString = `${Math.floor(hours)} hours, ${returnString}`;
+		returnString = `${Math.floor(hours)} hour${Math.floor(hours) === 1 ? '' : 's'}, ${returnString}`;
 	}
 	if (days >= 1) {
-		returnString = `${Math.floor(days)} days, ${returnString}`;
+		returnString = `${Math.floor(days)} day${Math.floor(days) === 1 ? '' : 's'}, ${returnString}`;
 	}
 
 	return returnString;
 }
 
 export default register;
-
-/*
-TO DO:
-- save the counting data to config in case bot dies
-- stats for counting?
-	most counts
-	least counts
-- convert final messages to embeds
-*/
