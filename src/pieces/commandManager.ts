@@ -2,10 +2,12 @@ import { Collection, Client, CommandInteraction, ApplicationCommand, Application
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS, MAINTAINERS, CHANNELS, DELETE_DELAY } from '@root/config';
+import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
 import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
 import { CommandError } from '../lib/types/errors';
+
+const DELETE_DELAY = 10000;
 
 async function register(bot: Client): Promise<void> {
 	try {
