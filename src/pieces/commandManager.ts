@@ -15,7 +15,7 @@ async function register(bot: Client): Promise<void> {
 	}
 
 	bot.on('messageCreate', async msg => {
-		if (msg.content.substring(0, 8).toLowerCase().includes('s;enroll')) {
+		if (msg.content.substring(0, 2).toLowerCase().includes('s;')) {
 			// eslint-disable-next-line max-len
 			msg.reply(`If you're trying to run a Sage command, we've moved over to using slash commands. If you're trying to enroll in a course, please use the dropdowns in <#${CHANNELS.ROLE_SELECT}> instead!`)
 				.then(reply => {
