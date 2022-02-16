@@ -20,15 +20,18 @@ export default class extends Command {
 	]
 
 	async run(interaction: CommandInteraction): Promise<void> {
-		interaction.guild.members.fetch();
-		interaction.deferReply();
+		await interaction.deferReply();
+		await interaction.guild.members.fetch();
 
 		// eslint-disable-next-line no-extra-parens
 		const users: Array<SageUser> = (await interaction.client.mongo.collection('users').find().toArray() as Array<SageUser>)
 			.filter(user => interaction.guild.members.cache.has(user.discordId))
 			.sort((ua, ub) => ua.level - ub.level !== 0 ? ua.level > ub.level ? -1 : 1 : ua.curExp < ub.curExp ? -1 : 1); // filter on level first, then remaining xp
 
-		let page = interaction.options.getNumber('pagenumber') ?? 1;
+		const dbAuthor = users.find(user => interaction.user.id === user.discordId);
+		const askerRank = users.indexOf(dbAuthor) + 1;
+
+		let page = interaction.options.getNumber('pagenumber') ?? Math.floor(askerRank / 10) + 1;
 
 		page = page * 10 > users.length ? Math.floor(users.length / 10) + 1 : page;
 
@@ -36,8 +39,6 @@ export default class extends Command {
 		const end = page * 10 > users.length ? undefined : page * 10;
 
 		const displUsers = users.slice(start, end);
-
-		const dbAuthor = users.find(user => interaction.user.id === user.discordId);
 
 		const canvas = createCanvas(Leaderboard.width, (Leaderboard.userPillHeight + 5) * displUsers.length);
 		const ctx = canvas.getContext('2d');
@@ -89,7 +90,6 @@ export default class extends Command {
 			ctx.fillStyle = Leaderboard.textColor;
 			ctx.fillText(`${exp} exp`, cursor.x, cursor.y);
 		}
-		const askerRank = users.indexOf(dbAuthor) + 1;
 		const { level: askerLevel } = dbAuthor;
 		const askerExp = dbAuthor.levelExp - dbAuthor.curExp;
 		const content = `You are #${askerRank} and at level ${askerLevel} with ${askerExp} exp.`;

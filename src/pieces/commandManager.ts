@@ -32,6 +32,15 @@ async function register(bot: Client): Promise<void> {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
 	});
+
+	bot.on('messageCreate', async msg => {
+		const lcMessage = msg.content.toLowerCase();
+		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes('sage');
+
+		if (thankCheck) {
+			msg.react('<:steve_peace:883541149032267816>');
+		}
+	});
 }
 
 async function handleDropdown(interaction: SelectMenuInteraction) {
@@ -63,13 +72,17 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 				member.roles.add(id);
 				continue;
 			}
-			const course = courses.find(c => c.name === role.name.substring(5));
-			const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-			user.courses.push(course.name);
-			member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
-			member.roles.add(id);
-			interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-			responseContent = `Your enrollments have been updated.`;
+			if (!member.roles.cache.some(r => r.id === id)) { // does user have this role?
+				const course = courses.find(c => c.name === role.name.substring(5));
+				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+				user.courses.push(course.name);
+				member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
+				member.roles.add(id);
+				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
+				responseContent = `Your enrollments have been updated.`;
+			} else {
+				responseContent = `It looks like you are already in the course you've selected! If you'd like to unenroll, please unselect the course from the dropdown.`;
+			}
 		}
 		interaction.reply({
 			content: `${responseContent}`,

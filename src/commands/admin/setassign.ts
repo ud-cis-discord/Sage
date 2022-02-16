@@ -26,17 +26,21 @@ export default class extends Command {
 		const newRole: AssignableRole = { id: role.id };
 
 		if (await assignables.countDocuments(newRole) > 0) {
+			await interaction.reply('Removing role...');
+			let responseMsg = `The role \`${role.name}\` has been removed.`;
 			if (!await modifyRoleDD(interaction, role, false, 'REMOVE')) {
-				return interaction.reply('Unable to remove role from dropdown menu,');
+				responseMsg = `The role \`${role.name}\` has been removed. However, I couldn't remove it from the assignables dropdown (it probably wasn't on there to begin with)`;
 			}
-			assignables.findOneAndDelete(newRole);
-			return interaction.reply(`The role \`${role.name}\` has been removed.`);
+			await assignables.findOneAndDelete(newRole);
+			interaction.editReply(responseMsg);
 		} else {
+			await interaction.reply('Adding role...');
 			if (!await modifyRoleDD(interaction, role, false, 'ADD')) {
-				return interaction.reply('Unable to add role to dropdown menu,');
+				return;
 			}
-			assignables.insertOne(newRole);
-			return interaction.reply(`The role \`${role.name}\` has been added.`);
+			await assignables.insertOne(newRole);
+			interaction.editReply(`The role \`${role.name}\` has been added.`);
+			return;
 		}
 	}
 
