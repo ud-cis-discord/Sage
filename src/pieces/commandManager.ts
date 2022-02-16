@@ -3,9 +3,9 @@ import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS } from '@root/config';
-import { Course } from '../lib/types/Course';
-import { SageUser } from '../lib/types/SageUser';
-import { CommandError } from '../lib/types/errors';
+import { Course } from '@lib/types/Course';
+import { SageUser } from '@lib/types/SageUser';
+import { CommandError } from '@lib/types/errors';
 
 async function register(bot: Client): Promise<void> {
 	try {
