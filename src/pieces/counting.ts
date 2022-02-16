@@ -14,7 +14,7 @@ async function register(bot: Client): Promise<void> {
 		if (msg.author.bot && !msg.partial) return; // sage will crash if it hits this line and the message is a partial
 		if (msg.createdTimestamp <= countingDB.startDate) return;
 
-		const endMsg = (`${msg.partial ? 'Someone' : msg.author.username} edited a message and broke the count!`);
+		const endMsg = `${msg.partial ? 'Someone' : msg.author.username} edited a message and broke the count!`;
 
 		if (countingDB.count > 0) {
 			await endGame(endMsg, bot);
@@ -26,7 +26,7 @@ async function register(bot: Client): Promise<void> {
 		if (msg.author.bot && !msg.partial) return; // sage will crash if it hits this line and the message is a partial
 		if (msg.createdTimestamp <= countingDB.startDate) return;
 
-		const endMsg = (`${msg.partial ? 'Someone' : msg.author.username} deleted a message and broke the count!`);
+		const endMsg = `${msg.partial ? 'Someone' : msg.author.username} deleted a message and broke the count!`;
 
 		if (countingDB.count > 0) {
 			await endGame(endMsg, bot);
@@ -49,22 +49,22 @@ async function register(bot: Client): Promise<void> {
 			let endMsg = '';
 			if (msg.stickers.size > 0) {
 				gameOver = true;
-				endMsg = (`${msg.author.username}, that's a nice sticker mate but we're supposed to be counting here.`);
+				endMsg = `${msg.author.username}, that's a nice sticker mate but we're supposed to be counting here.`;
 			} else if (msg.attachments.size > 0) {
 				gameOver = true;
-				endMsg = (`${msg.author.username}, you can't send attachments here. This is a counting channel.`);
+				endMsg = `${msg.author.username}, you can't send attachments here. This is a counting channel.`;
 			} else if (Number.isNaN(parseInt(msg.content))) {
 				gameOver = true;
-				endMsg = (`Really ${msg.author.username}? ${msg.content} isn't a number!`);
+				endMsg = `Really ${msg.author.username}? ${msg.content} isn't a number!`;
 			} else if (parseInt(msg.content) > countingDB.count + 1) {
 				gameOver = true;
-				endMsg = (`Come on ${msg.author.username}, ${msg.content} doesn't come after **${countingDB.count}**!`);
+				endMsg = `Come on ${msg.author.username}, ${msg.content} doesn't come after **${countingDB.count}**!`;
 			} else if (parseInt(msg.content) < countingDB.count) {
 				gameOver = true;
-				endMsg = (`Believe it or not ${msg.author.username}, ${msg.content} is less than **${countingDB.count}**.`);
+				endMsg = `Believe it or not ${msg.author.username}, ${msg.content} is less than **${countingDB.count}**.`;
 			} else if (parseInt(msg.content) === countingDB.count) {
 				gameOver = true;
-				endMsg = (`My dude that is literally the number we were on.`);
+				endMsg = `My dude that is literally the number we were on.`;
 			}
 
 			if (msg.content === (countingDB.count + 1).toString()) {
