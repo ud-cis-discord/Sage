@@ -3,9 +3,9 @@ import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS } from '@root/config';
-import { Course } from '../lib/types/Course';
-import { SageUser } from '../lib/types/SageUser';
-import { CommandError } from '../lib/types/errors';
+import { Course } from '@lib/types/Course';
+import { SageUser } from '@lib/types/SageUser';
+import { CommandError } from '@lib/types/errors';
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -17,6 +17,15 @@ async function register(bot: Client): Promise<void> {
 	bot.on('interactionCreate', async interaction => {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
+	});
+
+	bot.on('messageCreate', async msg => {
+		const lcMessage = msg.content.toLowerCase();
+		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes('sage');
+
+		if (thankCheck) {
+			msg.react('<:steve_peace:883541149032267816>');
+		}
 	});
 }
 
