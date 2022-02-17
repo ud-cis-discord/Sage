@@ -166,6 +166,28 @@ function removeRole(interaction: CommandInteraction,
 	return false;
 }
 
+export function msToHMS(ms: number): string {
+	let seconds = ms / 1000;
+	const days = seconds / 86400;
+	const hours = seconds / 3600;
+	seconds %= 3600;
+	const minutes = seconds / 60;
+	seconds %= 60;
+
+	let returnString = `${Math.round(seconds * 10) / 10} seconds`;
+	if (minutes >= 1) {
+		returnString = `${Math.floor(minutes)} minute${Math.floor(minutes) === 1 ? '' : 's'}, ${returnString}`;
+	}
+	if (hours >= 1) {
+		returnString = `${Math.floor(hours)} hour${Math.floor(hours) === 1 ? '' : 's'}, ${returnString}`;
+	}
+	if (days >= 1) {
+		returnString = `${Math.floor(days)} day${Math.floor(days) === 1 ? '' : 's'}, ${returnString}`;
+	}
+
+	return returnString;
+}
+
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
 	const time = moment().format('M-D-YY_HH-mm');
 	filename = `${filename}${timestamp ? `_${time}` : ''}` || time;
