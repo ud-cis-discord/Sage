@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { Client, MessageEmbed, TextChannel } from 'discord.js';
 import { DB, CHANNELS } from '@root/config';
 import { Counter } from '@lib/types/Counter';
@@ -88,14 +87,8 @@ async function register(bot: Client): Promise<void> {
 				case 100:
 					msg.react('💯');
 					break;
-				case 200:
+				case 250:
 					msg.react('😮');
-					break;
-				case 300:
-					msg.react('😀');
-					break;
-				case 400:
-					msg.react('😁');
 					break;
 				case 500:
 					msg.react('👏');
