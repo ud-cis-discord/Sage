@@ -2,10 +2,12 @@ import { Collection, Client, CommandInteraction, ApplicationCommand, Application
 import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
-import { DB, GUILDS, MAINTAINERS } from '@root/config';
-import { Course } from '@lib/types/Course';
-import { SageUser } from '@lib/types/SageUser';
-import { CommandError } from '@lib/types/errors';
+import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
+import { Course } from '../lib/types/Course';
+import { SageUser } from '../lib/types/SageUser';
+import { CommandError } from '../lib/types/errors';
+
+const DELETE_DELAY = 10000;
 
 async function register(bot: Client): Promise<void> {
 	try {
@@ -14,9 +16,30 @@ async function register(bot: Client): Promise<void> {
 		bot.emit('error', error);
 	}
 
+	bot.on('messageCreate', async msg => {
+		if (msg.content.substring(0, 2).toLowerCase().includes('s;')) {
+			// eslint-disable-next-line max-len
+			msg.reply(`If you're trying to run a Sage command, we've moved over to using slash commands. If you're trying to enroll in a course, please use the dropdowns in <#${CHANNELS.ROLE_SELECT}> instead!`)
+				.then(reply => {
+					// delete reply after 10 seconds
+					setTimeout(() => { reply.delete(); }, DELETE_DELAY);
+				});
+			msg.delete();
+		}
+	});
+
 	bot.on('interactionCreate', async interaction => {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
+	});
+
+	bot.on('messageCreate', async msg => {
+		const lcMessage = msg.content.toLowerCase();
+		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes('sage');
+
+		if (thankCheck) {
+			msg.react('<:steve_peace:883541149032267816>');
+		}
 	});
 }
 
