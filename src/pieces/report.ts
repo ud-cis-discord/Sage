@@ -10,7 +10,7 @@ import { Attachment } from 'nodemailer/lib/mailer';
 
 async function register(bot: Client): Promise<void> {
 	// 0 0 * * SUN :: 0 minutes, 0 hours, any day of month, any month, on Sundays (AKA midnight between Sat & Sun)
-	schedule('* * * * *', () => {
+	schedule('0 0 * * SUN', () => {
 		handleCron(bot)
 			.catch(async error => bot.emit('error', error));
 	});
@@ -36,7 +36,6 @@ async function handleCron(bot: Client): Promise<void> {
 				content: `Email,Count\n${courseUsers.map(user => `${user.email},${user.count}`).join('\n')}`
 			});
 		});
-		reports.forEach(report => console.log(`\n${report.filename}\n${report.content}`));
 
 		mailer.sendMail({
 			from: EMAIL.SENDER,
@@ -52,7 +51,7 @@ async function handleCron(bot: Client): Promise<void> {
 		});
 	});
 
-	// bot.mongo.collection(DB.USERS).updateMany({}, { $set: { count: 0 } });
+	bot.mongo.collection(DB.USERS).updateMany({}, { $set: { count: 0 } });
 }
 
 export default register;
