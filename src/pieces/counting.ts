@@ -2,6 +2,7 @@ import { Client, MessageEmbed, TextChannel } from 'discord.js';
 import { DB, CHANNELS } from '@root/config';
 import { Counter } from '@lib/types/Counter';
 import { msToHMS } from '@lib/utils';
+import prettyMilliseconds from 'pretty-ms';
 
 let countingDB: Counter;
 let countingChannel;
@@ -109,8 +110,8 @@ async function endGame(message: string, bot: Client) {
 	const endDate = Date.now();
 	if (countingDB.count !== 0) {
 		const resultEmbed = new MessageEmbed()
-			.setDescription(`The count lasted for **${msToHMS(endDate - countingDB.startDate)}**. With **${countingDB.count}** counts and **${countingDB.uniqueParticipants.length}** participants ` +
-			`that's an average of one count every **${msToHMS((endDate - countingDB.startDate) / countingDB.count)}**`)
+			.setDescription(`The count lasted for **${prettyMilliseconds(endDate - countingDB.startDate)}**. With **${countingDB.count}** counts and ` +
+			`**${countingDB.uniqueParticipants.length}** participants that's an average of one count every **${prettyMilliseconds((endDate - countingDB.startDate) / countingDB.count)}**`)
 			.setColor('BLURPLE'); // haha nice one discord
 		countingChannel.send({ content: message, embeds: [resultEmbed] });
 	} else {
