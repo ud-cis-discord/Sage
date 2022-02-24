@@ -5,6 +5,7 @@ import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@lib/utils';
 
 const BACKGROUND_COLOR = `rgb(${255 - 47}, ${255 - 49}, ${255 - 54})`;
+const IMAGE_RESIZE_FACTOR = 1.25;
 const PADDING = 4;
 
 export default class extends Command {
@@ -49,8 +50,8 @@ export default class extends Command {
 		}
 
 		// Image will have 4 pixels of padding on all sides
-		const canvasWidth = image.width + (PADDING * 2);
-		const canvasHeight = image.height + (PADDING * 2);
+		const canvasWidth = (image.width * IMAGE_RESIZE_FACTOR) + (PADDING * 2);
+		const canvasHeight = (image.height * IMAGE_RESIZE_FACTOR) + (PADDING * 2);
 
 		const canvas = createCanvas(canvasWidth, canvasHeight);
 		const ctx = canvas.getContext('2d');
@@ -62,7 +63,7 @@ export default class extends Command {
 		ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
 		// Draw image and invert color - necessary because the text is black and unreadable by default
-		ctx.drawImage(image, PADDING, PADDING);
+		ctx.drawImage(image, PADDING, PADDING, image.width * IMAGE_RESIZE_FACTOR, image.height * IMAGE_RESIZE_FACTOR);
 		try {
 			const canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
 
