@@ -43,7 +43,7 @@ export default class extends Command {
 				{ name: 'Roles', value: roles, inline: true }
 			]);
 
-		return interaction.reply({ embeds: [embed] });
+		return interaction.reply({ embeds: [embed], ephemeral: true });
 	}
 
 }
