@@ -1,7 +1,6 @@
 import { Client, MessageEmbed, TextChannel } from 'discord.js';
 import { DB, CHANNELS } from '@root/config';
 import { Counter } from '@lib/types/Counter';
-import { msToHMS } from '@lib/utils';
 import prettyMilliseconds from 'pretty-ms';
 
 let countingDB: Counter;
