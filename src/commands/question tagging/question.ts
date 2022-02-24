@@ -67,7 +67,7 @@ export default class extends Command {
 			fields.push({ name: doc.header.replace(/\n/g, ' '), value: `[Click to view](${doc.link})`, inline: false });
 		});
 		const embeds: Array<MessageEmbed> = [new MessageEmbed()
-			.setTitle(`Questions for ${course} ${assignment}`)
+			.setTitle(`Questions for ${course.name} ${assignment}`)
 			.addFields(fields.splice(0, 25))
 			.setColor('DARK_AQUA')];
 
