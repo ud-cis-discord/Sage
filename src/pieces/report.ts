@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 import moment from 'moment';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, EMAIL } from '@root/config';
-import { Course } from '../lib/types/Course';
+import { Course } from '@lib/types/Course';
 import { Attachment } from 'nodemailer/lib/mailer';
 
 
