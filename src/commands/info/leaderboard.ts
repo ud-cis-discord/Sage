@@ -1,5 +1,5 @@
 import { SageUser } from '@lib/types/SageUser';
-import { Leaderboard } from '@root/src/lib/enums';
+import { Leaderboard } from '@lib/enums';
 import { Command } from '@lib/types/Command';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
 import { MessageEmbed, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';

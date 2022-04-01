@@ -1,9 +1,9 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, Client, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils';
-import { Poll } from '@root/src/lib/types/Poll';
+import { generateErrorEmbed } from '@lib/utils/generalUtils';
+import { Poll } from '@lib/types/Poll';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
@@ -188,4 +188,8 @@ export default class extends Command {
 		? `**${options}** won the poll with ${votes} vote${votes === 1 ? '' : 's'}.`
 		: `**${options.join('** & **')}** tied the poll with ${votes} vote${votes === 1 ? '' : 's'} each.`;
 
+}
+
+export function handlePollOptionSelect(bot: Client, i: ButtonInteraction) {
+	return;
 }

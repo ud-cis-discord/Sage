@@ -2,7 +2,7 @@ import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
-import { generateErrorEmbed } from '@root/src/lib/utils';
+import { generateErrorEmbed } from '@lib/utils/generalUtils';
 
 
 export default class extends Command {

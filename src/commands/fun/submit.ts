@@ -1,7 +1,7 @@
 import { CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils';
+import { generateErrorEmbed } from '@lib/utils/generalUtils';
 
 const SUBMIT_TIMEOUT = 30;
 

@@ -5,7 +5,7 @@ import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, EMAIL } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { getMsgIdFromLink } from '@lib/utils';
+import { getMsgIdFromLink } from '@lib/utils/generalUtils';
 
 export default class extends Command {
 
