@@ -17,28 +17,35 @@ async function handleCron(bot: Client): Promise<void> {
 }
 
 async function checkPolls(bot: Client): Promise<void> {
-	const polls: Array<Poll> = await bot.mongo.collection<Poll>(DB.POLLS).find({
+	const polls: Poll[] = await bot.mongo.collection<Poll>(DB.POLLS).find({
 		expires: { $lte: new Date() }
 	}).toArray();
 	const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 
 	polls.forEach(async poll => {
 		const mdTimestamp = `<t:${Math.floor(Date.now() / 1000)}:R>`;
-		let choiceText = '';
-		poll.results.forEach((choice, index) => {
-			choiceText += `${emotes[index]} ${choice[0]}: ${choice[1]} vote${choice[1] === 1 ? '' : 's'}\n`;
+
+		const resultMap = new Map<string, number>();
+		poll.results.forEach(res => {
+			resultMap.set(res.option, res.users.length);
 		});
-		choiceText = choiceText.trim();
+		let choiceText = '';
+		let count = 0;
+		resultMap.forEach((value, key) => {
+			choiceText += `${emotes[count++]} ${key}: ${value} vote${value === 1 ? '' : 's'}\n`;
+		});
+		console.log(choiceText);
+
+		const pollMsg = await ((await bot.channels.fetch(poll.channel)) as TextChannel).messages.fetch(poll.message);
 		const pollEmbed = new MessageEmbed()
 			.setTitle(poll.question)
-			.setDescription(`This poll was created by ${(await bot.users.fetch(poll.owner)).username} and ended **${mdTimestamp}**`)
+			.setDescription(`This poll was created by ${(await pollMsg.guild.members.fetch(poll.owner)).displayName} and ended **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
 			.setColor('RANDOM');
-		const pollMsg = await ((await bot.channels.fetch(poll.channel)) as TextChannel).messages.fetch(poll.message);
 
 		pollMsg.edit({ embeds: [pollEmbed], components: [] });
 
-		bot.mongo.collection<Poll>(DB.POLLS).findOneAndDelete(poll);
+		await bot.mongo.collection<Poll>(DB.POLLS).findOneAndDelete(poll);
 	});
 }
 

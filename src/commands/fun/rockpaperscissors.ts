@@ -73,7 +73,7 @@ function checkWinner(playerNum: number, botNum: number): string {
 }
 
 
-export async function handleRpsOptionSelect(bot: Client, i: ButtonInteraction): Promise<void> {
+export async function handleRpsOptionSelect(i: ButtonInteraction): Promise<void> {
 	const interactionData = getDataFromCustomId(i.customId);
 	const choice = interactionData.additionalData[0];
 	const timer = interactionData.additionalData[1];

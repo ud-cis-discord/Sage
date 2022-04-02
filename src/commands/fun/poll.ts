@@ -1,9 +1,11 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, ButtonInteraction, Client, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, Client,
+	CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@lib/utils/generalUtils';
-import { Poll } from '@lib/types/Poll';
+import { dateToTimestamp, generateErrorEmbed } from '@lib/utils/generalUtils';
+import { Poll, PollResult } from '@lib/types/Poll';
+import { SageInteractionType } from '@root/src/lib/types/InteractionType';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
@@ -55,8 +57,11 @@ export default class extends Command {
 		const timespan = parse(interaction.options.getString('timespan'));
 		const question = interaction.options.getString('question');
 		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
+		if (!args.includes(interaction.options.getString('optiontype'))) {
+			throw `poll option types must be one of ${args.join(', ')}`;
+		}
+		const pollType = interaction.options.getString('optiontype') as 'Single' | 'Multiple';
 
-		const userSelections = new Map(); // user ID, their choice(s)
 		const choiceQuantities = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
 
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
@@ -83,10 +88,10 @@ export default class extends Command {
 		});
 		choiceText = choiceText.trim();
 
-		let pollFooter = interaction.options.getString('optiontype') === 'Multiple'
+		const pollFooter = pollType === 'Multiple'
 			? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
 			: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
-		let pollEmbed = new MessageEmbed()
+		const pollEmbed = new MessageEmbed()
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
@@ -97,9 +102,17 @@ export default class extends Command {
 		const choiceBtns2 = []; // next 5
 		choices.forEach((choice, index) => {
 			if (index < 5) {
-				choiceBtns.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
+				choiceBtns.push(new MessageButton({ label: `${choice}`,
+					customId: `${SageInteractionType.POLL}_${choice}`,
+					style: 'SECONDARY',
+					emoji: `${emotes[index]}` }));
 			} else {
-				choiceBtns2.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
+				choiceBtns2.push(new MessageButton({
+					label: `${choice}`,
+					customId: `${SageInteractionType.POLL}_${choice}`,
+					style: 'SECONDARY',
+					emoji: `${emotes[index]}`
+				}));
 			}
 		});
 
@@ -112,75 +125,17 @@ export default class extends Command {
 		let replyId: string;
 		await interaction.fetchReply().then(reply => { replyId = reply.id; });
 
-		const dbPoll = await interaction.client.mongo.collection<Poll>(DB.POLLS).insertOne({
-			owner: interaction.member.user.id,
+		await interaction.client.mongo.collection<Poll>(DB.POLLS).insertOne({
+			owner: interaction.user.id,
 			message: replyId,
 			expires: new Date(Date.now() + timespan),
-			results: choices.map(choice => [choice, 0]),
+			results: choices.map(choice => ({
+				option: choice,
+				users: []
+			})),
 			question: question,
-			channel: interaction.channelId
-		});
-
-		const collector = interaction.channel.createMessageComponentCollector({
-			filter: i => i.message.id === replyId
-		});
-
-		collector.on('collect', async (i: ButtonInteraction) => {
-			choiceQuantities.fill(0);
-
-			const usersChoices = userSelections.get(i.user.id) || [];
-			if (usersChoices && usersChoices.includes(i.customId)) { // user has already selected choice
-				if (interaction.options.getString('optiontype') === 'Multiple') {
-					usersChoices.splice(usersChoices.indexOf(i.customId), 1);
-					userSelections.set(i.user.id, usersChoices); // set this user's choice
-				} else {
-					userSelections.delete(i.user.id);
-				}
-			} else if (interaction.options.getString('optiontype') === 'Multiple') {
-				usersChoices.push(i.customId);
-				userSelections.set(i.user.id, usersChoices); // set this user's choice
-			} else {
-				userSelections.set(i.user.id, i.customId);
-			}
-
-			userSelections.forEach(vote => {
-				if (interaction.options.getString('optiontype') === 'Multiple') {
-					vote.forEach(selected => {
-						choiceQuantities[Number(selected) - 1] += 1;
-					});
-				} else {
-					choiceQuantities[Number(vote) - 1] += 1;
-				}
-			});
-
-			choiceText = '';
-			for (let j = 0; j < choices.length; j++) {
-				choiceText += `${emotes[j]} ${choices[j]}: ${choiceQuantities[j]} vote${choiceQuantities[j] === 1 ? '' : 's'}\n`;
-			}
-			choiceText = choiceText.trim();
-
-			pollFooter = interaction.options.getString('optiontype') === 'Multiple'
-				? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
-				: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
-			pollEmbed = new MessageEmbed()
-				.setTitle(question)
-				.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
-				.addField('Choices', choiceText)
-				.setFooter(pollFooter)
-				.setColor('RANDOM');
-
-			if (choiceBtns2.length === 0) {
-				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns })] });
-			} else {
-				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
-			}
-
-			console.log(choices, choiceQuantities);
-			await interaction.client.mongo.collection<Poll>(DB.POLLS).findOneAndUpdate({ _id: dbPoll.insertedId }, {
-				$set: { results: choices.map((choice, index) => [choice, choiceQuantities[index]]) }
-			});
-
-			i.deferUpdate(); // this makes it so "This interaction failed" does not appear when pressing buttons (since we don't reply again)
+			channel: interaction.channelId,
+			type: pollType
 		});
 	}
 
@@ -190,6 +145,100 @@ export default class extends Command {
 
 }
 
-export function handlePollOptionSelect(bot: Client, i: ButtonInteraction) {
+export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction): Promise<void> {
+	const pollMsg = await i.channel.messages.fetch(i.message.id);
+	const dbPoll = await bot.mongo.collection<Poll>(DB.POLLS).findOne({ message: pollMsg.id });
+	const pollOwner = await i.guild.members.fetch(dbPoll.owner);
+	let newPoll = { ...dbPoll };
+	const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, newPoll.results.length);
+	const newChoice = i.customId.split('_')[1];
+
+	const prevAnswers = dbPoll.results.filter(r => r.users.includes(i.user.id)).map(res => res.option);
+
+	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
+		await i.reply({ ephemeral: true, content: `Vote for ***${newChoice}*** recorded. To remove it, click the same option again.` });
+		newPoll = { ...newPoll, results: addAnswer(newPoll.results, i.user.id, newChoice) };
+	}
+	// if they clicked the same answer again or the poll was a single poll and they had a previous answer
+	if (prevAnswers.includes(newChoice) || (prevAnswers && newPoll.type === 'Single')) {
+		newPoll = { ...newPoll, results: removeAnswer(
+			newPoll.results,
+			i.user.id,
+			newPoll.type === 'Single' ? prevAnswers[0] : newChoice) };
+
+		if (prevAnswers.includes(newChoice) && newPoll.type !== 'Single') {
+			await i.reply({ ephemeral: true, content: `Vote for ${newChoice} removed.` });
+		}
+	}
+
+	const resultMap = new Map<string, number>();
+	newPoll.results.forEach(res => {
+		resultMap.set(res.option, res.users.length);
+	});
+
+	let choiceText = '';
+	let count = 0;
+	const choiceBtns: MessageButton[] = [];
+	resultMap.forEach((value, key) => {
+		choiceText += `${emotes[count]} ${key}: ${value} vote${value === 1 ? '' : 's'}\n`;
+		choiceBtns.push(new MessageButton({
+			label: `${key}`,
+			customId: `${SageInteractionType.POLL}_${key}`,
+			style: 'SECONDARY',
+			emoji: `${emotes[count++]}`
+		}));
+	});
+
+	choiceText = choiceText.trim();
+
+	const pollFooter = newPoll.type === 'Multiple'
+		? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
+		: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
+	const pollEmbed = new MessageEmbed()
+		.setTitle(newPoll.question)
+		.setDescription(`This poll was created by ${pollOwner.displayName} and ends **${dateToTimestamp(newPoll.expires, 'R')}**`)
+		.addField('Choices', choiceText)
+		.setFooter(pollFooter)
+		.setColor('RANDOM');
+
+	const msgComponents = [new MessageActionRow({ components: choiceBtns.slice(0, 5) })];
+	if (choiceBtns.length > 5) msgComponents.push(new MessageActionRow({ components: choiceBtns.slice(5) }));
+
+	pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
+
+	await i.client.mongo.collection<Poll>(DB.POLLS).findOneAndReplace({ message: newPoll.message }, newPoll);
 	return;
+}
+
+/**
+ * Takes in a list of poll results, a user, and a choice. Removes that user from
+ * the choice's user array.
+ * @param {PollResult[]} results The results to edit
+ * @param {string} user The user whose answer should be removed
+ * @param {string} choice The choice to remove a user from
+ * @returns {PollResult[]} The updated list of results
+ */
+function removeAnswer(results: PollResult[], user: string, choice: string) {
+	return results.map(r => {
+		if (r.option === choice) {
+			return { ...r, users: r.users.filter(id => id !== user) };
+		} else { return r; }
+	});
+}
+
+
+/**
+ * Takes in a list of poll results, a user, and a choice. Adds that user to the
+ * choice's user array.
+ * @param {PollResult[]} results The results to edit
+ * @param {string} user The user whose answer should be added
+ * @param {string} choice The choice to add a user to
+ * @returns {PollResult[]} The updated list of results
+ */
+function addAnswer(results: PollResult[], user: string, choice: string) {
+	return results.map(r => {
+		if (r.option === choice) {
+			return { ...r, users: [...r.users, user] };
+		} else { return r; }
+	});
 }
