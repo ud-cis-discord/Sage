@@ -1,8 +1,8 @@
 import { CHANNELS, DB } from '@root/config';
-import { Client, MessageEmbed, TextChannel } from 'discord.js';
+import { Client, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { schedule } from 'node-cron';
 import { Reminder } from '@lib/types/Reminder';
-import { Poll } from '@lib/types/Poll';
+import { Poll, PollResult } from '@lib/types/Poll';
 
 async function register(bot: Client): Promise<void> {
 	schedule('0/30 * * * * *', () => {
@@ -25,25 +25,62 @@ async function checkPolls(bot: Client): Promise<void> {
 	polls.forEach(async poll => {
 		const mdTimestamp = `<t:${Math.floor(Date.now() / 1000)}:R>`;
 
+		// figure out the winner and also put the results in a map for ease of use
 		const resultMap = new Map<string, number>();
+		let winners: PollResult[] = [];
 		poll.results.forEach(res => {
 			resultMap.set(res.option, res.users.length);
+			if (!winners[0]) {
+				winners = [res];
+				return;
+			}
+			if (winners[0] && res.users.length > winners[0].users.length) winners = [res];
+			else if (res.users.length === winners[0].users.length) winners.push(res);
 		});
+
+		// build up the win string
+		let winMessage: string;
+		const winCount = winners[0].users.length;
+		if (winCount === 0) {
+			winMessage = `It looks like no one has voted!`;
+		} else if (winners.length === 1) {
+			winMessage = `**${winners[0].option}** has won the poll with ${winCount} vote${winCount === 1 ? '' : 's'}!`;
+		} else {
+			winMessage = `**${
+				winners.slice(0, -1).map(win => win.option).join(', ')
+			} and ${
+				winners.slice(-1)[0].option
+			}** have won the poll with ${winners[0].users.length} vote${winCount === 1 ? '' : 's'} each!`;
+		}
+
+		// build up the text that is on the final poll embed
 		let choiceText = '';
 		let count = 0;
 		resultMap.forEach((value, key) => {
 			choiceText += `${emotes[count++]} ${key}: ${value} vote${value === 1 ? '' : 's'}\n`;
 		});
-		console.log(choiceText);
 
-		const pollMsg = await ((await bot.channels.fetch(poll.channel)) as TextChannel).messages.fetch(poll.message);
+		const pollChannel = await bot.channels.fetch(poll.channel);
+		if (!pollChannel.isText()) throw 'something went wrong fetching the poll\'s channel';
+		const pollMsg = await pollChannel.messages.fetch(poll.message);
+		const owner = await pollMsg.guild.members.fetch(poll.owner);
 		const pollEmbed = new MessageEmbed()
 			.setTitle(poll.question)
-			.setDescription(`This poll was created by ${(await pollMsg.guild.members.fetch(poll.owner)).displayName} and ended **${mdTimestamp}**`)
+			.setDescription(`This poll was created by ${owner.displayName} and ended **${mdTimestamp}**`)
+			.addField(`Winner${winners.length === 1 ? '' : 's'}`, winMessage)
 			.addField('Choices', choiceText)
 			.setColor('RANDOM');
 
 		pollMsg.edit({ embeds: [pollEmbed], components: [] });
+
+
+		pollMsg.channel.send({ embeds: [new MessageEmbed()
+			.setTitle(poll.question)
+			.setDescription(`${owner}'s poll has ended!`)
+			.addField(`Winner${winners.length === 1 ? '' : 's'}`, winMessage)
+			.addField('Original poll', `Click [here](${pollMsg.url}) to see the original poll.`)
+			.setColor('RANDOM')
+		] });
 
 		await bot.mongo.collection<Poll>(DB.POLLS).findOneAndDelete(poll);
 	});

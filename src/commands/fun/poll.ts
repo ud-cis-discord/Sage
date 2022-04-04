@@ -166,9 +166,7 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 			i.user.id,
 			newPoll.type === 'Single' ? prevAnswers[0] : newChoice) };
 
-		if (prevAnswers.includes(newChoice) && newPoll.type !== 'Single') {
-			await i.reply({ ephemeral: true, content: `Vote for ${newChoice} removed.` });
-		}
+		if (!i.replied) await i.reply({ ephemeral: true, content: `Vote for ${newChoice} removed.` });
 	}
 
 	const resultMap = new Map<string, number>();
