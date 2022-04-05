@@ -31,7 +31,7 @@ export default class extends Command {
 		const dbAuthor = users.find(user => interaction.user.id === user.discordId);
 		const askerRank = users.indexOf(dbAuthor) + 1;
 
-		let page = interaction.options.getNumber('pagenumber') ?? Math.floor(askerRank / 10) + 1;
+		let page = interaction.options.getNumber('pagenumber') ?? Math.floor((askerRank - 1) / 10) + 1;
 
 		page = page * 10 > users.length ? Math.floor(users.length / 10) + 1 : page;
 
