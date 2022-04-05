@@ -80,10 +80,6 @@ async function register(bot: Client): Promise<void> {
 			countingDB = await bot.mongo.collection(DB.COUNTING).findOne({ piece: 'counting' }); // update the counter data
 
 			switch (countingDB.count) {
-				case 69:
-				case 420:
-					msg.react('👌');
-					break;
 				case 100:
 					msg.react('💯');
 					break;
