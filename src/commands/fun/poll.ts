@@ -156,7 +156,6 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 	const prevAnswers = dbPoll.results.filter(r => r.users.includes(i.user.id)).map(res => res.option);
 
 	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
-		await i.reply({ ephemeral: true, content: `Vote for ***${newChoice}*** recorded. To remove it, click the same option again.` });
 		newPoll = { ...newPoll, results: addAnswer(newPoll.results, i.user.id, newChoice) };
 	}
 	// if they clicked the same answer again or the poll was a single poll and they had a previous answer
@@ -165,8 +164,6 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 			newPoll.results,
 			i.user.id,
 			newPoll.type === 'Single' ? prevAnswers[0] : newChoice) };
-
-		if (!i.replied) await i.reply({ ephemeral: true, content: `Vote for ${newChoice} removed.` });
 	}
 
 	const resultMap = new Map<string, number>();
@@ -202,7 +199,11 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 	const msgComponents = [new MessageActionRow({ components: choiceBtns.slice(0, 5) })];
 	if (choiceBtns.length > 5) msgComponents.push(new MessageActionRow({ components: choiceBtns.slice(5) }));
 
-	pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
+	await pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
+	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
+		await i.reply({ ephemeral: true, content: `Vote for ***${newChoice}*** recorded. To remove it, click the same option again.` });
+	}
+	if (!i.replied) await i.reply({ ephemeral: true, content: `Vote for ${newChoice} removed.` });
 
 	await i.client.mongo.collection<Poll>(DB.POLLS).findOneAndReplace({ message: newPoll.message }, newPoll);
 	return;
