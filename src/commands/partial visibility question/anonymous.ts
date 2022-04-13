@@ -55,7 +55,7 @@ export default class extends Command {
 		const questionId = await generateQuestionId(interaction);
 
 		const studentEmbed = new MessageEmbed()
-			.setAuthor(`Anonymous asked Question ${questionId}`, interaction.client.user.avatarURL())
+			.setAuthor({ name: `Anonymous asked Question ${questionId}`, iconURL: interaction.client.user.avatarURL() })
 			.setDescription(question);
 
 		const generalChannel = await interaction.client.channels.fetch(course.channels.general) as TextChannel;
@@ -63,7 +63,7 @@ export default class extends Command {
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
 		const staffEmbed = new MessageEmbed()
-			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
+			.setAuthor({ name: `${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(`[Click to jump](${messageLink})
 	It is recommended you reply in public, but sudoreply can be used **in a staff channel** to reply in private if necessary.`);
 

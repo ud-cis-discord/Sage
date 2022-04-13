@@ -39,7 +39,7 @@ export default class extends Command {
 				const staffChannel = interaction.guild.channels.cache.get(course.channels.staff) as TextChannel;
 				const embed = new MessageEmbed()
 					.setTitle(`${interaction.user.tag} Warned ${target.author.tag}`)
-					.setFooter(`${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}`)
+					.setFooter({ text: `${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}` })
 					.addFields([{
 						name: 'Reason',
 						value: reason

@@ -49,7 +49,7 @@ export default class extends Command {
 			.addFields(fields)
 			.setThumbnail('https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png')
 			.setTimestamp()
-			.setFooter(`Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}`)
+			.setFooter({ text: `Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}` })
 			.setColor('BLURPLE');
 
 		interaction.editReply({ embeds: [embed] });

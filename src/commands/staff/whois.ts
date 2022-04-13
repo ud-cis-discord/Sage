@@ -32,10 +32,10 @@ export default class extends Command {
 		(${prettyMilliseconds(Date.now() - member.joinedTimestamp)} ago)`;
 
 		const embed = new MessageEmbed()
-			.setAuthor(`${member.user.username}`, member.user.displayAvatarURL())
+			.setAuthor({ name: `${member.user.username}`, iconURL: member.user.displayAvatarURL() })
 			.setColor(member.displayColor)
 			.setTimestamp()
-			.setFooter(`Member ID: ${member.id}`)
+			.setFooter({ text: `Member ID: ${member.id}` })
 			.addFields([
 				{ name: 'Display Name', value: `${member.displayName} (<@${member.id}>)`, inline: true },
 				{ name: 'Account Created', value: accountCreated, inline: true },

@@ -38,7 +38,7 @@ export default class extends Command {
 		const channel = await interaction.client.channels.fetch(channelId) as TextChannel;
 
 		const embed = new MessageEmbed()
-			.setAuthor(`Anonymous responded to ${question.questionId}`, interaction.client.user.avatarURL())
+			.setAuthor({ name: `Anonymous responded to ${question.questionId}`, iconURL: interaction.client.user.avatarURL() })
 			.setDescription(`${interaction.options.getString('response')}\n\n[Jump to question](${question.messageLink})`);
 
 		channel.send({ embeds: [embed] });

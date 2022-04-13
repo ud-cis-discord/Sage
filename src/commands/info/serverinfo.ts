@@ -21,7 +21,7 @@ export default class extends Command {
 				{ name: 'Emojis', value: interaction.guild.emojis.cache.size.toString(), inline: true },
 				{ name: 'Members with Roles', value: `${membersWithRoles} (${percentage}%)`, inline: true }
 			])
-			.setAuthor(interaction.guild.name, interaction.guild.iconURL())
+			.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() })
 			.setColor('DARK_VIVID_PINK')
 			.setTimestamp();
 

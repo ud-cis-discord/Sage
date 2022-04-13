@@ -14,7 +14,7 @@ export default class extends Command {
 			.setTitle(`${interaction.user.username}, send your image submission for the contest in a separate message, along with an optional description in the same message.`)
 			.setDescription(`Your file must be a JPG or PNG. You must attach the image to the message, image links will not work.`)
 			.setColor('GREEN')
-			.setFooter(`You have ${SUBMIT_TIMEOUT} seconds to submit.`);
+			.setFooter({ text: `You have ${SUBMIT_TIMEOUT} seconds to submit.` });
 		interaction.reply({ embeds: [submitEmbed] });
 
 		let timeout = SUBMIT_TIMEOUT;
@@ -45,7 +45,7 @@ export default class extends Command {
 				const submissionChannel = await interaction.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 				const imgDesc = i.content || '';
 				const embed = new MessageEmbed()
-					.setAuthor(i.author.tag, i.author.avatarURL({ dynamic: true }))
+					.setAuthor({ name: i.author.tag, iconURL: i.author.avatarURL({ dynamic: true }) })
 					.setTitle('New contest submission')
 					.addField('URL', i.attachments.first().url)
 					.setDescription(imgDesc)
@@ -65,7 +65,7 @@ export default class extends Command {
 
 	countdown(interaction: CommandInteraction, timeout: number, embed: MessageEmbed): void {
 		const footerText = `You have ${timeout} second${timeout !== 1 ? 's' : ''} to submit.`;
-		embed.setFooter(footerText);
+		embed.setFooter({ text: footerText });
 		interaction.editReply({ embeds: [embed] });
 	}
 

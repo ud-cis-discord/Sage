@@ -125,7 +125,7 @@ export default class extends Command {
 		return new MessageEmbed()
 			.setColor('GREYPLE')
 			.setDescription(`[View on xkcd.com](https://xkcd.com/${comic.num}/)`)
-			.setFooter(comicDescription)
+			.setFooter({ text: comicDescription })
 			.setImage(comic.img)
 			.setTimestamp()
 			.setTitle(`${comic.safe_title} (#${comic.num}, ${moment(new Date(Number(comic.year), Number(comic.month) - 1, Number(comic.day))).format('YYYY MMMM Do')})`);

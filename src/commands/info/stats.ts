@@ -50,7 +50,7 @@ export default class extends Command {
 
 		const embed = new MessageEmbed()
 			.setColor('DARK_GREEN')
-			.setAuthor(`${BOT.NAME} Stats`, bot.user.displayAvatarURL())
+			.setAuthor({ name: `${BOT.NAME} Stats`, iconURL: bot.user.displayAvatarURL() })
 			.setThumbnail(bot.user.displayAvatarURL())
 			.setTimestamp(Date.now())
 			.addFields(fields);

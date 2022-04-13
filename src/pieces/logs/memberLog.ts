@@ -11,7 +11,7 @@ async function processMemberAdd(member: GuildMember, channel: TextChannel): Prom
 		.addField('Account created', `${member.user.createdAt.toLocaleString()}, ` +
 			`${prettyMilliseconds(Date.now() - member.user.createdTimestamp, { verbose: true })} ago`)
 		.setColor('AQUA')
-		.setFooter(`Discord ID: ${member.id}`)
+		.setFooter({ text: `Discord ID: ${member.id}` })
 		.setTimestamp();
 	channel.send({ embeds: [embed] });
 }
@@ -70,7 +70,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 		.setThumbnail(member.user.avatarURL({ dynamic: true }))
 		.addFields(fields)
 		.setColor('DARK_ORANGE')
-		.setFooter(`Discord ID: ${member.id}`)
+		.setFooter({ text: `Discord ID: ${member.id}` })
 		.setTimestamp();
 	channel.send({ embeds: [embed] });
 }
@@ -78,13 +78,13 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember, channel: TextChannel): Promise<void> {
 	if (newMember.guild.id !== GUILDS.MAIN) return;
 	const embed = new MessageEmbed()
-		.setFooter(`Discord ID: ${newMember.id}`)
+		.setFooter({ text: `Discord ID: ${newMember.id}` })
 		.setTimestamp();
 	let toSend = false;
 
 	if (!toSend && oldMember.displayName !== newMember.displayName) {
 		toSend = true;
-		embed.setAuthor(`${newMember.user.tag} changed their nickname.`, newMember.user.avatarURL({ dynamic: true }))
+		embed.setAuthor({ name: `${newMember.user.tag} changed their nickname.`, iconURL: newMember.user.avatarURL({ dynamic: true }) })
 			.addFields([
 				{
 					name: 'New nickname',
@@ -135,7 +135,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 			});
 		}
 
-		embed.setAuthor(`${newMember.user.tag} was ${updateType} the ${updatedRole.name} role`, newMember.user.avatarURL({ dynamic: true }))
+		embed.setAuthor({ name: `${newMember.user.tag} was ${updateType} the ${updatedRole.name} role`, iconURL: newMember.user.avatarURL({ dynamic: true }) })
 			.addFields(fields)
 			.setColor('NAVY');
 	}
@@ -148,9 +148,9 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 async function processUserUpdate(oldUser: User | PartialUser, newUser: User, channel: TextChannel): Promise<void> {
 	let toSend = false;
 	const embed = new MessageEmbed()
-		.setAuthor(newUser.tag, newUser.avatarURL({ dynamic: true }))
+		.setAuthor({ name: newUser.tag, iconURL: newUser.avatarURL({ dynamic: true }) })
 		.setColor('DARK_GOLD')
-		.setFooter(`Discord ID: ${newUser.id}`)
+		.setFooter({ text: `Discord ID: ${newUser.id}` })
 		.setTimestamp();
 
 	if (!toSend && oldUser.tag !== newUser.tag) {

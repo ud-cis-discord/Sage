@@ -18,9 +18,8 @@ export default class extends Command {
 	async run(interaction:CommandInteraction): Promise<void> {
 		const feedback = interaction.options.getString('feedback');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
-
 		const embed = new MessageEmbed()
-			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))
+			.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.avatarURL({ dynamic: true }) })
 			.setTitle('New Feedback')
 			.setDescription(feedback)
 			.setColor('DARK_GREEN')

@@ -30,7 +30,7 @@ export default class extends Command {
 		const embed = new MessageEmbed()
 			.setColor(role.color)
 			.setTitle(`${role.name} | ${memberList.size} members`)
-			.setFooter(`Role ID: ${role.id}`);
+			.setFooter({ text: `Role ID: ${role.id}` });
 
 		const attachments: MessageAttachment[] = [];
 

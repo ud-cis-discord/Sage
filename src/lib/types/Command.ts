@@ -1,6 +1,5 @@
 import { ROLES } from '@root/config';
-import { ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionData, ApplicationCommandPermissionData,
-	ApplicationCommandSubCommand,
+import { ApplicationCommandOption, ApplicationCommandOptionData, ApplicationCommandPermissionData, ApplicationCommandSubCommand,
 	ApplicationCommandSubCommandData, ApplicationCommandSubGroup, ApplicationCommandSubGroupData, CommandInteraction } from 'discord.js';
 
 
@@ -30,9 +29,3 @@ export abstract class Command {
 
 export type NonSubCommandOptionData = Exclude<ApplicationCommandOptionData, ApplicationCommandSubCommandData | ApplicationCommandSubGroupData>;
 export type NonSubCommandOption = Exclude<ApplicationCommandOption, ApplicationCommandSubCommand | ApplicationCommandSubGroup>;
-
-export interface CompCommand {
-	name: string,
-	description: string,
-	options: ApplicationCommandOption[]
-}

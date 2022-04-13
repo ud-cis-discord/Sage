@@ -11,7 +11,7 @@ export default class extends Command {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
 		const embed = new MessageEmbed()
-			.setAuthor(author)
+			.setAuthor({ name: author })
 			.setTitle(message)
 			.setDescription(`Commit [${hash.slice(0, 8)}](${github}/commit/${hash}) on ${branch}`)
 			.setColor('#fbb848')

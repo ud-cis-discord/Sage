@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 
@@ -85,15 +85,15 @@ export default class extends Command {
 
 		embed.setDescription(`${question.messageLink}`);
 		embed.setTitle(`${asker.user.tag}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
+		embed.setFooter({ text: `When you're done with this question, you can send \`/archive\` to close it` });
 		await privThread.send({
 			embeds: [embed]
 		});
 
 		const threadEmbed = new MessageEmbed()
-			.setAuthor(`${interaction.user.tag}`, interaction.user.avatarURL())
+			.setAuthor({ name: `${interaction.user.tag}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(response)
-			.setFooter(`Please have any further conversation in this thread!`);
+			.setFooter({ text: `Please have any further conversation in this thread!` });
 
 		return privThread.send({ embeds: [threadEmbed] });
 	}

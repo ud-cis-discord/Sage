@@ -77,7 +77,7 @@ export default class extends Command {
 		privThread.members.add(interaction.user.id);
 
 		const embed = new MessageEmbed()
-			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
+			.setAuthor({ name: `${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
 
 		const privateChannel = await interaction.client.channels.fetch(course.channels.private) as TextChannel;
@@ -87,7 +87,7 @@ export default class extends Command {
 
 		embed.setDescription(question);
 		embed.setTitle(`${interaction.user.username}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
+		embed.setFooter({ text: `When you're done with this question, you can send \`/archive\` to close it` });
 		const questionMessage = await privThread.send({
 			embeds: [embed]
 		});

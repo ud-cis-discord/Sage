@@ -88,7 +88,7 @@ export default class extends Command {
 			.setColor(Math.floor(Math.random() * 16777215))
 			.setTitle('Random Integer Generator')
 			.setFields(embedFields)
-			.setFooter(`${interaction.user.username} rolled ${numRolls} dice ranging from ${min} to ${max}`);
+			.setFooter({ text: `${interaction.user.username} rolled ${numRolls} dice ranging from ${min} to ${max}` });
 		return interaction.reply({ embeds: [responseEmbed] });
 	}
 

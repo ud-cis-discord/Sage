@@ -32,7 +32,7 @@ export default class extends Command {
 			.setTitle(`Looking Up:	${member.displayName}`)
 			.setThumbnail(user.avatarURL())
 			.setColor('GREEN')
-			.setFooter(`Member ID: ${user.id}`)
+			.setFooter({ text: `Member ID: ${user.id}` })
 			.setTimestamp()
 			.addFields([
 				{ name: 'Display Name', value: `<@${member.id}>`, inline: true },
