@@ -1,5 +1,5 @@
 import { ROLES } from '@root/config';
-import { ApplicationCommandOption, ApplicationCommandOptionData, ApplicationCommandPermissionData,
+import { ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionData, ApplicationCommandPermissionData,
 	ApplicationCommandSubCommand,
 	ApplicationCommandSubCommandData, ApplicationCommandSubGroup, ApplicationCommandSubGroupData, CommandInteraction } from 'discord.js';
 
@@ -16,7 +16,7 @@ export abstract class Command {
 	extendedHelp?: string;
 	runInDM?: boolean = true;
 	runInGuild?: boolean = true;
-	options?: NonSubCommandOptionData[];
+	options?: ApplicationCommandOptionData[];
 	permissions?: ApplicationCommandPermissionData[] = [{
 		id: ROLES.VERIFIED,
 		type: 'ROLE',

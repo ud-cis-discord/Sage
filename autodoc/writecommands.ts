@@ -1,6 +1,6 @@
 import 'module-alias/register';
-import { readdirRecursive } from '@lib/utils';
-import { Command, NonSubCommandOptionData } from '@lib/types/Command';
+import { isNonSubCommandOptionData, readdirRecursive } from '@lib/utils';
+import { Command } from '@lib/types/Command';
 import fs from 'fs';
 
 let cmdMd = `---
@@ -74,8 +74,10 @@ async function main() {
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
 		if (command.options) {
 			newCatText += '\n- Parameters:\n';
-			newCatText += command.options.map(param =>
-				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
+			newCatText += command.options.map(param => {
+				if (!isNonSubCommandOptionData(param)) return '';
+				return `  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`;
+			}
 			).join('\n');
 		}
 		categories.set(command.category, newCatText);

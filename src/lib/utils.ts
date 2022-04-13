@@ -1,7 +1,7 @@
 import {
 	Client, CommandInteraction, Message, MessageAttachment,
 	MessageEmbed, Role, TextChannel, MessageActionRow, ApplicationCommandPermissionData,
-	MessageSelectMenu, MessageSelectOptionData, ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionData
+	MessageSelectMenu, MessageSelectOptionData, ApplicationCommandOption, ApplicationCommandOptionData
 } from 'discord.js';
 import { Command, NonSubCommandOption, NonSubCommandOptionData } from '@lib/types/Command';
 import * as fs from 'fs';
@@ -20,27 +20,6 @@ export function isNonSubCommandOptionData(option: ApplicationCommandOptionData):
 
 export function isNonSubCommandOption(option: ApplicationCommandOption): option is NonSubCommandOption {
 	return option.type !== 'SUB_COMMAND' && option.type !== 'SUB_COMMAND_GROUP';
-}
-
-export function isCmdEqual(cmd1: Command, cmd2: ApplicationCommand): boolean {
-	const cmd1Op = cmd1.options ? cmd1.options.filter(isNonSubCommandOptionData) : null;
-	const cmd2Op = cmd2.options ? cmd2.options.filter(isNonSubCommandOption) : null;
-	return cmd1.name === cmd2.name
-		&& cmd1.description === cmd2.description
-		&& isOptionsListEqual(cmd1Op, cmd2Op);
-}
-
-export function isOptionsListEqual(
-	list1: NonSubCommandOptionData[],
-	list2: NonSubCommandOption[]):
-	boolean {
-	if ((!list1 && list2) || (!list2 && list1)) return;
-	return list1.every(list1Option => list2.find(list2Option =>
-		list2Option.name === list1Option.name
-			&& list2Option.description === list1Option.description
-			&& list2Option.required === list1Option.required
-			&& list2Option.type === list1Option.type
-	));
 }
 
 export function isPermissionEqual(perm1: ApplicationCommandPermissionData, perm2: ApplicationCommandPermissionData): boolean {

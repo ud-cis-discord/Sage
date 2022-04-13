@@ -1,11 +1,12 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, ApplicationCommandPermissionData, GuildMember, MessageSelectMenu, SelectMenuInteraction } from 'discord.js';
-import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
+import { Collection, Client, CommandInteraction, ApplicationCommand,
+	ApplicationCommandPermissionData, GuildMember, MessageSelectMenu, SelectMenuInteraction, ApplicationCommandData } from 'discord.js';
+import { isPermissionEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
-import { Course } from '../lib/types/Course';
-import { SageUser } from '../lib/types/SageUser';
-import { CommandError } from '../lib/types/errors';
+import { Course } from '@lib/types/Course';
+import { SageUser } from '@lib/types/SageUser';
+import { CommandError } from '@lib/types/errors';
 
 const DELETE_DELAY = 10000;
 
@@ -128,7 +129,7 @@ async function loadCommands(bot: Client) {
 
 		const guildCmd = commands.cache.find(cmd => cmd.name === command.name);
 
-		const cmdData = {
+		const cmdData: ApplicationCommandData = {
 			name: command.name,
 			description: command.description,
 			options: command?.options || [],
@@ -139,7 +140,7 @@ async function loadCommands(bot: Client) {
 			awaitedCmds.push(commands.create(cmdData));
 			numNew++;
 			console.log(`${command.name} does not exist, creating...`);
-		} else if (!isCmdEqual(command, guildCmd)) {
+		} else if (!guildCmd.equals(cmdData)) {
 			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
 			numEdited++;
 			console.log(`a different version of ${command.name} already exists, editing...`);

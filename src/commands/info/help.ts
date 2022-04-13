@@ -1,5 +1,5 @@
 import { CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
-import { getCommand } from '@lib/utils';
+import { getCommand, isNonSubCommandOptionData } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
 import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
@@ -41,9 +41,10 @@ export default class extends Command {
 			if (command.options) {
 				fields.push({
 					name: 'Parameters',
-					value: command.options.map(param =>
-						`**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}`
-					).join('\n'),
+					value: command.options.map(param => {
+						if (!isNonSubCommandOptionData(param)) return '';
+						return `**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}`;
+					}).join('\n'),
 					inline: false
 				});
 			}
