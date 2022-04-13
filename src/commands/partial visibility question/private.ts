@@ -55,7 +55,7 @@ export default class extends Command {
 		const bot = interaction.client;
 		const questionId = await generateQuestionId(interaction);
 
-		const courseGeneral = (await bot.channels.fetch(course.channels.general));
+		const courseGeneral = await bot.channels.fetch(course.channels.general);
 		if (courseGeneral.type !== 'GUILD_TEXT') throw 'The channel you\'re trying to create a thread in isn\'t a text channel.';
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
