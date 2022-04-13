@@ -1,7 +1,7 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
-import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
+import { ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
 import { modifyRoleDD } from '@lib/utils';
 
 const DECISION_TIMEOUT = 30;
@@ -12,7 +12,7 @@ export default class extends Command {
 	runInDM = false;
 	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'course',
 		description: 'The course ID of the course to be removed (ex: 108).',
 		type: 'CHANNEL',

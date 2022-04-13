@@ -1,14 +1,14 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
+import { CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
 import { getCommand } from '@lib/utils';
 import { BOT, PREFIX } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = `Provides info about all ${BOT.NAME} commands`;
 	extendedHelp = 'If given no arguments, a list of all commands you have access to will be sent to your DMs';
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'cmd',
 			description: 'command you would like to know more about',

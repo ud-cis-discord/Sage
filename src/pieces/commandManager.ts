@@ -139,7 +139,7 @@ async function loadCommands(bot: Client) {
 			awaitedCmds.push(commands.create(cmdData));
 			numNew++;
 			console.log(`${command.name} does not exist, creating...`);
-		} else if (!isCmdEqual(cmdData, guildCmd)) {
+		} else if (!isCmdEqual(command, guildCmd)) {
 			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
 			numEdited++;
 			console.log(`a different version of ${command.name} already exists, editing...`);

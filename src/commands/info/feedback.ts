@@ -1,12 +1,12 @@
-import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, TextChannel, CommandInteraction } from 'discord.js';
 import { BOT, CHANNELS, MAINTAINERS } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = `Provide feedback or bug reports about ${BOT.NAME}.`;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'feedback',
 			description: 'feedback to be sent to the admins',

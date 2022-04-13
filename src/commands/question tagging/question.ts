@@ -1,16 +1,16 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
+import { CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, DB, MAINTAINERS } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
 export default class extends Command {
 
 	description = 'Filters the questionTags collection for a given class and assignment';
 	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'assignment',
 			description: 'The ID of the assignment to filter questions from',

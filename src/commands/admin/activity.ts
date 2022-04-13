@@ -1,7 +1,8 @@
-import { ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, ExcludeEnum } from 'discord.js';
 import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
+import { ActivityTypes } from 'discord.js/typings/enums';
 
 const ACTIVITIES = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
 
@@ -10,7 +11,7 @@ export default class extends Command {
 	description = `Sets ${BOT.NAME}'s activity to the given status and content`;
 	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'status',
 			description: 'The activity status.',
@@ -32,7 +33,7 @@ export default class extends Command {
 	async run(interaction: CommandInteraction): Promise<void> {
 		const bot = interaction.client;
 		const content = interaction.options.getString('content');
-		const type = interaction.options.getString('status').toUpperCase() as ActivityType;
+		const type = interaction.options.getString('status').toUpperCase() as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>;
 
 		//	setting Sage's activity status in the guild
 		bot.user.setActivity(content, { type });

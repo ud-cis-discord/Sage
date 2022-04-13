@@ -1,8 +1,8 @@
 import { SageUser } from '@lib/types/SageUser';
 import { Leaderboard } from '@root/src/lib/enums';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
-import { MessageEmbed, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { MessageEmbed, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
@@ -10,7 +10,7 @@ export default class extends Command {
 	extendedHelp = 'Enter a page number to look further down the leaderboard';
 	runInDM = false;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'pagenumber',
 			description: 'leaderboard page to view',

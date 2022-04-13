@@ -1,14 +1,14 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
-import { Command } from '@lib/types/Command';
-import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
+import { MessageEmbed, TextChannel, CommandInteraction } from 'discord.js';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
 
 export default class extends Command {
 
 	description = `Reply to a question you previously asked with ${BOT.NAME}.`;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'questionid',
 			description: 'The ID of the question you would like to reply to',

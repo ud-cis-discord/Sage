@@ -1,6 +1,6 @@
 import 'module-alias/register';
 import { readdirRecursive } from '@lib/utils';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import fs from 'fs';
 
 let cmdMd = `---

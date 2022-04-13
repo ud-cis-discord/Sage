@@ -1,13 +1,13 @@
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
 export default class extends Command {
 
 	description = 'Find a comic from xkcd.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'comic',
 			description: `The comic to send. Can be 'latest', 'random', or a number.`,

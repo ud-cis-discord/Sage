@@ -1,8 +1,8 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { modifyRoleDD } from '@lib/utils';
 
 export default class extends Command {
@@ -11,7 +11,7 @@ export default class extends Command {
 	runInDM = false;
 	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'role',
 		description: 'The role to add to the list of self-assignable roles.',
 		type: 'ROLE',

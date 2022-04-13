@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, EMAIL } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { getMsgIdFromLink } from '@lib/utils';
 
 export default class extends Command {
@@ -12,7 +12,7 @@ export default class extends Command {
 	runInDM = false;
 	description = 'Warns a user for breaking the rules and deletes the offending message.';
 	extendedHelp = 'This command must be used when replying to a message.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'msglink',
 			description: 'Link to the offending message',

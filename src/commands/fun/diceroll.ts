@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, MessageEmbed } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { CommandInteraction, EmbedFieldData, MessageEmbed } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { generateErrorEmbed } from '@lib/utils';
 
 const DEFAULT_RANGE = [1, 6];
@@ -9,7 +9,7 @@ export default class extends Command {
 	description = `Get \`numdice\` random integers between \`minimum\` and \`maximum\`.`;
 	extendedHelp = `User specified minimum and maximum are inclusive. If no range is specified, defaults to one number ranging from ${DEFAULT_RANGE[0]} to ${DEFAULT_RANGE[1]}.`;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'minimum',
 			description: `Minimum of the roll range (defaults to ${DEFAULT_RANGE[0]})`,

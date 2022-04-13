@@ -1,14 +1,14 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { MAINTAINERS, ROLES } from '@root/config';
-import { ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives the muted role to the given user.';
 	runInDM = false;
 	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'user',
 			description: 'The user to mute',

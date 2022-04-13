@@ -1,7 +1,7 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, PresenceStatusData } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { ApplicationCommandPermissionData, CommandInteraction, PresenceStatusData } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 const STATUSES = ['online', 'idle', 'dnd', 'invisible'];
 export default class extends Command {
@@ -9,7 +9,7 @@ export default class extends Command {
 	description = `Sets ${BOT.NAME}'s status.`;
 	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'status',
 		description: 'The status to give the bot (online, idle, dnd, invis).',
 		type: 'STRING',

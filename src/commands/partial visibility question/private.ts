@@ -1,16 +1,16 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { CommandInteraction, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, DB, MAINTAINERS, ROLES } from '@root/config';
 import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Send a question to all course staff privately.';
 	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'question',
 			description: 'What you would like to ask',
@@ -55,7 +55,8 @@ export default class extends Command {
 		const bot = interaction.client;
 		const questionId = await generateQuestionId(interaction);
 
-		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
+		const courseGeneral = (await bot.channels.fetch(course.channels.general));
+		if (courseGeneral.type !== 'GUILD_TEXT') throw 'The channel you\'re trying to create a thread in isn\'t a text channel.';
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({

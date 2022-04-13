@@ -1,13 +1,13 @@
-import { MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { MessageEmbed, Role, MessageAttachment, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { sendToFile } from '@lib/utils';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives information about a role, including a list of the members who have it.';
 	runInDM = false;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'role',
 			description: 'Role to get the info of',

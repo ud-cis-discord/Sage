@@ -1,7 +1,7 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, MessageAttachment } from 'discord.js';
+import { CommandInteraction, MessageEmbed, MessageAttachment } from 'discord.js';
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { generateErrorEmbed } from '@lib/utils';
 
 const BACKGROUND_COLOR = `rgb(${255 - 47}, ${255 - 49}, ${255 - 54})`;
@@ -14,7 +14,7 @@ export default class extends Command {
 
 	description = `Accepts a LaTeX expression and posts it as a rendered image.`;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'input',
 			description: 'The LaTeX expression to render',

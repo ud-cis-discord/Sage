@@ -1,13 +1,13 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageEmbed } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, MessageEmbed } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives an overview of a member\'s info.';
 	runInDM = false;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'user',
 			description: 'The user to lookup',

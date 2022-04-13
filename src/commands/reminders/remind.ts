@@ -1,16 +1,16 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
 import { reminderTime } from '@lib/utils';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 
 	description = `Have ${BOT.NAME} give you a reminder.`;
 	extendedHelp = 'Reminders can be set to repeat daily or weekly.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'content',
 			description: 'What you\'d like to be reminded of',

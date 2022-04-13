@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildMember } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { CommandInteraction, GuildMember } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Press F to pay respects.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'target',
 			description: 'The user to pay respects to',

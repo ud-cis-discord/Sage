@@ -1,8 +1,8 @@
-import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { modifyRoleDD } from '@lib/utils';
 
 export default class extends Command {
@@ -11,7 +11,7 @@ export default class extends Command {
 	runInDM = false;
 	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'course',
 		description: 'The three-digit course ID of the course to be added (ex: 108).',
 		type: 'STRING',

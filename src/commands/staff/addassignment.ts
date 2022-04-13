@@ -1,8 +1,8 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
@@ -11,7 +11,7 @@ export default class extends Command {
 	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Adds an assignment to a given course ID\'s assignment list';
 	runInDM = false;
-	options: ApplicationCommandOptionData[] =[
+	options: NonSubCommandOptionData[] =[
 		{
 			name: 'course',
 			description: 'The course ID to add an assignment to',

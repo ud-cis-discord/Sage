@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { CommandInteraction } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Find the definition of a word.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'word',
 			description: 'The word to define',

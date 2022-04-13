@@ -1,14 +1,14 @@
 import { Reminder } from '@lib/types/Reminder';
 import { DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { CommandInteraction } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Cancel any pending reminders you may have.';
 	extendedHelp = 'You can only cancel one reminder at a time';
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'remindernumber',
 			type: 'INTEGER',

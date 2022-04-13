@@ -1,7 +1,7 @@
 import { BOT } from '@root/config';
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
 const QUESTION_CHAR_LIMIT = 256;
@@ -11,7 +11,7 @@ export default class extends Command {
 
 	description = `Have ${BOT.NAME} create a poll for you.`;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'timespan',
 			description: `How long your poll should last. Acceptable formats include '5s', '5m', '5h', '5h30m', '7h30m15s'...`,

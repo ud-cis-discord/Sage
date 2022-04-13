@@ -1,12 +1,12 @@
-import { MessageEmbed, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, CommandInteraction } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Displays the users current message count.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'hide',
 			description: 'determines if you want stats public or private',

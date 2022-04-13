@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 const MAGIC8BALL_RESPONSES = [
 	'As I see it, yes.',
@@ -29,7 +29,7 @@ export default class extends Command {
 	description = `Ask the 8-ball a question and you shall get an answer.`;
 	extendedHelp = `This command requires you to put a question mark ('?') at the end of your message.`;
 
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'question',
 			description: 'The question you want to ask',

@@ -1,5 +1,7 @@
 import { ROLES } from '@root/config';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOption, ApplicationCommandOptionData, ApplicationCommandPermissionData,
+	ApplicationCommandSubCommand,
+	ApplicationCommandSubCommandData, ApplicationCommandSubGroup, ApplicationCommandSubGroupData, CommandInteraction } from 'discord.js';
 
 
 export abstract class Command {
@@ -14,7 +16,7 @@ export abstract class Command {
 	extendedHelp?: string;
 	runInDM?: boolean = true;
 	runInGuild?: boolean = true;
-	options?: ApplicationCommandOptionData[];
+	options?: NonSubCommandOptionData[];
 	permissions?: ApplicationCommandPermissionData[] = [{
 		id: ROLES.VERIFIED,
 		type: 'ROLE',
@@ -26,8 +28,11 @@ export abstract class Command {
 
 }
 
+export type NonSubCommandOptionData = Exclude<ApplicationCommandOptionData, ApplicationCommandSubCommandData | ApplicationCommandSubGroupData>;
+export type NonSubCommandOption = Exclude<ApplicationCommandOption, ApplicationCommandSubCommand | ApplicationCommandSubGroup>;
+
 export interface CompCommand {
 	name: string,
 	description: string,
-	options: ApplicationCommandOptionData[]
+	options: ApplicationCommandOption[]
 }

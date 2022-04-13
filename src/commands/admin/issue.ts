@@ -1,15 +1,15 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { RequestError } from '@octokit/types';
 import { BOT, GITHUB_PROJECT } from '@root/config';
-import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
+import { ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
 	description = `Creates an issue in ${BOT.NAME}'s repository.`;
 	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'title',
 		description: 'What\'s the issue?',
 		type: 'STRING',

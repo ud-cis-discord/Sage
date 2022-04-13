@@ -1,8 +1,8 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
-import { Command } from '@lib/types/Command';
+import { ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 
 export default class extends Command {
@@ -10,7 +10,7 @@ export default class extends Command {
 	description = `Reply to a question asked through ${BOT.NAME}.`;
 	extendedHelp = 'Responses are put into a private thread between you and the asker.';
 	runInDM = false;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'questionid',
 			description: 'ID of question you are replying to',
@@ -58,14 +58,15 @@ export default class extends Command {
 			});
 		}
 
-		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
+		const courseGeneral = await bot.channels.fetch(course.channels.general);
+		if (courseGeneral.type !== 'GUILD_TEXT') throw 'The channel you\'re trying to create a thread in isn\'t a text channel.';
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s anonymous question (${question.questionId})'`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked an anonymous question`,
-				type: `GUILD_PRIVATE_THREAD`
+				type: 'GUILD_PRIVATE_THREAD'
 			});
 		} else {
 			throw `Something went wrong creating ${asker.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;

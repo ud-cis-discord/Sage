@@ -1,16 +1,16 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
+import { CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
 import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Send an anonymous question in your classes general channel.';
 	extendedHelp = `${BOT.NAME} will automatically determine your course if you are only enrolled in one!`;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'question',
 			description: 'What would you like to ask?',

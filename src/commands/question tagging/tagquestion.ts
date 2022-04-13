@@ -1,14 +1,14 @@
-import { ApplicationCommandOptionData, CommandInteraction, TextChannel } from 'discord.js';
+import { CommandInteraction, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@root/src/lib/types/QuestionTag';
 import { DB } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils';
 
 export default class extends Command {
 
 	description = 'Tags a message with a given course/assignment ID. Must be run in a class-specific channel.';
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'message',
 			description: 'The link of the message you want to tag',

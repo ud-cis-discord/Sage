@@ -1,9 +1,9 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
 import { DB } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
@@ -12,7 +12,7 @@ export default class extends Command {
 	set their message count and a negative will subtract that from their total`;
 	runInDM = false;
 	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'user',
 			description: 'The user whose message count will be edited',

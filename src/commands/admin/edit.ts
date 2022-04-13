@@ -1,7 +1,7 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, TextChannel } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, TextChannel } from 'discord.js';
 import { BOT } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
@@ -9,7 +9,7 @@ export default class extends Command {
 	usage = '<messageLink>|<content>';
 	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'msg_link',
 		description: 'A message link.',
 		type: 'STRING',

@@ -1,16 +1,16 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Formatters } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Formatters } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { getCommand } from '@lib/utils';
 import { SageData } from '@lib/types/SageData';
 import { DB } from '@root/config';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Disable a command';
 	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	options: ApplicationCommandOptionData[] = [{
+	options: NonSubCommandOptionData[] = [{
 		name: 'command',
 		description: 'The name of the command to be disabled.',
 		type: 'STRING',

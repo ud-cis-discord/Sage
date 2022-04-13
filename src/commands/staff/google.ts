@@ -1,13 +1,13 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 import { BOT } from '@root/config';
-import { MessageEmbed, ApplicationCommandPermissionData, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { MessageEmbed, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
 	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = `Have ${BOT.NAME} google something for someone`;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'query',
 			type: 'STRING',

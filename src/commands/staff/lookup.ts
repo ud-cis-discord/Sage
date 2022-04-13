@@ -1,16 +1,16 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData } from 'discord.js';
 import nodemailer from 'nodemailer';
-import { Command } from '@lib/types/Command';
+import { Command, NonSubCommandOptionData } from '@lib/types/Command';
 
 export default class extends Command {
 
 	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Looks up information about a given user';
 	runInDM = false;
-	options: ApplicationCommandOptionData[] = [
+	options: NonSubCommandOptionData[] = [
 		{
 			name: 'user',
 			type: 'USER',
