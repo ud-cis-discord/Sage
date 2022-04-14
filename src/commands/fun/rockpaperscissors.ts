@@ -1,5 +1,5 @@
 import { BOT } from '@root/config';
-import { ButtonInteraction, Client, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { SageInteractionType } from '@lib/types/InteractionType';
 import { buildCustomId, getDataFromCustomId } from '@lib/utils/interactionUtils';
@@ -21,22 +21,31 @@ export default class extends Command {
 		const confirmBtns = [
 			new MessageButton({
 				label: 'Rock',
-				customId: buildCustomId(SageInteractionType.RPS,
-					interaction.user.id, ['rock', `${timer[Symbol.toPrimitive]()}`]),
+				customId: buildCustomId({
+					type: SageInteractionType.RPS,
+					commandOwner: interaction.user.id,
+					additionalData: ['rock', `${timer[Symbol.toPrimitive]()}`]
+				}),
 				style: 'PRIMARY',
 				emoji: '👊'
 			}),
 			new MessageButton({
 				label: 'Paper',
-				customId: buildCustomId(SageInteractionType.RPS,
-					interaction.user.id, ['paper', `${timer[Symbol.toPrimitive]()}`]),
+				customId: buildCustomId({
+					type: SageInteractionType.RPS,
+					commandOwner: interaction.user.id,
+					additionalData: ['paper', `${timer[Symbol.toPrimitive]()}`]
+				}),
 				style: 'PRIMARY',
 				emoji: '✋'
 			}),
 			new MessageButton({
 				label: 'Scissors',
-				customId: buildCustomId(SageInteractionType.RPS,
-					interaction.user.id, ['scissors', `${timer[Symbol.toPrimitive]()}`]),
+				customId: buildCustomId({
+					type: SageInteractionType.RPS,
+					commandOwner: interaction.user.id,
+					additionalData: ['scissors', `${timer[Symbol.toPrimitive]()}`]
+				}),
 				style: 'PRIMARY',
 				emoji: '✌'
 			})
