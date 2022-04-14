@@ -92,7 +92,6 @@ export async function handleRpsOptionSelect(i: ButtonInteraction): Promise<void>
 	const botMove = CHOICES[Math.floor(Math.random() * CHOICES.length)];
 	const winner = checkWinner(CHOICES.indexOf(choice), CHOICES.indexOf(botMove));
 
-	clearInterval();
 	let winEmbed: MessageEmbed;
 
 	if (winner === BOT.NAME) {
