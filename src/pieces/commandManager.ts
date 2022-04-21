@@ -91,7 +91,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 	}
 }
 
-async function loadCommands(bot: Client) {
+export async function loadCommands(bot: Client): Promise<void> {
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
 	const oldCommandSettings = sageData?.commandSettings || [];
