@@ -2,7 +2,7 @@ import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@root/src/lib/permissions';
 import { Command } from '@root/src/lib/types/Command';
 import { readdirRecursive } from '@root/src/lib/utils';
-import { ApplicationCommandData, CommandInteraction, Guild } from 'discord.js';
+import { ApplicationCommandData, CommandInteraction, InteractionCollector } from 'discord.js';
 
 export default class extends Command {
 
@@ -10,7 +10,8 @@ export default class extends Command {
 	permissions = BOTMASTER_PERMS;
 
 	async run(interaction: CommandInteraction): Promise<void> {
-		const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
+		const commandFiles = readdirRecursive(`${__dirname}/..`).filter(file => file.endsWith('.js'));
+		interaction.deferReply();
 
 		const commands: ApplicationCommandData[] = [];
 		for (const file of commandFiles) {
@@ -48,6 +49,7 @@ export default class extends Command {
 		await interaction.channel.send(`Setting ${BOT.NAME}'s commands...`);
 		await interaction.guild.commands.set(commands);
 
+		await interaction.guild.commands.fetch();
 		await Promise.all(interaction.guild.commands.cache.map(command => {
 			const botCmd = interaction.client.commands.find(cmd => cmd.name === command.name);
 			return interaction.guild.commands.permissions.set({
@@ -55,6 +57,7 @@ export default class extends Command {
 				permissions: botCmd.permissions
 			});
 		}));
+		await interaction.followUp(`Successfully refreshed ${BOT.NAME}'s commands.`);
 	}
 
 }
