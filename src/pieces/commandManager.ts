@@ -102,7 +102,6 @@ export async function loadCommands(bot: Client): Promise<void> {
 	const commandFiles = readdirRecursive(`${__dirname}/../commands`).filter(file => file.endsWith('.js'));
 
 	const awaitedCmds: Promise<ApplicationCommand>[] = [];
-	await bot.guilds.cache.get(GUILDS.MAIN).commands.set([]);
 
 	for (const file of commandFiles) {
 		const commandModule = await import(file);
