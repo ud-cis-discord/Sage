@@ -48,19 +48,13 @@ export default class extends Command {
 		await interaction.guild.commands.set([]);
 		await interaction.channel.send(`Setting ${BOT.NAME}'s commands...`);
 		await interaction.guild.commands.set(commands);
-
-		await interaction.guild.commands.fetch();
-		await Promise.all(interaction.guild.commands.cache.map(command => {
-			const botCmd = interaction.client.commands.find(cmd => cmd.name === command.name);
-			if (botCmd) {
-				console.log(`Updating permissions for ${botCmd.name}`);
-				return interaction.guild.commands.permissions.set({
-					command: command.id,
-					permissions: botCmd.permissions
-				});
-			} else { return Promise.resolve(); }
-		}));
-		await interaction.followUp(`Successfully refreshed ${BOT.NAME}'s commands.`);
+		await interaction.followUp(`Successfully refreshed ${BOT.NAME}'s commands. Restarting...`);
+		interaction.client.user.setActivity(`Restarting...`, { type: 'PLAYING' });
+		interaction.channel.send(`Restarting ${BOT.NAME}`)
+			.then(() => {
+				interaction.client.destroy();
+				process.exit(0);
+			});
 	}
 
 }
