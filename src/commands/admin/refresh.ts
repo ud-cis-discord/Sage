@@ -2,7 +2,7 @@ import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@root/src/lib/permissions';
 import { Command } from '@root/src/lib/types/Command';
 import { readdirRecursive } from '@root/src/lib/utils';
-import { ApplicationCommandData, CommandInteraction, InteractionCollector } from 'discord.js';
+import { ApplicationCommandData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
@@ -52,10 +52,13 @@ export default class extends Command {
 		await interaction.guild.commands.fetch();
 		await Promise.all(interaction.guild.commands.cache.map(command => {
 			const botCmd = interaction.client.commands.find(cmd => cmd.name === command.name);
-			return interaction.guild.commands.permissions.set({
-				command: command.id,
-				permissions: botCmd.permissions
-			});
+			if (botCmd) {
+				console.log(`Updating permissions for ${botCmd.name}`);
+				return interaction.guild.commands.permissions.set({
+					command: command.id,
+					permissions: botCmd.permissions
+				});
+			} else { return Promise.resolve(); }
 		}));
 		await interaction.followUp(`Successfully refreshed ${BOT.NAME}'s commands.`);
 	}
