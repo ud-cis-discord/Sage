@@ -35,7 +35,7 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('messageCreate', async msg => {
 		const lcMessage = msg.content.toLowerCase();
-		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes('sage');
+		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes(' sage');
 
 		if (thankCheck) {
 			msg.react('<:steve_peace:883541149032267816>');
@@ -50,11 +50,13 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 	if (customId === 'roleselect' && member instanceof GuildMember) {
 		const component = interaction.component as MessageSelectMenu;
 		const removed = component.options.filter((option) => !values.includes(option.value));
+		const addedRoleNames = [];
+		const removedRoleNames = [];
 		for (const id of removed) {
 			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
 			if (!role.name.includes('CISC')) {
 				member.roles.remove(id.value);
-				continue;
+				removedRoleNames.push(role.name);
 			}
 			if (member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
 				const course = courses.find(c => c.name === role.name.substring(5));
@@ -62,6 +64,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 				user.courses = user.courses.filter(c => c !== course.name);
 				member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
 				member.roles.remove(id.value);
+				removedRoleNames.push(role.name);
 				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
 				responseContent = `Your enrollments have been updated.`;
 			}
@@ -70,6 +73,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 			const role = interaction.guild.roles.cache.find(r => r.id === id);
 			if (!role.name.includes('CISC')) {
 				member.roles.add(id);
+				addedRoleNames.push(role.name);
 				continue;
 			}
 			if (!member.roles.cache.some(r => r.id === id)) { // does user have this role?
@@ -78,14 +82,14 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 				user.courses.push(course.name);
 				member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
 				member.roles.add(id);
+				addedRoleNames.push(role.name);
 				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
 				responseContent = `Your enrollments have been updated.`;
-			} else {
-				responseContent = `It looks like you are already in the course you've selected! If you'd like to unenroll, please unselect the course from the dropdown.`;
 			}
 		}
 		interaction.reply({
-			content: `${responseContent}`,
+			content: `${responseContent} The following changes have been applied to your roles:
+			${addedRoleNames.length !== 0 ? `**Added: **${addedRoleNames.join(', ')}\n\t\t\t` : ''}${removedRoleNames.length !== 0 ? `**Removed: **${removedRoleNames.join(', ')}` : ''}`,
 			ephemeral: true
 		});
 	}
@@ -166,31 +170,31 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 	await Promise.all(awaitedCmds);
 
-	let permsUpdated = 0;
-	console.log('Checking for updated permissions...');
-	await Promise.all(commands.cache.map(async command => {
-		let curPerms: ApplicationCommandPermissionData[];
-		try {
-			curPerms = await command.permissions.fetch({ command: command.id });
-		} catch (err) {
-			curPerms = [];
-		}
+	// let permsUpdated = 0;
+	// console.log('Checking for updated permissions...');
+	// await Promise.all(commands.cache.map(async command => {
+	// 	let curPerms: ApplicationCommandPermissionData[];
+	// 	try {
+	// 		curPerms = await command.permissions.fetch({ command: command.id });
+	// 	} catch (err) {
+	// 		curPerms = [];
+	// 	}
 
-		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
-		if (botCmd
-			&& (botCmd.permissions.length !== curPerms.length
-				|| !botCmd.permissions.every(perm =>
-					curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
-			console.log(`Updating permissions for ${botCmd.name}`);
-			permsUpdated++;
-			return commands.permissions.set({
-				command: command.id,
-				permissions: botCmd.permissions
-			});
-		}
-	}));
-
-	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited) and ${permsUpdated} permission${permsUpdated === 1 ? '' : 's'} updated.`);
+	// 	const botCmd = bot.commands.find(cmd => cmd.name === command.name);
+	// 	if (botCmd
+	// 		&& (botCmd.permissions.length !== curPerms.length
+	// 			|| !botCmd.permissions.every(perm =>
+	// 				curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
+	// 		console.log(`Updating permissions for ${botCmd.name}`);
+	// 		permsUpdated++;
+	// 		return commands.permissions.set({
+	// 			command: command.id,
+	// 			permissions: botCmd.permissions
+	// 		});
+	// 	}
+	// }));
+	// console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited) and ${permsUpdated} permission${permsUpdated === 1 ? '' : 's'} updated.`);
+	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited)`);
 }
 
 async function runCommand(interaction: CommandInteraction, bot: Client): Promise<unknown> {
