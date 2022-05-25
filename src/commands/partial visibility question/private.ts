@@ -59,7 +59,7 @@ export default class extends Command {
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({
-				name: `${interaction.user.username}‘s private question (${questionId})'`,
+				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked a private question`,
 				type: `GUILD_PRIVATE_THREAD`
@@ -69,7 +69,7 @@ export default class extends Command {
 		}
 
 		privThread.guild.members.fetch();
-		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(ROLES.STUDENT_ADMIN) || mem.roles.cache.has(course.roles.staff)
+		privThread.guild.members.cache.filter(mem => mem.roles.cache.has(course.roles.staff)
 		).forEach(staff => {
 			privThread.members.add(staff);
 		});
