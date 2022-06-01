@@ -9,6 +9,10 @@ Some features of sage include:
 - 🐱‍👤 Private and anonymous questions
 - 🔥 and many more!
 
-Sage was originally created by Ben Segal, Josh Lyon, and Ren Ross, and currently is maintained by:
+Sage was originally created by: 
+| <div style="float: left; text-align: center; padding: 10px"><img src="https://avatars.githubusercontent.com/u/34194692?v=4" height="30px" style="border-radius: 15px"><br><a href="https://github.com/BenSegal855">Ben Segal</a> </div> | <div style="float: left; text-align: center; padding: 10px;"><img src="https://avatars.githubusercontent.com/u/54593801?v=4" height="30px" style="border-radius: 15px"><br><a href="https://github.com/joshualyon7">Josh Lyon</a> </div> |<div style="float: left; text-align: center; padding: 10px;"><img src="https://avatars.githubusercontent.com/u/60983762?s=460&u=46281912deec981f7c2160fe20ac9516bc59f3ff&v=4" height="30px" style="border-radius: 15px"><br><a href="https://github.com/renross">Ren Ross</a> </div>
+|-|-|-
+
+Sage is currently maintained by:
 | <div style="float: left; text-align: center; padding: 10px"><img src="https://avatars.githubusercontent.com/u/58154576?v=4" height="30px" style="border-radius: 15px"><br><a href="https://github.com/sbrugel">Simon Brugel</a> </div> | <div style="float: left; text-align: center; padding: 10px;"><img src="https://avatars.githubusercontent.com/u/60983762?s=460&u=46281912deec981f7c2160fe20ac9516bc59f3ff&v=4" height="30px" style="border-radius: 15px"><br><a href="https://github.com/renross">Ren Ross</a> </div> | <div style="float: left; text-align: center; padding: 10px;"><img src="https://avatars.githubusercontent.com/u/79226283?v=4" height="30px" style="border-radius: 15px"><br><a href="https://github.com/bladetyr">Blade Tyrrell</a> </div> 
 |-|-|-
