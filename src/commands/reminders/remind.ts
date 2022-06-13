@@ -47,7 +47,8 @@ export default class extends Command {
 		const reminder: Reminder = {
 			owner: interaction.user.id,
 			content,
-			mode: interaction.channel.type === 'DM' ? 'private' : 'public',
+			// mode: interaction.channel.type === 'DM' ? 'private' : 'public',
+			mode: 'public', // temporary
 			expires: new Date(duration + Date.now()),
 			repeat
 		};

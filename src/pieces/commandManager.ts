@@ -139,6 +139,8 @@ export async function loadCommands(bot: Client): Promise<void> {
 			awaitedCmds.push(commands.create(cmdData));
 			numNew++;
 			console.log(`${command.name} does not exist, creating...`);
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 		} else if (!isCmdEqual(cmdData, guildCmd)) {
 			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
 			numEdited++;
@@ -166,38 +168,35 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 	await Promise.all(awaitedCmds);
 
-	let permsUpdated = 0;
-	console.log('Checking for updated permissions...');
-	await Promise.all(commands.cache.map(async command => {
-		let curPerms: ApplicationCommandPermissionData[];
-		try {
-			curPerms = await command.permissions.fetch({ command: command.id });
-		} catch (err) {
-			curPerms = [];
-		}
+	// let permsUpdated = 0;
+	// console.log('Checking for updated permissions...');
+	// await Promise.all(commands.cache.map(async command => {
+	// 	let curPerms: ApplicationCommandPermissionData[];
+	// 	try {
+	// 		curPerms = await command.permissions.fetch({ command: command.id });
+	// 	} catch (err) {
+	// 		curPerms = [];
+	// 	}
 
-		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
-		if (botCmd
-			&& (botCmd.permissions.length !== curPerms.length
-				|| !botCmd.permissions.every(perm =>
-					curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
-			console.log(`Updating permissions for ${botCmd.name}`);
-			permsUpdated++;
-			return commands.permissions.set({
-				command: command.id,
-				permissions: botCmd.permissions
-			});
-		}
-	}));
+	// 	const botCmd = bot.commands.find(cmd => cmd.name === command.name);
+	// 	if (botCmd
+	// 		&& (botCmd.permissions.length !== curPerms.length
+	// 			|| !botCmd.permissions.every(perm =>
+	// 				curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
+	// 		console.log(`Updating permissions for ${botCmd.name}`);
+	// 		permsUpdated++;
+	// 		return commands.permissions.set({
+	// 			command: command.id,
+	// 			permissions: botCmd.permissions
+	// 		});
+	// 	}
+	// }));
 
-	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited) and ${permsUpdated} permission${permsUpdated === 1 ? '' : 's'} updated.`);
+	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
 async function runCommand(interaction: CommandInteraction, bot: Client): Promise<unknown> {
 	const command = bot.commands.get(interaction.commandName);
-	if (interaction.channel.type === 'DM' && command.runInDM === false) {
-		return interaction.reply('This command cannot be run in DMs');
-	}
 
 	if (interaction.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
 		return interaction.reply({

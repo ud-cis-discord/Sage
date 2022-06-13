@@ -75,6 +75,7 @@ async function main() {
 		if (command.options) {
 			newCatText += '\n- Parameters:\n';
 			newCatText += command.options.map(param =>
+				// @ts-ignore
 				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
 			).join('\n');
 		}

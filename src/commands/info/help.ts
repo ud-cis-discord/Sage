@@ -42,7 +42,12 @@ export default class extends Command {
 				fields.push({
 					name: 'Parameters',
 					value: command.options.map(param =>
-						`**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}`
+						`**${param.name}** (${() => {
+							if ('required' in param) {
+								return param.required ? 'required' : 'optional';
+							}
+							return 'required';
+						}}): ${param.description}`
 					).join('\n'),
 					inline: false
 				});
@@ -106,7 +111,7 @@ export default class extends Command {
 				interaction.user.send({ embeds: [embed] })
 					.then(() => {
 						if (!notified) {
-							if (interaction.channel.type !== 'DM') interaction.reply({ content: 'I\'ve sent all commands to your DMs.', ephemeral: true });
+							interaction.reply({ content: 'I\'ve sent all commands to your DMs.', ephemeral: true });
 							notified = true;
 						}
 					})

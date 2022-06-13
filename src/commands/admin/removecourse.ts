@@ -93,6 +93,7 @@ export default class extends Command {
 				studentRole.delete(reason);
 
 				// update and remove from database
+				// @ts-ignore
 				await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
 				await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
 

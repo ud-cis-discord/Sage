@@ -1,4 +1,4 @@
-import { ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ActivityOptions, ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -35,7 +35,7 @@ export default class extends Command {
 		const type = interaction.options.getString('status').toUpperCase() as ActivityType;
 
 		//	setting Sage's activity status in the guild
-		bot.user.setActivity(content, { type });
+		bot.user.setActivity(content, type as ActivityOptions);
 		//	updating Sage's activity status in the database (so that it stays upon a restart)
 		bot.mongo.collection(DB.CLIENT_DATA).updateOne(
 			{ _id: bot.user.id },

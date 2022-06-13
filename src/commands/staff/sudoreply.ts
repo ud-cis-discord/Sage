@@ -65,6 +65,8 @@ export default class extends Command {
 				name: `${interaction.user.username}‘s anonymous question (${question.questionId})'`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked an anonymous question`,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				type: `GUILD_PRIVATE_THREAD`
 			});
 		} else {

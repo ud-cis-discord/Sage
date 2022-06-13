@@ -55,14 +55,16 @@ export default class extends Command {
 		const bot = interaction.client;
 		const questionId = await generateQuestionId(interaction);
 
+		console.log(course.name);
+		console.log(course.channels.general);
+
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
-				reason: `${interaction.user.username} asked a private question`,
-				type: `GUILD_PRIVATE_THREAD`
+				reason: `${interaction.user.username} asked a private question`
 			});
 		} else {
 			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
