@@ -31,6 +31,12 @@ async function register(bot: Client): Promise<void> {
 	bot.on('interactionCreate', async interaction => {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
+		if (interaction.isModalSubmit()) {
+			const { customId, fields } = interaction;
+			if (customId === 'modal') {
+				// handling goes here...
+			}
+		}
 	});
 
 	bot.on('messageCreate', async msg => {
@@ -140,7 +146,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 			numNew++;
 			console.log(`${command.name} does not exist, creating...`);
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+			// @ts-ignore: guildCmd's typing wasn't properly infered, throws a gigantic error I'm not even going to *try* to understand.
 		} else if (!isCmdEqual(cmdData, guildCmd)) {
 			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
 			numEdited++;
@@ -167,6 +173,9 @@ export async function loadCommands(bot: Client): Promise<void> {
 	}
 
 	await Promise.all(awaitedCmds);
+
+	// TEMPORARILY DISABLED DUE TO DJS UPDATE
+	// bots cannot set their own perms as of djs v13.6
 
 	// let permsUpdated = 0;
 	// console.log('Checking for updated permissions...');
@@ -215,8 +224,6 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
 		}
-	} else {
-		return interaction.reply('We haven\'t switched that one over yet');
 	}
 }
 

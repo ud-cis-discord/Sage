@@ -85,9 +85,8 @@ async function main() {
 		const activity = status?.name || `${PREFIX}help`;
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		// eslint-disable-next-line quotes
-		const type: ExcludeEnum<typeof ActivityTypes, "CUSTOM"> = status?.type || 'PLAYING';
+		// @ts-ignore: type's typing not properly inferred
+		const type: ExcludeEnum<typeof ActivityTypes, 'CUSTOM'> = status?.type || 'PLAYING';
 		bot.user.setActivity(`${activity} (v${sageVersion})`, { type });
 		setTimeout(() => bot.user.setActivity(activity, { type }), 30e3);
 	});

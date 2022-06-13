@@ -55,16 +55,16 @@ export default class extends Command {
 		const bot = interaction.client;
 		const questionId = await generateQuestionId(interaction);
 
-		console.log(course.name);
-		console.log(course.channels.general);
-
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
-				reason: `${interaction.user.username} asked a private question`
+				reason: `${interaction.user.username} asked a private question`,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore: typescript throws a fit for some reason now, claims type is of type 'never'. Problem since djs v13.6
+				type: 'GUILD_PRIVATE_THREAD'
 			});
 		} else {
 			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;

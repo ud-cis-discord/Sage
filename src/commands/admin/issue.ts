@@ -41,11 +41,11 @@ export default class extends Command {
 			title: title,
 			labels: labels,
 			body: body || `\n\n<sub>Created by ${interaction.user.username} via ${BOT.NAME}</sub>`
-		}).catch((response: { status: any; }) => {
+		}).catch(response => {
 			console.log(response);
 			let errormsg = '';
 			const { errors } = response as RequestError;
-			errors.forEach((error: { code: any; field: any; }) => {
+			errors.forEach((error: { code; field; }) => {
 				errormsg += `Value ${error.code} for field ${error.field}.\n`;
 			});
 			interaction.reply({ content: `Issue creation failed. (HTTP Error ${response.status})

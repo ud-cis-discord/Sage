@@ -31,10 +31,9 @@ export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2:
 }
 
 function checkOptions(list1Option: ApplicationCommandOptionData, list2Option: ApplicationCommandOptionData): boolean {
-	if ('required' in list1Option && 'required' in list2Option) {
+	if ('required' in list1Option && 'required' in list2Option) { // see note 1 comment block in help.ts
 		return list2Option.required === list1Option.required;
 	}
-	console.log('outside of here');
 	return false;
 }
 
