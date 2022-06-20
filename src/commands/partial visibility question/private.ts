@@ -88,7 +88,7 @@ export default class extends Command {
 
 		embed.setDescription(question);
 		embed.setTitle(`${interaction.user.username}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
+		embed.setFooter({ text: `When you're done with this question, you can send \`/archive\` to close it` });
 		const questionMessage = await privThread.send({
 			embeds: [embed]
 		});

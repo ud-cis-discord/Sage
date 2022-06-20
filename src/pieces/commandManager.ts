@@ -1,5 +1,5 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, ApplicationCommandPermissionData, GuildMember, MessageSelectMenu, SelectMenuInteraction } from 'discord.js';
-import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils';
+import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, GuildMemberRoleManager } from 'discord.js';
+import { isCmdEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
@@ -215,6 +215,26 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 	}
 
 	if (bot.commands.get(interaction.commandName).run !== undefined) {
+		let success = false;
+		for (const user of command.permissions) {
+			if (user.id === interaction.user.id && user.type === 'USER') { // the user is able to use this command (most likely admin-only)
+				console.log('User can run this command! Breaking...');
+				success = true;
+				break;
+			}
+			if (user.type === 'ROLE') {
+				if ((interaction.member.roles as GuildMemberRoleManager).cache.find(role => role.id === user.id)) {
+					console.log('User has the required role! Breaking...');
+					success = true;
+					break;
+				}
+			}
+		}
+
+		const failMessages = ['HTTP 401: Unauthorized', `I'm sorry ${interaction.user.username}, I'm afraid I can't do that.`,
+			'Username is not in the sudoers file. This incident will be reported.', `I'm sorry ${interaction.user.username}, but you need sigma nine clearance for that.`];
+		if (!success) return interaction.reply(failMessages[Math.floor(Math.random() * failMessages.length)]);
+
 		try {
 			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => {
