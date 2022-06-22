@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData, MessageAttachment } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -21,16 +21,16 @@ export default class extends Command {
 		required: true
 	},
 	{
-		name: 'image',
-		description: 'The announcement image url',
-		type: 'STRING',
+		name: 'file',
+		description: 'A file to be posted with the announcement',
+		type: 'ATTACHMENT',
 		required: false
 	}]
 
 	async run(interaction: CommandInteraction): Promise<void> {
 		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
 		const channelOption = interaction.options.getChannel('channel');
-		const image = interaction.options.getString('image');
+		const file = interaction.options.getAttachment('file');
 		let content = interaction.options.getString('content');
 
 		const tempMessage = content.split(`\\n`);
@@ -39,13 +39,9 @@ export default class extends Command {
 		const channel = (channelOption || announceChannel) as TextChannel;
 		await channel.send({
 			content: content,
+			files: [file.url],
 			allowedMentions: { parse: ['everyone', 'roles'] }
 		});
-		if (image) {
-			await channel.send({
-				content: image
-			});
-		}
 
 		return interaction.reply(`Your announcement has been sent in ${channel}`);
 	}
