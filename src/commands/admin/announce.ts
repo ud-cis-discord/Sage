@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData, MessageAttachment } from 'discord.js';
+import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData, Modal, TextInputComponent, MessageActionRow, ModalActionRowComponent } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -10,14 +10,8 @@ export default class extends Command {
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'channel',
-		description: 'The channel to send the announcement in.',
+		description: 'The channel to send the announcement in',
 		type: 'CHANNEL',
-		required: true
-	},
-	{
-		name: 'content',
-		description: `The announcement content. Adding in \n will add in a line break.`,
-		type: 'STRING',
 		required: true
 	},
 	{
@@ -31,19 +25,41 @@ export default class extends Command {
 		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
 		const channelOption = interaction.options.getChannel('channel');
 		const file = interaction.options.getAttachment('file');
-		let content = interaction.options.getString('content');
-
-		const tempMessage = content.split(`\\n`);
-		content = tempMessage.join(`\n`);
 
 		const channel = (channelOption || announceChannel) as TextChannel;
-		await channel.send({
-			content: content,
-			files: [file.url],
-			allowedMentions: { parse: ['everyone', 'roles'] }
-		});
 
-		return interaction.reply(`Your announcement has been sent in ${channel}`);
+		const modal = new Modal()
+			.setTitle('Announce')
+			.setCustomId('announce');
+
+		const contentsComponent = new TextInputComponent()
+			.setCustomId('content')
+			.setLabel('Content to send with this announcement')
+			.setStyle('PARAGRAPH')
+			.setRequired(true);
+
+		const channelComponent = new TextInputComponent()
+			.setCustomId('channel')
+			.setLabel('ID of receiving channel (auto-filled)')
+			.setStyle('SHORT')
+			.setRequired(true)
+			.setValue(channel.id);
+
+		const fileComponent = new TextInputComponent()
+			.setCustomId('file')
+			.setLabel('URL to attached file (auto-filled)')
+			.setStyle('SHORT')
+			.setRequired(false)
+			.setValue(file ? file.url : '');
+
+		const modalRows: MessageActionRow<ModalActionRowComponent>[] = [
+			new MessageActionRow<ModalActionRowComponent>().addComponents(contentsComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(channelComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(fileComponent)
+		];
+		modal.addComponents(...modalRows);
+
+		await interaction.showModal(modal);
 	}
 
 }

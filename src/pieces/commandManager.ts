@@ -1,4 +1,5 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, GuildMemberRoleManager } from 'discord.js';
+import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, GuildMemberRoleManager,
+	TextChannel, ModalSubmitInteraction } from 'discord.js';
 import { isCmdEqual, readdirRecursive } from '@lib/utils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -31,12 +32,7 @@ async function register(bot: Client): Promise<void> {
 	bot.on('interactionCreate', async interaction => {
 		if (interaction.isCommand()) runCommand(interaction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
-		if (interaction.isModalSubmit()) {
-			const { customId, fields } = interaction;
-			if (customId === 'modal') {
-				// handling goes here...
-			}
-		}
+		if (interaction.isModalSubmit()) handleModal(interaction, bot);
 	});
 
 	bot.on('messageCreate', async msg => {
@@ -94,6 +90,32 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 			content: `${responseContent}`,
 			ephemeral: true
 		});
+	}
+}
+
+async function handleModal(interaction: ModalSubmitInteraction, bot: Client) {
+	const { customId, fields } = interaction;
+	switch (customId) {
+		case 'announce': {
+			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
+			const content = fields.getTextInputValue('content');
+			const file = fields.getTextInputValue('file');
+			await channel.send({
+				content: content,
+				files: file !== '' ? [file] : null,
+				allowedMentions: { parse: ['everyone', 'roles'] }
+			});
+			interaction.reply({ content: `Your announcement was posted in ${channel}.` });
+			break;
+		}
+		case 'edit': {
+			const content = fields.getTextInputValue('content');
+			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
+			const message = await channel.messages.fetch(fields.getTextInputValue('message'));
+			await message.edit(content);
+			interaction.reply({ content: `Your message was edited.` });
+			break;
+		}
 	}
 }
 
