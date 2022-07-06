@@ -240,13 +240,13 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		let success = false;
 		for (const user of command.permissions) {
 			if (user.id === interaction.user.id && user.type === 'USER') { // the user is able to use this command (most likely admin-only)
-				console.log('User can run this command! Breaking...');
 				success = true;
 				break;
 			}
 			if (user.type === 'ROLE') {
+				// says these parens are unneeded, but removing them breaks this line, so
+				// eslint-disable-next-line no-extra-parens
 				if ((interaction.member.roles as GuildMemberRoleManager).cache.find(role => role.id === user.id)) {
-					console.log('User has the required role! Breaking...');
 					success = true;
 					break;
 				}
