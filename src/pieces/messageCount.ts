@@ -1,6 +1,6 @@
-import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
+import { Client, TextChannel, Role, Message, MessageEmbed, ThreadChannel } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
-import { CHANNELS, PREFIX, DB, ROLES, GUILDS } from '@root/config';
+import { CHANNELS, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 const xpRatio = 1.25;
@@ -10,7 +10,8 @@ const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
 const countedChannelTypes = [
 	'GUILD_TEXT',
-	'GUILD_PUBLIC_THREAD'
+	'GUILD_PUBLIC_THREAD',
+	'GUILD_PRIVATE_THREAD'
 ];
 
 async function register(bot: Client): Promise<void> {
@@ -25,16 +26,19 @@ async function countMessages(msg: Message): Promise<void> {
 	if (
 		!countedChannelTypes.includes(msg.channel.type)
 		|| msg.guild?.id !== GUILDS.MAIN
-		|| msg.content.toLowerCase().startsWith(PREFIX)
 		|| msg.author.bot
 	) {
+		console.log('invalid channel');
 		return;
 	}
 
-	const channel = msg.channel as TextChannel;
+	const { channel } = msg;
 
 	let countInc = 0;
-	if (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]'))) {
+	const validChannel = (channel instanceof TextChannel) && (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]')));
+	const validThread = (channel instanceof ThreadChannel) && channel.name.includes('private');
+	if (validChannel || validThread) {
+		console.log('valid message');
 		countInc++;
 	}
 
