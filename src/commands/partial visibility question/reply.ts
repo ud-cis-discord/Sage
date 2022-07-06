@@ -23,7 +23,7 @@ export default class extends Command {
 		},
 		{
 			name: 'file',
-			description: 'A file to beposted with the reply',
+			description: 'A file to be posted with the reply',
 			type: 'ATTACHMENT',
 			required: false
 		}

@@ -15,7 +15,7 @@ export default class extends Command {
 		},
 		{
 			name: 'file',
-			description: 'A file to be posted with thefeedback',
+			description: 'A file to be posted with the feedback',
 			type: 'ATTACHMENT',
 			required: false
 		}
