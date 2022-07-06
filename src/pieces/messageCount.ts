@@ -28,7 +28,6 @@ async function countMessages(msg: Message): Promise<void> {
 		|| msg.guild?.id !== GUILDS.MAIN
 		|| msg.author.bot
 	) {
-		console.log('invalid channel');
 		return;
 	}
 
@@ -38,7 +37,6 @@ async function countMessages(msg: Message): Promise<void> {
 	const validChannel = (channel instanceof TextChannel) && (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]')));
 	const validThread = (channel instanceof ThreadChannel) && channel.name.includes('private');
 	if (validChannel || validThread) {
-		console.log('valid message');
 		countInc++;
 	}
 
