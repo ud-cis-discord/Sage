@@ -30,7 +30,7 @@ async function register(bot: Client): Promise<void> {
 	});
 
 	bot.on('interactionCreate', async interaction => {
-		if (interaction.isCommand()) runCommand(interaction, bot);
+		if (interaction.isCommand() || interaction.isContextMenu()) runCommand(interaction as CommandInteraction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
 		if (interaction.isModalSubmit()) handleModal(interaction, bot);
 	});
@@ -148,7 +148,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 		command.name = name;
 
-		if (!command.description || command.description.length >= 100 || command.description.length <= 0) {
+		if ((!command.description || command.description.length >= 100 || command.description.length) <= 0 && (command.type === 'CHAT_INPUT')) {
 			throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
 		}
 
@@ -160,6 +160,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 			name: command.name,
 			description: command.description,
 			options: command?.options || [],
+			type: command.type || 'CHAT_INPUT',
 			defaultPermission: false
 		};
 

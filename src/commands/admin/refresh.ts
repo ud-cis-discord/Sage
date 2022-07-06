@@ -31,7 +31,7 @@ export default class extends Command {
 
 			command.name = name;
 
-			if (!command.description || command.description.length >= 100 || command.description.length <= 0) {
+			if ((!command.description || command.description.length >= 100 || command.description.length) <= 0 && (command.type === 'CHAT_INPUT')) {
 				throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
 			}
 

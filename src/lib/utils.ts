@@ -21,6 +21,7 @@ export function isCmdEqual(cmd1: CompCommand, cmd2: CompCommand): boolean {
 }
 
 export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2: ApplicationCommandOptionData[]): boolean {
+	if (list1.length !== list2.length) return false;
 	const valid = list1.every(list1Option => list2.find(list2Option =>
 		list2Option.name === list1Option.name
 			&& list2Option.description === list1Option.description
