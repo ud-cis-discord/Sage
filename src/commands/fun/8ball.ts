@@ -47,7 +47,7 @@ export default class extends Command {
 			.setColor('#000000')
 			.setTitle('The magic 8-ball says...')
 			.setDescription(response)
-			.setFooter(`${interaction.user.username} asked: ${question}`);
+			.setFooter({ text: `${interaction.user.username} asked: ${question}` });
 		return interaction.reply({ embeds: [responseEmbed], files: [{ attachment: `${__dirname}../../../../../assets/images/8-ball.png`, name: '8-ball.png' }] });
 	}
 

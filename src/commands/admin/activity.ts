@@ -1,4 +1,4 @@
-import { ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ActivityOptions, ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -34,7 +34,9 @@ export default class extends Command {
 		const content = interaction.options.getString('content');
 		const type = interaction.options.getString('status').toUpperCase() as ActivityType;
 
-		//	setting Sage's activity status in the guild
+		// setting Sage's activity status in the guild
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore - idk why TypeScript is complaining about this when it's literally the correct type
 		bot.user.setActivity(content, { type });
 		//	updating Sage's activity status in the database (so that it stays upon a restart)
 		bot.mongo.collection(DB.CLIENT_DATA).updateOne(

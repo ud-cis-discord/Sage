@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageActionRow, Modal, ModalActionRowComponent, TextChannel, TextInputComponent } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -11,20 +11,13 @@ export default class extends Command {
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'msg_link',
-		description: 'A message link.',
-		type: 'STRING',
-		required: true
-	},
-	{
-		name: 'msg_content',
-		description: 'The updated message content. Adding in \n will add in a line break.',
+		description: 'A message link',
 		type: 'STRING',
 		required: true
 	}]
 
 	async run(interaction: CommandInteraction): Promise<void> {
 		const link = interaction.options.getString('msg_link');
-		let content = interaction.options.getString('msg_content');
 
 		//	for discord canary users, links are different
 		const newLink = link.replace('canary.', '');
@@ -44,11 +37,38 @@ export default class extends Command {
 					ephemeral: true });
 		}
 
-		const tempMessage = content.split(`\\n`);
-		content = tempMessage.join(`\n`);
+		const modal = new Modal()
+			.setTitle('Edit')
+			.setCustomId('edit');
 
-		await message.edit(content);
-		return interaction.reply('I\'ve updated that message.');
+		const contentsComponent = new TextInputComponent()
+			.setCustomId('content')
+			.setLabel('New message content')
+			.setStyle('PARAGRAPH')
+			.setRequired(true);
+
+		const messageComponent = new TextInputComponent()
+			.setCustomId('message')
+			.setLabel('ID of message to be edited (auto-filled)')
+			.setStyle('SHORT')
+			.setRequired(true)
+			.setValue(message.id);
+
+		const channelComponent = new TextInputComponent()
+			.setCustomId('channel')
+			.setLabel('The channel this message is in (auto-filled)')
+			.setStyle('SHORT')
+			.setRequired(true)
+			.setValue(message.channelId);
+
+		const modalRows: MessageActionRow<ModalActionRowComponent>[] = [
+			new MessageActionRow<ModalActionRowComponent>().addComponents(contentsComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(messageComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(channelComponent)
+		];
+		modal.addComponents(...modalRows);
+
+		await interaction.showModal(modal);
 	}
 
 }

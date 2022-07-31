@@ -62,7 +62,9 @@ export default class extends Command {
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked a private question`,
-				type: `GUILD_PRIVATE_THREAD`
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore: typescript throws a fit for some reason now, claims type is of type 'never'. Problem since djs v13.6
+				type: 'GUILD_PRIVATE_THREAD'
 			});
 		} else {
 			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
@@ -86,7 +88,7 @@ export default class extends Command {
 
 		embed.setDescription(question);
 		embed.setTitle(`${interaction.user.username}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
+		embed.setFooter({ text: `When you're done with this question, you can send \`/archive\` to close it` });
 		const questionMessage = await privThread.send({
 			embeds: [embed]
 		});

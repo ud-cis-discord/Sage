@@ -75,6 +75,8 @@ async function main() {
 		if (command.options) {
 			newCatText += '\n- Parameters:\n';
 			newCatText += command.options.map(param =>
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore: see Note 1 comment block in help.ts
 				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
 			).join('\n');
 		}

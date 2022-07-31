@@ -23,7 +23,7 @@ async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> 
 		.setTitle(`${user.tag} was banned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
-		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}`)
+		.setFooter({ text: `Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}` })
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
 }
@@ -50,7 +50,7 @@ async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<voi
 		.setTitle(`${user.tag} was unbanned.`)
 		.addFields(fields)
 		.setColor('GREYPLE')
-		.setFooter(`Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}`)
+		.setFooter({ text: `Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}` })
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
 }
@@ -79,7 +79,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 			.setTitle(`${member.user.tag} ${muted} by ${logEntry.executor.tag}`)
 			.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 			.setColor('DARK_RED')
-			.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
+			.setFooter({ text: `TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}` })
 			.setTimestamp();
 		modLog.send({ embeds: [embed] });
 	}
@@ -100,7 +100,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
 		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 		.setColor('YELLOW')
-		.setFooter(`TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}`)
+		.setFooter({ text: `TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}` })
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
 }
