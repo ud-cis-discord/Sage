@@ -197,33 +197,6 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 	await Promise.all(awaitedCmds);
 
-	// TEMPORARILY DISABLED DUE TO DJS UPDATE
-	// bots cannot set their own perms as of djs v13.6
-
-	// let permsUpdated = 0;
-	// console.log('Checking for updated permissions...');
-	// await Promise.all(commands.cache.map(async command => {
-	// 	let curPerms: ApplicationCommandPermissionData[];
-	// 	try {
-	// 		curPerms = await command.permissions.fetch({ command: command.id });
-	// 	} catch (err) {
-	// 		curPerms = [];
-	// 	}
-
-	// 	const botCmd = bot.commands.find(cmd => cmd.name === command.name);
-	// 	if (botCmd
-	// 		&& (botCmd.permissions.length !== curPerms.length
-	// 			|| !botCmd.permissions.every(perm =>
-	// 				curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
-	// 		console.log(`Updating permissions for ${botCmd.name}`);
-	// 		permsUpdated++;
-	// 		return commands.permissions.set({
-	// 			command: command.id,
-	// 			permissions: botCmd.permissions
-	// 		});
-	// 	}
-	// }));
-
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
