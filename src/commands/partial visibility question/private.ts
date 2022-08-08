@@ -58,6 +58,8 @@ export default class extends Command {
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
