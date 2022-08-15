@@ -2,7 +2,7 @@ import { Client, TextChannel, Role, Message, MessageEmbed, PartialMessage, Threa
 import { DatabaseError } from '@lib/types/errors';
 import { CHANNELS, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
-import { calcNeededExp } from '@lib/utils';
+import { calcNeededExp } from '@lib/utils/generalUtils';
 
 const startingColor = 80;
 const greenIncrement = 8;
