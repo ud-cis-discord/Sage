@@ -5,7 +5,7 @@ import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, EMAIL } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { getMsgIdFromLink } from '@lib/utils/generalUtils';
+import { getMsgIdFromLink } from '@root/src/lib/utils/generalUtils';
 
 export default class extends Command {
 
@@ -39,7 +39,7 @@ export default class extends Command {
 				const staffChannel = interaction.guild.channels.cache.get(course.channels.staff) as TextChannel;
 				const embed = new MessageEmbed()
 					.setTitle(`${interaction.user.tag} Warned ${target.author.tag}`)
-					.setFooter(`${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}`)
+					.setFooter({ text: `${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}` })
 					.addFields([{
 						name: 'Reason',
 						value: reason

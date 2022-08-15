@@ -2,7 +2,7 @@ import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
-import { reminderTime } from '@lib/utils/generalUtils';
+import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -47,7 +47,7 @@ export default class extends Command {
 		const reminder: Reminder = {
 			owner: interaction.user.id,
 			content,
-			mode: interaction.channel.type === 'DM' ? 'private' : 'public',
+			mode: 'public', // temporary
 			expires: new Date(duration + Date.now()),
 			repeat
 		};

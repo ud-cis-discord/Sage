@@ -3,7 +3,7 @@ import { ApplicationCommandOptionData, ButtonInteraction, Client,
 	CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
-import { dateToTimestamp, generateErrorEmbed } from '@lib/utils/generalUtils';
+import { dateToTimestamp, generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 import { Poll, PollResult } from '@lib/types/Poll';
 import { SageInteractionType } from '@root/src/lib/types/InteractionType';
 
@@ -95,7 +95,7 @@ export default class extends Command {
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
-			.setFooter(pollFooter)
+			.setFooter({ text: pollFooter })
 			.setColor('RANDOM');
 
 		const choiceBtns = []; // first 5 choices

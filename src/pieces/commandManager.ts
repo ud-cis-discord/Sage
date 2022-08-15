@@ -1,5 +1,6 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, ApplicationCommandPermissionData, GuildMember, MessageSelectMenu, SelectMenuInteraction } from 'discord.js';
-import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@lib/utils/generalUtils';
+import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, ModalSubmitInteraction, TextChannel,
+	GuildMemberRoleManager } from 'discord.js';
+import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
@@ -29,8 +30,9 @@ async function register(bot: Client): Promise<void> {
 	});
 
 	bot.on('interactionCreate', async interaction => {
-		if (interaction.isCommand()) runCommand(interaction, bot);
+		if (interaction.isCommand() || interaction.isContextMenu()) runCommand(interaction as CommandInteraction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
+		if (interaction.isModalSubmit()) handleModal(interaction, bot);
 	});
 
 	bot.on('messageCreate', async msg => {
@@ -91,7 +93,33 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 	}
 }
 
-async function loadCommands(bot: Client) {
+async function handleModal(interaction: ModalSubmitInteraction, bot: Client) {
+	const { customId, fields } = interaction;
+	switch (customId) {
+		case 'announce': {
+			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
+			const content = fields.getTextInputValue('content');
+			const file = fields.getTextInputValue('file');
+			await channel.send({
+				content: content,
+				files: file !== '' ? [file] : null,
+				allowedMentions: { parse: ['everyone', 'roles'] }
+			});
+			interaction.reply({ content: `Your announcement was posted in ${channel}.` });
+			break;
+		}
+		case 'edit': {
+			const content = fields.getTextInputValue('content');
+			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
+			const message = await channel.messages.fetch(fields.getTextInputValue('message'));
+			await message.edit(content);
+			interaction.reply({ content: `Your message was edited.` });
+			break;
+		}
+	}
+}
+
+export async function loadCommands(bot: Client): Promise<void> {
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
 	const oldCommandSettings = sageData?.commandSettings || [];
@@ -120,7 +148,7 @@ async function loadCommands(bot: Client) {
 
 		command.name = name;
 
-		if (!command.description || command.description.length >= 100 || command.description.length <= 0) {
+		if ((!command.description || command.description.length >= 100 || command.description.length) <= 0 && (command.type === 'CHAT_INPUT')) {
 			throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
 		}
 
@@ -132,6 +160,7 @@ async function loadCommands(bot: Client) {
 			name: command.name,
 			description: command.description,
 			options: command?.options || [],
+			type: command.type || 'CHAT_INPUT',
 			defaultPermission: false
 		};
 
@@ -139,6 +168,8 @@ async function loadCommands(bot: Client) {
 			awaitedCmds.push(commands.create(cmdData));
 			numNew++;
 			console.log(`${command.name} does not exist, creating...`);
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore: guildCmd's typing wasn't properly infered, throws a gigantic error I'm not even going to *try* to understand.
 		} else if (!isCmdEqual(cmdData, guildCmd)) {
 			awaitedCmds.push(commands.edit(guildCmd.id, cmdData));
 			numEdited++;
@@ -166,38 +197,11 @@ async function loadCommands(bot: Client) {
 
 	await Promise.all(awaitedCmds);
 
-	let permsUpdated = 0;
-	console.log('Checking for updated permissions...');
-	await Promise.all(commands.cache.map(async command => {
-		let curPerms: ApplicationCommandPermissionData[];
-		try {
-			curPerms = await command.permissions.fetch({ command: command.id });
-		} catch (err) {
-			curPerms = [];
-		}
-
-		const botCmd = bot.commands.find(cmd => cmd.name === command.name);
-		if (botCmd
-			&& (botCmd.permissions.length !== curPerms.length
-				|| !botCmd.permissions.every(perm =>
-					curPerms.find(curPerm => isPermissionEqual(curPerm, perm))))) {
-			console.log(`Updating permissions for ${botCmd.name}`);
-			permsUpdated++;
-			return commands.permissions.set({
-				command: command.id,
-				permissions: botCmd.permissions
-			});
-		}
-	}));
-
-	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited) and ${permsUpdated} permission${permsUpdated === 1 ? '' : 's'} updated.`);
+	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
 async function runCommand(interaction: CommandInteraction, bot: Client): Promise<unknown> {
 	const command = bot.commands.get(interaction.commandName);
-	if (interaction.channel.type === 'DM' && command.runInDM === false) {
-		return interaction.reply('This command cannot be run in DMs');
-	}
 
 	if (interaction.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
 		return interaction.reply({
@@ -207,6 +211,26 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 	}
 
 	if (bot.commands.get(interaction.commandName).run !== undefined) {
+		let success = false;
+		for (const user of command.permissions) {
+			if (user.id === interaction.user.id && user.type === 'USER') { // the user is able to use this command (most likely admin-only)
+				success = true;
+				break;
+			}
+			if (user.type === 'ROLE') {
+				// says these parens are unneeded, but removing them breaks this line, so
+				// eslint-disable-next-line no-extra-parens
+				if ((interaction.member.roles as GuildMemberRoleManager).cache.find(role => role.id === user.id)) {
+					success = true;
+					break;
+				}
+			}
+		}
+
+		const failMessages = ['HTTP 401: Unauthorized', `I'm sorry ${interaction.user.username}, I'm afraid I can't do that.`,
+			'Username is not in the sudoers file. This incident will be reported.', `I'm sorry ${interaction.user.username}, but you need sigma nine clearance for that.`];
+		if (!success) return interaction.reply(failMessages[Math.floor(Math.random() * failMessages.length)]);
+
 		try {
 			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => {
@@ -216,8 +240,6 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
 		}
-	} else {
-		return interaction.reply('We haven\'t switched that one over yet');
 	}
 }
 

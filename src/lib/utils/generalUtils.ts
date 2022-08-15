@@ -21,13 +21,21 @@ export function isCmdEqual(cmd1: CompCommand, cmd2: CompCommand): boolean {
 }
 
 export function isOptionsListEqual(list1: ApplicationCommandOptionData[], list2: ApplicationCommandOptionData[]): boolean {
+	if (list1.length !== list2.length) return false;
 	const valid = list1.every(list1Option => list2.find(list2Option =>
 		list2Option.name === list1Option.name
 			&& list2Option.description === list1Option.description
-			&& list2Option.required === list1Option.required
+			&& checkOptions(list1Option, list2Option)
 			&& list2Option.type === list1Option.type
 	));
 	return valid;
+}
+
+function checkOptions(list1Option: ApplicationCommandOptionData, list2Option: ApplicationCommandOptionData): boolean {
+	if ('required' in list1Option && 'required' in list2Option) { // see note 1 comment block in help.ts
+		return list2Option.required === list1Option.required;
+	}
+	return false;
 }
 
 export function isPermissionEqual(perm1: ApplicationCommandPermissionData, perm2: ApplicationCommandPermissionData): boolean {

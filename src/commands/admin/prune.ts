@@ -21,7 +21,7 @@ export default class extends Command {
 		const confirmEmbed = new MessageEmbed()
 			.setTitle(`Server prune will kick ${toKick.size} members from the guild. Proceed?`)
 			.setColor('RED')
-			.setFooter(`This command will expire in ${PRUNE_TIMEOUT}s`);
+			.setFooter({ text: `This command will expire in ${PRUNE_TIMEOUT}s` });
 
 		const confirmBtns = [
 			new MessageButton({ label: 'Cancel', customId: 'cancel', style: 'SECONDARY' }),
@@ -84,7 +84,7 @@ export default class extends Command {
 				confirmBtns.forEach(btn => btn.setDisabled(true));
 				confirmEmbed.setColor('BLUE').setDescription('Prune timed out.');
 			}
-			confirmEmbed.setFooter('');
+			confirmEmbed.setFooter({ text: '' });
 			confirmMsg.edit({ embeds: [confirmEmbed], components: [new MessageActionRow({ components: confirmBtns })] });
 
 			collected.forEach(interactionX => {
@@ -96,7 +96,7 @@ export default class extends Command {
 	}
 
 	countdown(msg: Message, timeout: number, confirmBtns: MessageButton[], confirmEmbed: MessageEmbed): void {
-		confirmEmbed.setFooter(`This command will expire in ${timeout}s`);
+		confirmEmbed.setFooter({ text: `This command will expire in ${timeout}s` });
 		msg.edit({ embeds: [confirmEmbed], components: [new MessageActionRow({ components: confirmBtns })] });
 	}
 

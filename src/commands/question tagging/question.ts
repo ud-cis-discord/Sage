@@ -4,7 +4,7 @@ import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@lib/utils/generalUtils';
+import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
 export default class extends Command {
 

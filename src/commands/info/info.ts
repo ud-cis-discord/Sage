@@ -20,7 +20,7 @@ export default class extends Command {
 	 
 	Please let any of us know if you have any issues! We try to fix bugs as soon as possible and are still adding new features.
 	
-	If you're interested in how ${BOT.NAME} works, you can check the code out at <https://github.com/ud-cis-discord/SageV2>.`;
+	If you're interested in how ${BOT.NAME} works, you can check the code out at <https://github.com/ud-cis-discord/Sage>.`;
 		return interaction.reply(info);
 	}
 

@@ -3,7 +3,7 @@ import { AssignableRole } from '@lib/types/AssignableRole';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { modifyRoleDD } from '@lib/utils/generalUtils';
+import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
 
 export default class extends Command {
 

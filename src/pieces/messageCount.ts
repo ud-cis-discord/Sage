@@ -1,6 +1,6 @@
-import { Client, TextChannel, Role, Message, MessageEmbed } from 'discord.js';
+import { Client, TextChannel, Role, Message, MessageEmbed, ThreadChannel } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
-import { CHANNELS, PREFIX, DB, ROLES, GUILDS } from '@root/config';
+import { CHANNELS, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
 
 const xpRatio = 1.25;
@@ -10,7 +10,8 @@ const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
 const countedChannelTypes = [
 	'GUILD_TEXT',
-	'GUILD_PUBLIC_THREAD'
+	'GUILD_PUBLIC_THREAD',
+	'GUILD_PRIVATE_THREAD'
 ];
 
 async function register(bot: Client): Promise<void> {
@@ -25,16 +26,17 @@ async function countMessages(msg: Message): Promise<void> {
 	if (
 		!countedChannelTypes.includes(msg.channel.type)
 		|| msg.guild?.id !== GUILDS.MAIN
-		|| msg.content.toLowerCase().startsWith(PREFIX)
 		|| msg.author.bot
 	) {
 		return;
 	}
 
-	const channel = msg.channel as TextChannel;
+	const { channel } = msg;
 
 	let countInc = 0;
-	if (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]'))) {
+	const validChannel = (channel instanceof TextChannel) && (!channel.topic || (channel.topic && !channel.topic.startsWith('[no message count]')));
+	const validThread = (channel instanceof ThreadChannel) && channel.name.includes('private');
+	if (validChannel || validThread) {
 		countInc++;
 	}
 
@@ -112,7 +114,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setDescription(embedText)
 		.addField('XP to next level:', user.levelExp.toString(), true)
 		.setColor(createLevelRgb(user.level))
-		.setFooter('You can turn the messages off by using the `/togglelevelpings` command')
+		.setFooter({ text: 'You can turn the messages off by using the `/togglelevelpings` command' })
 		.setTimestamp();
 
 	// eslint-disable-next-line no-extra-parens

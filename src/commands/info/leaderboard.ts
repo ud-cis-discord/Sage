@@ -97,7 +97,7 @@ export default class extends Command {
 
 		const embed = new MessageEmbed()
 			.setTitle('UD CIS Discord Leaderboard')
-			.setFooter(`Showing page ${page} (${start + 1} - ${end || users.length})`)
+			.setFooter({ text: `Showing page ${page} (${start + 1} - ${end || users.length})` })
 			.setColor(interaction.guild.members.cache.get(displUsers[0].discordId).displayHexColor)
 			.setDescription(content)
 			.setImage('attachment://leaderboard.png');

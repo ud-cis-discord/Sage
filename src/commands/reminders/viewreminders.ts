@@ -1,7 +1,7 @@
 import { DB } from '@root/config';
 import { Reminder } from '@lib/types/Reminder';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { reminderTime } from '@lib/utils/generalUtils';
+import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -26,7 +26,7 @@ export default class extends Command {
 					.setTitle('Pending reminders')
 					.setColor('DARK_AQUA'));
 			}
-			const hidden = reminder.mode === 'private' && interaction.channel.type !== 'DM';
+			const hidden = reminder.mode === 'private';
 			embeds[Math.floor(i / 25)].addField(
 				`${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
 				hidden ? 'Some time in the future.' : reminderTime(reminder));

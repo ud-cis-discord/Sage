@@ -86,7 +86,6 @@ export async function handleRpsOptionSelect(i: ButtonInteraction): Promise<void>
 	const interactionData = getDataFromCustomId(i.customId);
 	const choice = interactionData.additionalData[0];
 	const timer = interactionData.additionalData[1];
-
 	if (i.user.id !== interactionData.commandOwner) {
 		await i.reply({
 			content: 'You cannot respond to a command you did not execute',

@@ -1,5 +1,5 @@
 import 'module-alias/register';
-import { readdirRecursive } from '@lib/utils/generalUtils';
+import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import fs from 'fs';
 
@@ -75,6 +75,8 @@ async function main() {
 		if (command.options) {
 			newCatText += '\n- Parameters:\n';
 			newCatText += command.options.map(param =>
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore: see Note 1 comment block in help.ts
 				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
 			).join('\n');
 		}

@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@lib/utils/generalUtils';
+import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
 const DEFAULT_RANGE = [1, 6];
 const DEFAULT_ROLLS = 1;
@@ -88,7 +88,7 @@ export default class extends Command {
 			.setColor(Math.floor(Math.random() * 16777215))
 			.setTitle('Random Integer Generator')
 			.setFields(embedFields)
-			.setFooter(`${interaction.user.username} rolled ${numRolls} dice ranging from ${min} to ${max}`);
+			.setFooter({ text: `${interaction.user.username} rolled ${numRolls} dice ranging from ${min} to ${max}` });
 		return interaction.reply({ embeds: [responseEmbed] });
 	}
 

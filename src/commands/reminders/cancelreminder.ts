@@ -34,7 +34,7 @@ export default class extends Command {
 
 		interaction.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
 
-		const hidden = reminder.mode === 'private' && interaction.channel.type !== 'DM';
+		const hidden = reminder.mode === 'private';
 		return interaction.reply({
 			content: `Canceled reminder: **${reminder.content}**`,
 			ephemeral: hidden
