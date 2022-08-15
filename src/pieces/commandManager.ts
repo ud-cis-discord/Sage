@@ -1,6 +1,6 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, GuildMemberRoleManager,
-	TextChannel, ModalSubmitInteraction } from 'discord.js';
-import { isCmdEqual, readdirRecursive } from '@lib/utils';
+import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, ModalSubmitInteraction, TextChannel,
+	GuildMemberRoleManager } from 'discord.js';
+import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';

@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@lib/utils';
+import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
 const DEFAULT_RANGE = [1, 6];
 const DEFAULT_ROLLS = 1;
