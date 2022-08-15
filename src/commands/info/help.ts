@@ -39,14 +39,30 @@ export default class extends Command {
 			}
 
 			if (command.options) {
+				let val = '';
+				for (const param of command.options) {
+					let reqValue = 'required';
+					if ('required' in param) { // see Note 1 below
+						reqValue = param.required ? 'required' : 'optional';
+					}
+					val += `**${param.name}** (${reqValue}) : ${param.description}\n`;
+				}
+
 				fields.push({
 					name: 'Parameters',
-					value: command.options.map(param =>
-						`**${param.name}** (${param.required ? 'required' : 'optional'}): ${param.description}`
-					).join('\n'),
+					value: val,
 					inline: false
 				});
 			}
+
+			/*
+				Note 1
+				Param, according to TS, can be either an ApplicationCommandOptionData or ApplicationCommandSubGroupData object. Here, it's obviously
+				the former. However, the latter does not have a 'required' property. This has been an issue since at least discord.js v13.6.
+
+				TS assumes the worst and thinks 'param' is the latter. This checks if there is a 'required' property on the object anyways (which there always will be).
+				This was mainly just to calm the compiler down.
+			*/
 
 			fields.push({
 				name: 'More commands',
@@ -106,7 +122,7 @@ export default class extends Command {
 				interaction.user.send({ embeds: [embed] })
 					.then(() => {
 						if (!notified) {
-							if (interaction.channel.type !== 'DM') interaction.reply({ content: 'I\'ve sent all commands to your DMs.', ephemeral: true });
+							interaction.reply({ content: 'I\'ve sent all commands to your DMs.', ephemeral: true });
 							notified = true;
 						}
 					})

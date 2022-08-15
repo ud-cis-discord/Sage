@@ -14,7 +14,7 @@ export default class extends Command {
 		const choiceEmbed = new MessageEmbed()
 			.setTitle(`Make your choice, ${interaction.user.username}...`)
 			.setColor('RED')
-			.setFooter(`You have ${timeout} seconds to make up your mind.`);
+			.setFooter({ text: `You have ${timeout} seconds to make up your mind.` });
 
 		const confirmBtns = [
 			new MessageButton({ label: 'Rock', customId: 'rock', style: 'PRIMARY', emoji: '👊' }),
@@ -95,7 +95,7 @@ export default class extends Command {
 		const footerText = timeout > 1
 			? `You have ${timeout} seconds to make up your mind.`
 			: `You have ${timeout} second to make up your mind.`;
-		embed.setFooter(footerText);
+		embed.setFooter({ text: footerText });
 		interaction.editReply({ embeds: [embed], components: [new MessageActionRow({ components: btns })] });
 	}
 

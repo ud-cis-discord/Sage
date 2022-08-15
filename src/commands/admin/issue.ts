@@ -45,7 +45,7 @@ export default class extends Command {
 			console.log(response);
 			let errormsg = '';
 			const { errors } = response as RequestError;
-			errors.forEach(error => {
+			errors.forEach((error: { code; field; }) => {
 				errormsg += `Value ${error.code} for field ${error.field}.\n`;
 			});
 			interaction.reply({ content: `Issue creation failed. (HTTP Error ${response.status})

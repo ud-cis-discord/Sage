@@ -12,6 +12,7 @@
         },
         "resolveJsonModule": true,
         "rootDir": "./",
+		"skipLibCheck": true,
 		"target": "ES2019",
 		"types": [
 			"node",
@@ -21,6 +22,7 @@
     },
     "exclude": [
         "**/node_modules",
+		"**/node_modules/discord.js/typings/index.d.ts", // problematic in djs versions >13.1
 		"**/dist",
 		"config.example.ts"
     ]
