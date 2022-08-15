@@ -200,7 +200,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 	}
 
 	await Promise.all(awaitedCmds);
-  
+
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
