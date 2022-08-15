@@ -283,13 +283,26 @@ async function processInviteDelete(invite: Invite, serverLog: TextChannel): Prom
 
 async function processMessageDelete(msg: Message | PartialMessage, serverLog: TextChannel): Promise<void> {
 	if (!('name' in msg.channel) || msg.guild.id !== GUILDS.MAIN) return;
-	const embed = new MessageEmbed()
-		.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
-		.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
-			`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
-		.setFooter({ text: `Message ID: ${msg.id} | Author ID: ${msg.author.id}` })
-		.setColor('ORANGE')
-		.setTimestamp();
+
+	let embed;
+	if (msg.partial) { // this message is a partial, so author/content information is not available.
+		embed = new MessageEmbed()
+			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
+				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
+			.setFooter(`Message ID: ${msg.id}`)
+			.setColor('ORANGE')
+			.setTimestamp();
+		serverLog.send({ embeds: [embed] });
+		return;
+	} else {
+		embed = new MessageEmbed()
+			.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
+			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
+				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
+			.setFooter(`Message ID: ${msg.id} | Author ID: ${msg.author.id}`)
+			.setColor('ORANGE')
+			.setTimestamp();
+	}
 
 	const attachments: MessageAttachment[] = [];
 
