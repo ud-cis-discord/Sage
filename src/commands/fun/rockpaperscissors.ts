@@ -1,6 +1,8 @@
 import { BOT } from '@root/config';
 import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
+import { SageInteractionType } from '@lib/types/InteractionType';
+import { buildCustomId, getDataFromCustomId } from '@lib/utils/interactionUtils';
 
 const DECISION_TIMEOUT = 10;
 const CHOICES = ['rock', 'paper', 'scissors'];
@@ -10,16 +12,43 @@ export default class extends Command {
 	description = `The ultimate battle of human vs program. Can you best ${BOT.NAME} in a round of rock paper scissors?`;
 
 	async run(interaction: CommandInteraction): Promise<void> {
-		let timeout = DECISION_TIMEOUT;
 		const choiceEmbed = new MessageEmbed()
 			.setTitle(`Make your choice, ${interaction.user.username}...`)
 			.setColor('RED')
-			.setFooter({ text: `You have ${timeout} seconds to make up your mind.` });
+			.setFooter(`You have ${DECISION_TIMEOUT} seconds to make up your mind.`);
 
+		const timer = setInterval(this.timeoutMessage, DECISION_TIMEOUT * 1000, interaction);
 		const confirmBtns = [
-			new MessageButton({ label: 'Rock', customId: 'rock', style: 'PRIMARY', emoji: '👊' }),
-			new MessageButton({ label: 'Paper', customId: 'paper', style: 'PRIMARY', emoji: '✋' }),
-			new MessageButton({ label: 'Scissors', customId: 'scissors', style: 'PRIMARY', emoji: '✌' })
+			new MessageButton({
+				label: 'Rock',
+				customId: buildCustomId({
+					type: SageInteractionType.RPS,
+					commandOwner: interaction.user.id,
+					additionalData: ['rock', `${timer[Symbol.toPrimitive]()}`]
+				}),
+				style: 'PRIMARY',
+				emoji: '👊'
+			}),
+			new MessageButton({
+				label: 'Paper',
+				customId: buildCustomId({
+					type: SageInteractionType.RPS,
+					commandOwner: interaction.user.id,
+					additionalData: ['paper', `${timer[Symbol.toPrimitive]()}`]
+				}),
+				style: 'PRIMARY',
+				emoji: '✋'
+			}),
+			new MessageButton({
+				label: 'Scissors',
+				customId: buildCustomId({
+					type: SageInteractionType.RPS,
+					commandOwner: interaction.user.id,
+					additionalData: ['scissors', `${timer[Symbol.toPrimitive]()}`]
+				}),
+				style: 'PRIMARY',
+				emoji: '✌'
+			})
 		];
 
 		await interaction.reply({
@@ -27,85 +56,70 @@ export default class extends Command {
 			components: [new MessageActionRow({ components: confirmBtns })]
 		});
 
-		let replyId;
-		interaction.fetchReply().then(reply => { replyId = reply.id; });
+		return;
+	}
 
-		const collector = interaction.channel.createMessageComponentCollector({
-			time: DECISION_TIMEOUT * 1000,
-			filter: i => i.message.id === replyId
+	timeoutMessage(i: CommandInteraction): void {
+		const failEmbed = new MessageEmbed()
+			.setTitle(`${i.user.username} couldn't make up their mind! Command timed out.`)
+			.setColor('RED');
+
+		i.editReply({
+			components: [],
+			embeds: [failEmbed]
 		});
+	}
 
-		const countdown = setInterval(() => this.countdown(interaction, --timeout, confirmBtns, choiceEmbed), 1000);
+}
 
-		collector.on('collect', async (i: ButtonInteraction) => {
-			if (interaction.user.id !== i.user.id) {
-				await i.reply({
-					content: 'You cannot respond to a command you did not execute',
-					ephemeral: true
-				});
-				return;
-			}
+function checkWinner(playerNum: number, botNum: number): string {
+	if (playerNum === botNum) return 'Nobody';
+	if ((playerNum > botNum && playerNum - botNum === 1) || (botNum > playerNum && botNum - playerNum === 2)) {
+		return 'You';
+	} else {
+		return BOT.NAME;
+	}
+}
 
-			const botMove = CHOICES[Math.floor(Math.random() * CHOICES.length)];
-			const winner = this.checkWinner(CHOICES.indexOf(i.customId), CHOICES.indexOf(botMove));
 
-			clearInterval(countdown);
-			let winEmbed: MessageEmbed;
-
-			if (winner === BOT.NAME) {
-				winEmbed = new MessageEmbed()
-					.setTitle(`${interaction.user.username} threw ${i.customId} and ${BOT.NAME} threw ${botMove}. ${winner} won - the machine triumphs!`)
-					.setColor('RED');
-			} else if (winner === 'Nobody') {
-				winEmbed = new MessageEmbed()
-					.setTitle(`Both ${interaction.user.username} and ${BOT.NAME} threw ${i.customId}. It's a draw!`)
-					.setColor('BLUE');
-			} else {
-				winEmbed = new MessageEmbed()
-					.setTitle(`${interaction.user.username} threw ${i.customId} and ${BOT.NAME} threw ${botMove}. ${interaction.user.username} won - humanity triumphs!`)
-					.setColor('GREEN');
-			}
-			await interaction.editReply({
-				components: [],
-				embeds: [winEmbed]
-			});
-		}).on('end', async collected => {
-			const validCollected = collected.filter(i => i.isButton()
-			&& i.message.id === interaction.id
-			&& i.user.id === interaction.user.id);
-
-			clearInterval(countdown);
-
-			if (timeout === 1 && validCollected.size === 0) { // when clearInterval is used, timeout sticks to 1 second
-				const failEmbed = new MessageEmbed()
-					.setTitle(`${interaction.user.username} couldn't make up their mind! Command timed out.`)
-					.setColor('RED');
-
-				await interaction.editReply({
-					components: [],
-					embeds: [failEmbed]
-				});
-				return;
-			}
+export async function handleRpsOptionSelect(i: ButtonInteraction): Promise<void> {
+	const interactionData = getDataFromCustomId(i.customId);
+	const choice = interactionData.additionalData[0];
+	const timer = interactionData.additionalData[1];
+	if (i.user.id !== interactionData.commandOwner) {
+		await i.reply({
+			content: 'You cannot respond to a command you did not execute',
+			ephemeral: true
 		});
 		return;
 	}
 
-	countdown(interaction: CommandInteraction, timeout: number, btns: MessageButton[], embed: MessageEmbed): void {
-		const footerText = timeout > 1
-			? `You have ${timeout} seconds to make up your mind.`
-			: `You have ${timeout} second to make up your mind.`;
-		embed.setFooter({ text: footerText });
-		interaction.editReply({ embeds: [embed], components: [new MessageActionRow({ components: btns })] });
-	}
+	clearInterval(Number.parseInt(timer));
+	const msg = await i.channel.messages.fetch(i.message.id);
 
-	checkWinner(playerNum: number, botNum: number): string {
-		if (playerNum === botNum) return 'Nobody';
-		if ((playerNum > botNum && playerNum - botNum === 1) || (botNum > playerNum && botNum - playerNum === 2)) {
-			return 'You';
-		} else {
-			return BOT.NAME;
-		}
-	}
+	const botMove = CHOICES[Math.floor(Math.random() * CHOICES.length)];
+	const winner = checkWinner(CHOICES.indexOf(choice), CHOICES.indexOf(botMove));
 
+	let winEmbed: MessageEmbed;
+
+	if (winner === BOT.NAME) {
+		winEmbed = new MessageEmbed()
+			.setTitle(`${i.user.username} threw ${choice} and ${BOT.NAME} threw ${botMove}. ${winner} won - the machine triumphs!`)
+			.setColor('RED');
+	} else if (winner === 'Nobody') {
+		winEmbed = new MessageEmbed()
+			.setTitle(`Both ${i.user.username} and ${BOT.NAME} threw ${choice}. It's a draw!`)
+			.setColor('BLUE');
+	} else {
+		winEmbed = new MessageEmbed()
+			.setTitle(`${i.user.username} threw ${choice} and ${BOT.NAME} threw ${botMove}. ${i.user.username} won - humanity triumphs!`)
+			.setColor('GREEN');
+	}
+	await msg.edit({
+		components: [],
+		embeds: [winEmbed]
+	});
+	await i.deferUpdate();
+
+	return;
 }

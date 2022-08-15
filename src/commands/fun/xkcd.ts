@@ -2,7 +2,7 @@ import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, Me
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils';
+import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
 export default class extends Command {
 

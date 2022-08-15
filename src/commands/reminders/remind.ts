@@ -2,7 +2,7 @@ import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
-import { reminderTime } from '@lib/utils';
+import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {

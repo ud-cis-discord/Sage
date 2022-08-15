@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
-import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
+import { generateErrorEmbed, generateQuestionId } from '@lib/utils/generalUtils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
 import { PVQuestion } from '@lib/types/PVQuestion';

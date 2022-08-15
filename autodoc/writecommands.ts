@@ -1,5 +1,5 @@
 import 'module-alias/register';
-import { readdirRecursive } from '@lib/utils';
+import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import fs from 'fs';
 
