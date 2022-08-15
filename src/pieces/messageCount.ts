@@ -1,9 +1,9 @@
-import { Client, TextChannel, Role, Message, MessageEmbed, ThreadChannel } from 'discord.js';
+import { Client, TextChannel, Role, Message, MessageEmbed, PartialMessage, ThreadChannel } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
 import { CHANNELS, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
+import { calcNeededExp } from '@lib/utils/generalUtils';
 
-const xpRatio = 1.25;
 const startingColor = 80;
 const greenIncrement = 8;
 const maxGreen:[number, number, number] = [0, 255, 0];
@@ -17,6 +17,10 @@ const countedChannelTypes = [
 async function register(bot: Client): Promise<void> {
 	bot.on('messageCreate', async msg => {
 		countMessages(msg).catch(async error => bot.emit('error', error));
+	});
+	bot.on('messageDelete', async msg => {
+		if (msg.content && msg.content.startsWith('s;')) return;
+		handleExpDetract(msg);
 	});
 }
 
@@ -49,6 +53,35 @@ async function countMessages(msg: Message): Promise<void> {
 	);
 }
 
+async function handleExpDetract(msg: Message | PartialMessage) {
+	const bot = msg.client;
+	let user: SageUser;
+	try {
+		user = await msg.author.client.mongo.collection(DB.USERS).findOne({ discordId: msg.author.id });
+	} catch (error) { // message deleted is a partial, cannot get user, so ignore.
+		return;
+	}
+
+	if (user.curExp < user.levelExp) {
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: 0, curExp: +1 } }
+		);
+	} else { // if exp for this level exceeds the max, roll back a level.
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $set: { curExp: 1, levelExp: calcNeededExp(user.levelExp, '-') }, $inc: { level: -1 } }
+		);
+	}
+
+	if (user.count >= 1) { // it wouldn't make sense to have a negative message count (when using s;check here)
+		bot.mongo.collection(DB.USERS).findOneAndUpdate(
+			{ discordId: msg.author.id },
+			{ $inc: { count: -1, curExp: 0 } }
+		);
+	}
+}
+
 async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise<void> {
 	if (err) {
 		throw err;
@@ -59,7 +92,7 @@ async function handleLevelUp(err: Error, entry: SageUser, msg: Message): Promise
 	}
 
 	if (--entry.curExp <= 0) {
-		entry.curExp = entry.levelExp = Math.floor(entry.levelExp * xpRatio);
+		entry.curExp = entry.levelExp = calcNeededExp(entry.levelExp, '+');
 		entry.level++;
 		if (entry.levelPings) {
 			sendLevelPing(msg, entry);

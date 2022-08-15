@@ -1,7 +1,7 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@root/src/lib/permissions';
 import { Command } from '@root/src/lib/types/Command';
-import { readdirRecursive } from '@root/src/lib/utils';
+import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { ApplicationCommandData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {

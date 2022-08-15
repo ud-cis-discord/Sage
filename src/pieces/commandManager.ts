@@ -1,6 +1,6 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, GuildMemberRoleManager,
-	TextChannel, ModalSubmitInteraction } from 'discord.js';
-import { isCmdEqual, readdirRecursive } from '@lib/utils';
+import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, ModalSubmitInteraction, TextChannel,
+	GuildMemberRoleManager } from 'discord.js';
+import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
@@ -37,7 +37,7 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('messageCreate', async msg => {
 		const lcMessage = msg.content.toLowerCase();
-		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes('sage');
+		const thankCheck = (lcMessage.includes('thank') || lcMessage.includes('thx')) && lcMessage.includes(' sage');
 
 		if (thankCheck) {
 			msg.react('<:steve_peace:883541149032267816>');
@@ -52,11 +52,13 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 	if (customId === 'roleselect' && member instanceof GuildMember) {
 		const component = interaction.component as MessageSelectMenu;
 		const removed = component.options.filter((option) => !values.includes(option.value));
+		const addedRoleNames = [];
+		const removedRoleNames = [];
 		for (const id of removed) {
 			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
 			if (!role.name.includes('CISC')) {
 				member.roles.remove(id.value);
-				continue;
+				removedRoleNames.push(role.name);
 			}
 			if (member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
 				const course = courses.find(c => c.name === role.name.substring(5));
@@ -64,6 +66,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 				user.courses = user.courses.filter(c => c !== course.name);
 				member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
 				member.roles.remove(id.value);
+				removedRoleNames.push(role.name);
 				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
 				responseContent = `Your enrollments have been updated.`;
 			}
@@ -72,6 +75,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 			const role = interaction.guild.roles.cache.find(r => r.id === id);
 			if (!role.name.includes('CISC')) {
 				member.roles.add(id);
+				addedRoleNames.push(role.name);
 				continue;
 			}
 			if (!member.roles.cache.some(r => r.id === id)) { // does user have this role?
@@ -80,14 +84,14 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 				user.courses.push(course.name);
 				member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
 				member.roles.add(id);
+				addedRoleNames.push(role.name);
 				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
 				responseContent = `Your enrollments have been updated.`;
-			} else {
-				responseContent = `It looks like you are already in the course you've selected! If you'd like to unenroll, please unselect the course from the dropdown.`;
 			}
 		}
 		interaction.reply({
-			content: `${responseContent}`,
+			content: `${responseContent} The following changes have been applied to your roles:
+			${addedRoleNames.length !== 0 ? `**Added: **${addedRoleNames.join(', ')}\n\t\t\t` : ''}${removedRoleNames.length !== 0 ? `**Removed: **${removedRoleNames.join(', ')}` : ''}`,
 			ephemeral: true
 		});
 	}

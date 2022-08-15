@@ -1,5 +1,5 @@
-import { Command } from '@root/src/lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils';
+import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@lib/utils/generalUtils';
 import { CommandInteraction } from 'discord.js';
 
 export default class extends Command {
