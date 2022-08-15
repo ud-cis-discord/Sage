@@ -1,19 +1,24 @@
-import { Message, MessageReaction } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, GuildMember } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	description = 'Press x to doubt';
-	extendedHelp = 'This command must be used by replying to a message.';
-	aliases = ['x'];
-
-	async run(msg: Message): Promise<Message | MessageReaction> {
-		if (!msg.reference) {
-			return msg.channel.send(this.extendedHelp);
+	description = 'Press X to doubt.';
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'target',
+			description: 'The user to doubt',
+			type: 'USER',
+			required: true
 		}
+	]
 
-		const message = await msg.channel.messages.fetch(msg.reference.messageId);
-		return message.react('❎');
+	run(interaction: CommandInteraction): Promise<void> {
+		const target = interaction.options.getMember('target') as GuildMember;
+		return interaction.reply({ files: [{
+			attachment: `${__dirname}../../../../../assets/images/doubt.jpg`,
+			name: 'doubt.jpg'
+		}], content: `${interaction.user.username} pressed X to doubt ${target.user.username}` });
 	}
 
 }

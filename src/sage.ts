@@ -1,13 +1,15 @@
 import 'module-alias/register';
 import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
-import { Client, Intents, PartialTypes } from 'discord.js';
+import { ApplicationCommandPermissionData, Client, ExcludeEnum, Intents, PartialTypes, Team } from 'discord.js';
 import { readdirRecursive } from '@lib/utils';
 import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
 import { Octokit } from '@octokit/rest';
 import { version as sageVersion } from '@root/package.json';
 import { registerFont } from 'canvas';
 import { SageData } from '@lib/types/SageData';
+import { setBotmasterPerms } from './lib/permissions';
+import { ActivityTypes } from 'discord.js/typings/enums';
 
 const BOT_INTENTS = [
 	Intents.FLAGS.DIRECT_MESSAGES,
@@ -51,6 +53,17 @@ async function main() {
 	registerFont(`${__dirname}/../../assets/Roboto-Regular.ttf`, { family: 'Roboto' });
 
 	bot.once('ready', async () => {
+		// I'm mad about this - Josh </3
+		const team = (await bot.application.fetch()).owner as Team;
+		setBotmasterPerms(team.members.map(value => {
+			const permData: ApplicationCommandPermissionData = {
+				id: value.id,
+				permission: true,
+				type: 'USER'
+			};
+			return permData;
+		}));
+
 		const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
 		for (const file of pieceFiles) {
 			const piece = await import(file);
@@ -70,7 +83,10 @@ async function main() {
 		const status = (await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData)?.status;
 
 		const activity = status?.name || `${PREFIX}help`;
-		const type = status?.type || 'PLAYING';
+
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: type's typing not properly inferred
+		const type: ExcludeEnum<typeof ActivityTypes, 'CUSTOM'> = status?.type || 'PLAYING';
 		bot.user.setActivity(`${activity} (v${sageVersion})`, { type });
 		setTimeout(() => bot.user.setActivity(activity, { type }), 30e3);
 	});

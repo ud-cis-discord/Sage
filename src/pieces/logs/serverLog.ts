@@ -58,7 +58,7 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 		.setTitle(`Created new ${channel.type} channel, #${channel.name}`)
 		.setDescription(`${channel.name} is in the ${channel.parent ? channel.parent.name : 'none'} category.`)
 		.addFields(fields)
-		.setFooter(`Channel ID: ${channel.id}`)
+		.setFooter({ text: `Channel ID: ${channel.id}` })
 		.setColor('PURPLE')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -83,7 +83,7 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted ${channel.type} channel, #${channel.name}`)
 		.addFields(fields)
-		.setFooter(`Channel ID: ${channel.id}`)
+		.setFooter({ text: `Channel ID: ${channel.id}` })
 		.setColor('PURPLE')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -101,7 +101,7 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 
 	const embed = new MessageEmbed()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
-		.setFooter(`Channel ID: ${newChannel.id}`)
+		.setFooter({ text: `Channel ID: ${newChannel.id}` })
 		.setColor('PURPLE')
 		.setTimestamp();
 
@@ -176,7 +176,7 @@ async function processEmojiCreate(emote: GuildEmoji, serverLog: TextChannel): Pr
 		.setTitle(`${emote.name} <:${emote.name}:${emote.id}> emote created`)
 		.setImage(emote.url)
 		.setColor('DARK_VIVID_PINK')
-		.setFooter(`Emote ID: ${emote.id}`)
+		.setFooter({ text: `Emote ID: ${emote.id}` })
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -191,7 +191,7 @@ async function processEmojiDelete(emote: GuildEmoji, serverLog: TextChannel): Pr
 		.setTitle(`${emote.name} emote deleted`)
 		.setImage(emote.url)
 		.setColor('DARK_VIVID_PINK')
-		.setFooter(`Emote ID: ${emote.id}`)
+		.setFooter({ text: `Emote ID: ${emote.id}` })
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -205,7 +205,7 @@ async function processEmojiUpdate(oldEmote: GuildEmoji, newEmote: GuildEmoji, se
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`<:${newEmote.name}:${newEmote.id}> ${oldEmote.name} is now called ${newEmote.name}`)
 		.setColor('DARK_VIVID_PINK')
-		.setFooter(`Emote ID: ${newEmote.id}`)
+		.setFooter({ text: `Emote ID: ${newEmote.id}` })
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -354,7 +354,7 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
 		.setDescription(logEntry.reason ? `**Reason**\n${logEntry.reason}` : '')
 		.setColor('ORANGE')
-		.setFooter(`Deleter ID: ${logEntry.executor.id}`)
+		.setFooter({ text: `Deleter ID: ${logEntry.executor.id}` })
 		.setTimestamp();
 
 	serverLog.send({
@@ -393,7 +393,7 @@ async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<vo
 		.setAuthor(`${logEntry.executor.tag}`, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Created new role @${role.name}`)
 		.addFields(fields)
-		.setFooter(`Role ID: ${role.id}`)
+		.setFooter({ text: `Role ID: ${role.id}` })
 		.setColor('DARK_BLUE')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -419,7 +419,7 @@ async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<vo
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted role @${role.name}`)
 		.addFields(fields)
-		.setFooter(`Role ID: ${role.id}`)
+		.setFooter({ text: `Role ID: ${role.id}` })
 		.setColor('DARK_BLUE')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -435,7 +435,7 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`@${newRole.name} role updated`)
 		.setColor('DARK_BLUE')
-		.setFooter(`Role ID: ${newRole.id}`)
+		.setFooter({ text: `Role ID: ${newRole.id}` })
 		.setTimestamp();
 
 	if (newRole.name !== oldRole.name) {
@@ -472,7 +472,7 @@ async function processThreadCreate(thread: ThreadChannel, serverLog: TextChannel
 		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
 		.setDescription(`<#${thread.id}>`)
 		.setColor('GREYPLE')
-		.setFooter(`Thread ID: ${thread.id}`)
+		.setFooter({ text: `Thread ID: ${thread.id}` })
 		.setTimestamp();
 
 	serverLog.send({ embeds: [embed] });
@@ -488,7 +488,7 @@ async function processThreadDelete(thread: ThreadChannel, serverLog: TextChannel
 		.setTitle(`Thread deleted: "${thread.name}"`)
 		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
 		.setColor('GREYPLE')
-		.setFooter(`Thread ID: ${thread.id}`)
+		.setFooter({ text: `Thread ID: ${thread.id}` })
 		.setTimestamp();
 
 	serverLog.send({ embeds: [embed] });
@@ -505,7 +505,7 @@ async function processThreadUpdate(oldThread: ThreadChannel, newThread: ThreadCh
 		.setFields([{ name: 'Thread type', inline: false, value: `${newThread.type}` }])
 		.setDescription(`<#${newThread.id}>`)
 		.setColor('GREYPLE')
-		.setFooter(`Thread ID: ${newThread.id}`)
+		.setFooter({ text: `Thread ID: ${newThread.id}` })
 		.setTimestamp();
 
 	if (newThread.name !== oldThread.name) {

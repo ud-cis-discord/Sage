@@ -1,37 +1,47 @@
-import { Message, Role } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
-import { roleParser } from '@lib/arguments';
-import { adminPerms } from '@lib/permissions';
+import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
+import { modifyRoleDD } from '@lib/utils';
 
 export default class extends Command {
 
-	description = `Adds a role to the assignable collection of the database 
-	if that role is not already in it. If the role is already in the collection, it removes it.`;
-	usage = '<role>';
-	aliases = ['addassign'];
+	description = `Adds a role to the assignable collection of the database, or removes it if it's there already`;
 	runInDM = false;
+	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
-	permissions(msg: Message): boolean {
-		return adminPerms(msg);
-	}
+	options: ApplicationCommandOptionData[] = [{
+		name: 'role',
+		description: 'The role to add to the list of self-assignable roles.',
+		type: 'ROLE',
+		required: true
+	}]
 
-	async run(msg: Message, [cmd]: [Role]): Promise<Message> {
-		const assignables = msg.client.mongo.collection(DB.ASSIGNABLE);
-		const newRole: AssignableRole = { id: cmd.id };
+	async run(interaction: CommandInteraction): Promise<void> {
+		const apiRole = interaction.options.getRole('role');
+		const role = await interaction.guild.roles.fetch(apiRole.id);
+
+		const assignables = interaction.client.mongo.collection(DB.ASSIGNABLE);
+		const newRole: AssignableRole = { id: role.id };
 
 		if (await assignables.countDocuments(newRole) > 0) {
-			assignables.findOneAndDelete(newRole);
-			return msg.channel.send(`The role \`${cmd.name}\` has been removed.`);
+			await interaction.reply('Removing role...');
+			let responseMsg = `The role \`${role.name}\` has been removed.`;
+			if (!await modifyRoleDD(interaction, role, false, 'REMOVE')) {
+				responseMsg = `The role \`${role.name}\` has been removed. However, I couldn't remove it from the assignables dropdown (it probably wasn't on there to begin with)`;
+			}
+			await assignables.findOneAndDelete(newRole);
+			interaction.editReply(responseMsg);
 		} else {
-			assignables.insertOne(newRole);
-			return msg.channel.send(`The role \`${cmd.name}\` has been added.`);
+			await interaction.reply('Adding role...');
+			if (!await modifyRoleDD(interaction, role, false, 'ADD')) {
+				return;
+			}
+			await assignables.insertOne(newRole);
+			interaction.editReply(`The role \`${role.name}\` has been added.`);
+			return;
 		}
-	}
-
-	async argParser(msg: Message, input: string): Promise<Array<Role>> {
-		return [await roleParser(msg, input)];
 	}
 
 }

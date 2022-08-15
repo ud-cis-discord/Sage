@@ -1,111 +1,180 @@
 import { BOT } from '@root/config';
-import { Message, MessageEmbed, MessageReaction } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
+import { generateErrorEmbed } from '@root/src/lib/utils';
 
-const QUESTION_CHAR_LIMIT = 1024;
-const EMBED_TITLE_CHAR_LIMIT = 256;
+const QUESTION_CHAR_LIMIT = 256;
+const args = ['Single', 'Multiple'];
 
 export default class extends Command {
 
-	description = `Have ${BOT.NAME} create a poll for you`;
-	aliases = ['vote'];
-	usage = '<timespan>|<question>|<choices...>';
-	extendedHelp = 'You can have two to ten choices.';
+	description = `Have ${BOT.NAME} create a poll for you.`;
+
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'timespan',
+			description: `How long your poll should last. Acceptable formats include '5s', '5m', '5h', '5h30m', '7h30m15s'...`,
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'question',
+			description: `What would you like to ask?`,
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'choices',
+			description: `A poll can have 2-10 choices. Separate choices with '|' (no spaces/quotes).`,
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'optiontype',
+			description: `Whether participants can only select one choice or multiple.`,
+			type: 'STRING',
+			required: true,
+			choices: args.map((arg) => ({
+				name: arg,
+				value: arg
+			}))
+		}
+	]
 	runInDM = false;
 
+	resetArray(array: number[], len: number): number[] {
+		for (let i = 0; i < len; i++) {
+			array[i] = 0;
+		}
+		return array;
+	}
 
-	async run(msg: Message, [timespan, question, ...choices]: [number, string, ...Array<string>]): Promise<Message> {
+	async run(interaction: CommandInteraction): Promise<void> {
+		const timespan = parse(interaction.options.getString('timespan'));
+		const question = interaction.options.getString('question');
+		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
+
+		const userSelections = new Map(); // user ID, their choice(s)
+		const choiceQuantites = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
+
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
-		if (question.length > QUESTION_CHAR_LIMIT) {
-			msg.channel.send(`Your question is too long. Please keep it under ${QUESTION_CHAR_LIMIT} characters!`);
-			return;
+		if (!timespan) {
+			return interaction.reply({ embeds: [generateErrorEmbed(`${interaction.options.getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', 
+			'5h', '5h30m', '7h30m15s'...`)], ephemeral: true });
 		}
-
-		let choiceText = '';
-		choices.forEach((choice, option) => {
-			choiceText += `${emotes[option]} ${choice}\n`;
-		});
-		choiceText = choiceText.trim();
+		if (question.length > QUESTION_CHAR_LIMIT) {
+			return interaction.reply({ embeds: [generateErrorEmbed(`Your question is too long. Please keep it under ${QUESTION_CHAR_LIMIT} characters.`)], ephemeral: true });
+		}
+		if (choices.length < 2) {
+			return interaction.reply({ embeds: [generateErrorEmbed(`You must supply at least 2 choices to make a poll.`)], ephemeral: true });
+		}
+		if (choices.length > 10) {
+			return interaction.reply({ embeds: [generateErrorEmbed(`You cannot supply more than 10 choices.`)], ephemeral: true });
+		}
 
 		const mdTimestamp = `<t:${Math.floor(Date.now() / 1000) + (timespan / 1000)}:R>`;
 
-		const pollEmbed = new MessageEmbed()
-			.setTitle(`Poll from ${msg.member.displayName}`)
-			.addField('Question', question)
-			.addField('Choices', choiceText, false)
-			.setDescription(`This poll ends ${mdTimestamp}`)
+		let choiceText = '';
+		choices.forEach((choice, index) => {
+			choiceText += `${emotes[index]} ${choice}: ${choiceQuantites[index]} vote${choiceQuantites[index] === 1 ? '' : 's'}\n`;
+		});
+		choiceText = choiceText.trim();
+
+		let pollFooter = interaction.options.getString('optiontype') === 'Multiple'
+			? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
+			: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
+		let pollEmbed = new MessageEmbed()
+			.setTitle(question)
+			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
+			.addField('Choices', choiceText)
+			.setFooter({ text: pollFooter })
 			.setColor('RANDOM');
 
+		const choiceBtns = []; // first 5 choices
+		const choiceBtns2 = []; // next 5
+		choices.forEach((choice, index) => {
+			if (index < 5) {
+				choiceBtns.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
+			} else {
+				choiceBtns2.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
+			}
+		});
 
-		const pollMsg = await msg.channel.send({ embeds: [pollEmbed] });
+		if (choiceBtns2.length === 0) {
+			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns })] });
+		} else {
+			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
+		}
 
-		emotes.forEach(emote => pollMsg.react(emote));
+		let replyId;
+		interaction.fetchReply().then(reply => { replyId = reply.id; });
 
-		return pollMsg.awaitReactions({
-			filter: (reaction: MessageReaction) => emotes.includes(reaction.emoji.name),
-			time: timespan
-		}).then(reactions => {
-			let maxVotes = 0;
-			reactions.forEach(reaction => {
-				if (reaction.users.cache.size > maxVotes) maxVotes = reaction.users.cache.size;
-			});
+		const collector = interaction.channel.createMessageComponentCollector({
+			time: timespan,
+			filter: i => i.message.id === replyId
+		});
 
-			pollEmbed.fields = [
-				{ name: 'Question', value: question, inline: false },
-				{
-					name: 'Choices',
-					value: choiceText
-						.split('\n')
-						.map((choice, idx) => {
-							const votes = reactions.get(emotes[idx]).count - 1;
-							return `${choice} - ${votes} vote${votes === 1 ? '' : 's'}`;
-						}).join('\n'),
-					inline: false
+		collector.on('collect', async (i: ButtonInteraction) => {
+			choiceQuantites.fill(0);
+
+			const usersChoices = userSelections.get(i.user.id) || [];
+			if (usersChoices && usersChoices.includes(i.customId)) { // user has already selected choice
+				if (interaction.options.getString('optiontype') === 'Multiple') {
+					usersChoices.splice(usersChoices.indexOf(i.customId), 1);
+					userSelections.set(i.user.id, usersChoices); // set this user's choice
+				} else {
+					userSelections.delete(i.user.id);
 				}
-			];
-
-			if (maxVotes <= 1) {
-				pollMsg.edit({ embeds: [pollEmbed
-					.addField('Results', 'The poll ended but it looks like no one voted ☹')
-					.setDescription(`This poll ended ${mdTimestamp}`)] });
-
-				const embed = new MessageEmbed()
-					.setTitle(`Poll from ${msg.member.displayName}`)
-					.setDescription(`The poll ended but it looks like no one voted ☹\n\n[Click to view poll](${pollMsg.url})`)
-					.setColor(pollEmbed.color);
-				return pollMsg.channel.send({ embeds: [embed] });
+			} else if (interaction.options.getString('optiontype') === 'Multiple') {
+				usersChoices.push(i.customId);
+				userSelections.set(i.user.id, usersChoices); // set this user's choice
+			} else {
+				userSelections.set(i.user.id, i.customId);
 			}
 
-			const winners = reactions
-				.filter(reaction => reaction.users.cache.size >= maxVotes)
-				.map(reaction => choices[emotes.indexOf(reaction.emoji.name)]);
+			userSelections.forEach(vote => {
+				if (interaction.options.getString('optiontype') === 'Multiple') {
+					vote.forEach(selected => {
+						choiceQuantites[Number(selected) - 1] += 1;
+					});
+				} else {
+					choiceQuantites[Number(vote) - 1] += 1;
+				}
+			});
 
-			pollMsg.edit({ embeds: [pollEmbed
-				.addField('Results', this.winMessage(winners, maxVotes - 1))
-				.setDescription(`This poll ended ${mdTimestamp}`)] });
-			pollMsg.reactions.removeAll();
-			const embed = new MessageEmbed()
-				.setTitle(`Poll from ${msg.member.displayName} Result`)
-				.addField('Question',
-					question.length > EMBED_TITLE_CHAR_LIMIT ? `${question.slice(0, EMBED_TITLE_CHAR_LIMIT - 3)}...` : question)
-				.addField('Result', `${this.winMessage(winners, maxVotes - 1)}\n\n[Click to view poll](${pollMsg.url})`)
-				.setColor(pollEmbed.color);
-			return pollMsg.channel.send({ embeds: [embed] });
+			choiceText = '';
+			for (let j = 0; j < choices.length; j++) {
+				choiceText += `${emotes[j]} ${choices[j]}: ${choiceQuantites[j]} vote${choiceQuantites[j] === 1 ? '' : 's'}\n`;
+			}
+			choiceText = choiceText.trim();
+
+			pollFooter = interaction.options.getString('optiontype') === 'Multiple'
+				? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
+				: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
+			pollEmbed = new MessageEmbed()
+				.setTitle(question)
+				.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
+				.addField('Choices', choiceText)
+				.setFooter({ text: pollFooter })
+				.setColor('RANDOM');
+
+			if (choiceBtns2.length === 0) {
+				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns })] });
+			} else {
+				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
+			}
+
+			i.deferUpdate(); // this makes it so "This interaction failed" does not appear when pressing buttons (since we don't reply again)
+		}).on('end', () => {
+			pollEmbed = new MessageEmbed()
+				.setTitle(question)
+				.setDescription(`This poll was created by ${interaction.user.username} and ended **${mdTimestamp}**`)
+				.addField('Choices', choiceText)
+				.setColor('RANDOM');
+			interaction.editReply({ embeds: [pollEmbed], components: [] });
 		});
-	}
-
-	argParser(_msg: Message, input: string): Array<number | string> {
-		const [rawTimespan, ...rest] = input.split('|').map(arg => arg.trim());
-
-		const timespan = parse(rawTimespan);
-		if (!timespan) throw `**${rawTimespan}** is not a valid timespan!\n\nUsage: ${this.usage}`;
-
-		if (rest.length < 3) throw 'I need at least two choices to make a poll.';
-		if (rest.length > 11) throw 'Sorry but that\'s too many choices for me. Please use ten or less.';
-
-		return [timespan, ...rest];
 	}
 
 	winMessage = (options: Array<string>, votes: number): string => options.length === 1

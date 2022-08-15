@@ -1,21 +1,26 @@
-import { staffPerms } from '@lib/permissions';
-import { userParser } from '@root/src/lib/arguments';
-import { GuildMember, Message, MessageEmbed } from 'discord.js';
+import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageEmbed } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives an overview of a member\'s info.';
-	usage = '<user>';
 	runInDM = false;
-	aliases = ['member'];
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'user',
+			description: 'The user to lookup',
+			type: 'USER',
+			required: true
+		}
+	];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	permissions(msg: Message): boolean {
-		return staffPerms(msg);
-	}
+	async run(interaction: CommandInteraction): Promise<void> {
+		const user = interaction.options.getUser('user');
+		const member = await interaction.guild.members.fetch(user.id);
 
-	run(msg: Message, [member]: [GuildMember]): Promise<Message> {
 		const roles = member.roles.cache.size > 1
 			? [...member.roles.cache.filter(r => r.id !== r.guild.id).sort().values()].join(' ')
 			: 'none';
@@ -30,7 +35,7 @@ export default class extends Command {
 			.setAuthor(`${member.user.username}`, member.user.displayAvatarURL())
 			.setColor(member.displayColor)
 			.setTimestamp()
-			.setFooter(`Member ID: ${member.id}`)
+			.setFooter({ text: `Member ID: ${member.id}` })
 			.addFields([
 				{ name: 'Display Name', value: `${member.displayName} (<@${member.id}>)`, inline: true },
 				{ name: 'Account Created', value: accountCreated, inline: true },
@@ -38,15 +43,7 @@ export default class extends Command {
 				{ name: 'Roles', value: roles, inline: true }
 			]);
 
-		return msg.channel.send({ embeds: [embed] });
-	}
-
-	async argParser(msg: Message, input: string): Promise<Array<GuildMember>> {
-		if (!input) {
-			throw `Usage: ${this.usage}`;
-		}
-
-		return [await userParser(msg, input)];
+		return interaction.reply({ embeds: [embed], ephemeral: true });
 	}
 
 }

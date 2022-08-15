@@ -1,4 +1,4 @@
-import { EmbedField, Message, MessageEmbed, version as discordVersion } from 'discord.js';
+import { EmbedField, CommandInteraction, MessageEmbed, version as discordVersion } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { version as sageVersion } from '@root/package.json';
 import { BOT } from '@root/config';
@@ -8,9 +8,9 @@ export default class extends Command {
 
 	description = 'Displays info about Sage\'s current status';
 
-	run(msg: Message): Promise<Message> {
+	async run(interaction:CommandInteraction): Promise<void> {
 		const fields: Array<EmbedField> = [];
-		const bot = msg.client;
+		const bot = interaction.client;
 
 		fields.push({
 			name: 'Users',
@@ -55,7 +55,7 @@ export default class extends Command {
 			.setTimestamp(Date.now())
 			.addFields(fields);
 
-		return msg.channel.send({ embeds: [embed] });
+		return interaction.reply({ embeds: [embed] });
 	}
 
 }

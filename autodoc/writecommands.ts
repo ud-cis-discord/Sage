@@ -12,9 +12,9 @@ layout: page
 title: Commands
 permalink: pages/commands
 ---
-Here is a list of all of the commands available for Sage, with the format \`s;command [arguments]\`.
+Here is a list of all of the commands available for Sage, usable with \`/<command name here>\`.
 <br>
-Note, \`[argument]\` denotes an optional argument while \`<argument>\` denotes a required argument. Brackets should be omitted when running commands.
+Note, any arguments to the commands will be shown with descriptions when you select the command you want to run.
 `;
 
 const staffInfo = `### Staff Commands
@@ -32,7 +32,7 @@ permalink: staff_pages/staff%20commands
 ## Running Commands
 
 As staff, you have access to some commands not listed in the general [commands page][29]. You run them the same as the
-other commands, using \`s;[command] [arguments]\`in any channel that Sage is in, although we recommend running staff
+other commands, using \`/<command name here>\`in any channel that Sage is in, although we recommend running staff
 commands in staff-only channels.
 
 `;
@@ -42,7 +42,15 @@ async function main() {
 
 	const commandFiles = readdirRecursive(`${__dirname}/../src/commands`).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		const command: Command = await import(file);
+		const commandModule = await import(file);
+
+		if (!(typeof commandModule.default === 'function')) {
+			console.log(`Invalid command ${file}`);
+			continue;
+		}
+
+		// eslint-disable-next-line new-cap
+		const command: Command = new commandModule.default;
 
 		// scrape commands
 		const dirs = file.split('/');
@@ -63,9 +71,15 @@ async function main() {
 		let newCatText = `${categories.get(command.category)}\n\n**${command.name}**\n`;
 
 		newCatText += command.description ? `\n- Description: ${command.description}\n` : ``;
-		newCatText += `\n- Usage: \`s;${command.name} ${command.usage ? `${command.usage}\`\n` : `\`\n`}`;
-		newCatText += command.aliases ? `\n- Aliases: ${command.aliases.map(alias => `\`${alias}\`\n`).join(', ')}` : ``;
 		newCatText += command.extendedHelp ? `\n- More info: ${command.extendedHelp}\n` : ``;
+		if (command.options) {
+			newCatText += '\n- Parameters:\n';
+			newCatText += command.options.map(param =>
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore: see Note 1 comment block in help.ts
+				`  - ${param.name} (${param.required ? 'required' : 'optional'}): ${param.description}`
+			).join('\n');
+		}
 		categories.set(command.category, newCatText);
 	}
 
