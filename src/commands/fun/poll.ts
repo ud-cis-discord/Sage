@@ -1,8 +1,11 @@
-import { BOT } from '@root/config';
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { BOT, DB } from '@root/config';
+import { ApplicationCommandOptionData, ButtonInteraction, Client,
+	CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils';
+import { dateToTimestamp, generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
+import { Poll, PollResult } from '@lib/types/Poll';
+import { SageInteractionType } from '@root/src/lib/types/InteractionType';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
@@ -54,9 +57,12 @@ export default class extends Command {
 		const timespan = parse(interaction.options.getString('timespan'));
 		const question = interaction.options.getString('question');
 		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
+		if (!args.includes(interaction.options.getString('optiontype'))) {
+			throw `poll option types must be one of ${args.join(', ')}`;
+		}
+		const pollType = interaction.options.getString('optiontype') as 'Single' | 'Multiple';
 
-		const userSelections = new Map(); // user ID, their choice(s)
-		const choiceQuantites = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
+		const choiceQuantities = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
 
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
@@ -78,14 +84,14 @@ export default class extends Command {
 
 		let choiceText = '';
 		choices.forEach((choice, index) => {
-			choiceText += `${emotes[index]} ${choice}: ${choiceQuantites[index]} vote${choiceQuantites[index] === 1 ? '' : 's'}\n`;
+			choiceText += `${emotes[index]} ${choice}: ${choiceQuantities[index]} vote${choiceQuantities[index] === 1 ? '' : 's'}\n`;
 		});
 		choiceText = choiceText.trim();
 
-		let pollFooter = interaction.options.getString('optiontype') === 'Multiple'
+		const pollFooter = pollType === 'Multiple'
 			? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
 			: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
-		let pollEmbed = new MessageEmbed()
+		const pollEmbed = new MessageEmbed()
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
@@ -96,9 +102,17 @@ export default class extends Command {
 		const choiceBtns2 = []; // next 5
 		choices.forEach((choice, index) => {
 			if (index < 5) {
-				choiceBtns.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
+				choiceBtns.push(new MessageButton({ label: `${choice}`,
+					customId: `${SageInteractionType.POLL}_${choice}`,
+					style: 'SECONDARY',
+					emoji: `${emotes[index]}` }));
 			} else {
-				choiceBtns2.push(new MessageButton({ label: `${choice}`, customId: `${index + 1}`, style: 'SECONDARY', emoji: `${emotes[index]}` }));
+				choiceBtns2.push(new MessageButton({
+					label: `${choice}`,
+					customId: `${SageInteractionType.POLL}_${choice}`,
+					style: 'SECONDARY',
+					emoji: `${emotes[index]}`
+				}));
 			}
 		});
 
@@ -108,72 +122,20 @@ export default class extends Command {
 			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
 		}
 
-		let replyId;
-		interaction.fetchReply().then(reply => { replyId = reply.id; });
+		let replyId: string;
+		await interaction.fetchReply().then(reply => { replyId = reply.id; });
 
-		const collector = interaction.channel.createMessageComponentCollector({
-			time: timespan,
-			filter: i => i.message.id === replyId
-		});
-
-		collector.on('collect', async (i: ButtonInteraction) => {
-			choiceQuantites.fill(0);
-
-			const usersChoices = userSelections.get(i.user.id) || [];
-			if (usersChoices && usersChoices.includes(i.customId)) { // user has already selected choice
-				if (interaction.options.getString('optiontype') === 'Multiple') {
-					usersChoices.splice(usersChoices.indexOf(i.customId), 1);
-					userSelections.set(i.user.id, usersChoices); // set this user's choice
-				} else {
-					userSelections.delete(i.user.id);
-				}
-			} else if (interaction.options.getString('optiontype') === 'Multiple') {
-				usersChoices.push(i.customId);
-				userSelections.set(i.user.id, usersChoices); // set this user's choice
-			} else {
-				userSelections.set(i.user.id, i.customId);
-			}
-
-			userSelections.forEach(vote => {
-				if (interaction.options.getString('optiontype') === 'Multiple') {
-					vote.forEach(selected => {
-						choiceQuantites[Number(selected) - 1] += 1;
-					});
-				} else {
-					choiceQuantites[Number(vote) - 1] += 1;
-				}
-			});
-
-			choiceText = '';
-			for (let j = 0; j < choices.length; j++) {
-				choiceText += `${emotes[j]} ${choices[j]}: ${choiceQuantites[j]} vote${choiceQuantites[j] === 1 ? '' : 's'}\n`;
-			}
-			choiceText = choiceText.trim();
-
-			pollFooter = interaction.options.getString('optiontype') === 'Multiple'
-				? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
-				: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
-			pollEmbed = new MessageEmbed()
-				.setTitle(question)
-				.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
-				.addField('Choices', choiceText)
-				.setFooter({ text: pollFooter })
-				.setColor('RANDOM');
-
-			if (choiceBtns2.length === 0) {
-				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns })] });
-			} else {
-				interaction.editReply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
-			}
-
-			i.deferUpdate(); // this makes it so "This interaction failed" does not appear when pressing buttons (since we don't reply again)
-		}).on('end', () => {
-			pollEmbed = new MessageEmbed()
-				.setTitle(question)
-				.setDescription(`This poll was created by ${interaction.user.username} and ended **${mdTimestamp}**`)
-				.addField('Choices', choiceText)
-				.setColor('RANDOM');
-			interaction.editReply({ embeds: [pollEmbed], components: [] });
+		await interaction.client.mongo.collection<Poll>(DB.POLLS).insertOne({
+			owner: interaction.user.id,
+			message: replyId,
+			expires: new Date(Date.now() + timespan),
+			results: choices.map(choice => ({
+				option: choice,
+				users: []
+			})),
+			question: question,
+			channel: interaction.channelId,
+			type: pollType
 		});
 	}
 
@@ -181,4 +143,101 @@ export default class extends Command {
 		? `**${options}** won the poll with ${votes} vote${votes === 1 ? '' : 's'}.`
 		: `**${options.join('** & **')}** tied the poll with ${votes} vote${votes === 1 ? '' : 's'} each.`;
 
+}
+
+export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction): Promise<void> {
+	const pollMsg = await i.channel.messages.fetch(i.message.id);
+	const dbPoll = await bot.mongo.collection<Poll>(DB.POLLS).findOne({ message: pollMsg.id });
+	const pollOwner = await i.guild.members.fetch(dbPoll.owner);
+	let newPoll = { ...dbPoll };
+	const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, newPoll.results.length);
+	const newChoice = i.customId.split('_')[1];
+
+	const prevAnswers = dbPoll.results.filter(r => r.users.includes(i.user.id)).map(res => res.option);
+
+	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
+		newPoll = { ...newPoll, results: addAnswer(newPoll.results, i.user.id, newChoice) };
+	}
+	// if they clicked the same answer again or the poll was a single poll and they had a previous answer
+	if (prevAnswers.includes(newChoice) || (prevAnswers && newPoll.type === 'Single')) {
+		newPoll = { ...newPoll, results: removeAnswer(
+			newPoll.results,
+			i.user.id,
+			newPoll.type === 'Single' ? prevAnswers[0] : newChoice) };
+	}
+
+	const resultMap = new Map<string, number>();
+	newPoll.results.forEach(res => {
+		resultMap.set(res.option, res.users.length);
+	});
+
+	let choiceText = '';
+	let count = 0;
+	const choiceBtns: MessageButton[] = [];
+	resultMap.forEach((value, key) => {
+		choiceText += `${emotes[count]} ${key}: ${value} vote${value === 1 ? '' : 's'}\n`;
+		choiceBtns.push(new MessageButton({
+			label: `${key}`,
+			customId: `${SageInteractionType.POLL}_${key}`,
+			style: 'SECONDARY',
+			emoji: `${emotes[count++]}`
+		}));
+	});
+
+	choiceText = choiceText.trim();
+
+	const pollFooter = newPoll.type === 'Multiple'
+		? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
+		: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
+	const pollEmbed = new MessageEmbed()
+		.setTitle(newPoll.question)
+		.setDescription(`This poll was created by ${pollOwner.displayName} and ends **${dateToTimestamp(newPoll.expires, 'R')}**`)
+		.addField('Choices', choiceText)
+		.setFooter(pollFooter)
+		.setColor('RANDOM');
+
+	const msgComponents = [new MessageActionRow({ components: choiceBtns.slice(0, 5) })];
+	if (choiceBtns.length > 5) msgComponents.push(new MessageActionRow({ components: choiceBtns.slice(5) }));
+
+	await pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
+	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
+		await i.reply({ ephemeral: true, content: `Vote for ***${newChoice}*** recorded. To remove it, click the same option again.` });
+	}
+	if (!i.replied) await i.reply({ ephemeral: true, content: `Vote for ${newChoice} removed.` });
+
+	await i.client.mongo.collection<Poll>(DB.POLLS).findOneAndReplace({ message: newPoll.message }, newPoll);
+	return;
+}
+
+/**
+ * Takes in a list of poll results, a user, and a choice. Removes that user from
+ * the choice's user array.
+ * @param {PollResult[]} results The results to edit
+ * @param {string} user The user whose answer should be removed
+ * @param {string} choice The choice to remove a user from
+ * @returns {PollResult[]} The updated list of results
+ */
+function removeAnswer(results: PollResult[], user: string, choice: string) {
+	return results.map(r => {
+		if (r.option === choice) {
+			return { ...r, users: r.users.filter(id => id !== user) };
+		} else { return r; }
+	});
+}
+
+
+/**
+ * Takes in a list of poll results, a user, and a choice. Adds that user to the
+ * choice's user array.
+ * @param {PollResult[]} results The results to edit
+ * @param {string} user The user whose answer should be added
+ * @param {string} choice The choice to add a user to
+ * @returns {PollResult[]} The updated list of results
+ */
+function addAnswer(results: PollResult[], user: string, choice: string) {
+	return results.map(r => {
+		if (r.option === choice) {
+			return { ...r, users: [...r.users, user] };
+		} else { return r; }
+	});
 }

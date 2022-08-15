@@ -1,5 +1,5 @@
 import { Client, TextChannel, MessageEmbed, MessageAttachment } from 'discord.js';
-import { sendToFile } from '@lib/utils';
+import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { CommandError } from '@lib/types/errors';
 import { CHANNELS } from '@root/config';
 

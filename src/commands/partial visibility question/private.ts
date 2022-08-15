@@ -3,7 +3,7 @@ import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
 import { BOT, DB, MAINTAINERS } from '@root/config';
-import { generateErrorEmbed, generateQuestionId } from '@lib/utils';
+import { generateErrorEmbed, generateQuestionId } from '@lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -58,6 +58,8 @@ export default class extends Command {
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
 		if (courseGeneral.isText()) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,

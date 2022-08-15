@@ -1,7 +1,7 @@
 import { DB } from '@root/config';
 import { Reminder } from '@lib/types/Reminder';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { reminderTime } from '@lib/utils';
+import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {

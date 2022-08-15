@@ -105,6 +105,11 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 	}
 }
 
+export type TimestampType = 't' | 'T' | 'd' | 'D' | 'f' | 'F' | 'R';
+export function dateToTimestamp(date: Date, type: TimestampType = 't'): string {
+	return `<t:${Math.round(date.valueOf() / 1e3)}:${type}>`;
+}
+
 function addRole(interaction: CommandInteraction,
 	rolesMsg: Message,
 	menu: MessageSelectMenu,

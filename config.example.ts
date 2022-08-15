@@ -14,7 +14,8 @@ export const DB = {
 	ASSIGNABLE: 'assignable',
 	COURSES: 'courses',
 	REMINDERS: 'reminders',
-	CLIENT_DATA: 'clientData'
+	CLIENT_DATA: 'clientData',
+	POLLS: 'polls'
 };
 
 export const GUILDS = {			// Guild IDs for each guild
