@@ -12,11 +12,18 @@ export default class extends Command {
 			description: 'feedback to be sent to the admins',
 			type: 'STRING',
 			required: true
+		},
+		{
+			name: 'file',
+			description: 'A file to be posted with the feedback',
+			type: 'ATTACHMENT',
+			required: false
 		}
 	]
 
 	async run(interaction:CommandInteraction): Promise<void> {
 		const feedback = interaction.options.getString('feedback');
+		const file = interaction.options.getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
 		const embed = new MessageEmbed()
@@ -25,6 +32,8 @@ export default class extends Command {
 			.setDescription(feedback)
 			.setColor('DARK_GREEN')
 			.setTimestamp();
+
+		if (file) embed.setImage(file.url);
 
 		feedbackChannel.send({ embeds: [embed] });
 

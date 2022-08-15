@@ -35,7 +35,7 @@ export default class extends Command {
 			.setAuthor(`${member.user.username}`, member.user.displayAvatarURL())
 			.setColor(member.displayColor)
 			.setTimestamp()
-			.setFooter(`Member ID: ${member.id}`)
+			.setFooter({ text: `Member ID: ${member.id}` })
 			.addFields([
 				{ name: 'Display Name', value: `${member.displayName} (<@${member.id}>)`, inline: true },
 				{ name: 'Account Created', value: accountCreated, inline: true },

@@ -89,7 +89,7 @@ export default class extends Command {
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
-			.setFooter(pollFooter)
+			.setFooter({ text: pollFooter })
 			.setColor('RANDOM');
 
 		const choiceBtns = []; // first 5 choices
@@ -157,7 +157,7 @@ export default class extends Command {
 				.setTitle(question)
 				.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 				.addField('Choices', choiceText)
-				.setFooter(pollFooter)
+				.setFooter({ text: pollFooter })
 				.setColor('RANDOM');
 
 			if (choiceBtns2.length === 0) {

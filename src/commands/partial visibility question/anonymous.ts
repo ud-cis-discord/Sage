@@ -22,11 +22,18 @@ export default class extends Command {
 			description: 'What course chat would you like to ask your question in?',
 			type: 'STRING',
 			required: false
+		},
+		{
+			name: 'file',
+			description: 'A file to be posted with the question',
+			type: 'ATTACHMENT',
+			required: false
 		}
 	]
 
 	async run(interaction: CommandInteraction): Promise<void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
+		const file = interaction.options.getAttachment('file');
 
 		if (!user) {
 			return interaction.reply({ embeds: [generateErrorEmbed(`Something went wrong. Please contact ${MAINTAINERS}`)], ephemeral: true });
@@ -57,6 +64,8 @@ export default class extends Command {
 		const studentEmbed = new MessageEmbed()
 			.setAuthor(`Anonymous asked Question ${questionId}`, interaction.client.user.avatarURL())
 			.setDescription(question);
+
+		if (file) studentEmbed.setImage(file.url);
 
 		const generalChannel = await interaction.client.channels.fetch(course.channels.general) as TextChannel;
 		const questionMessage = await generalChannel.send({ embeds: [studentEmbed] });

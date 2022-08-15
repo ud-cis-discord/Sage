@@ -31,5 +31,8 @@
 		"timespan",
 		"udel",
 		"viewremind"
-	]
+	],
+	"search.exclude": {
+		"**/node_modules": false
+	}
 }

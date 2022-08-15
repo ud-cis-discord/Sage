@@ -65,6 +65,8 @@ export default class extends Command {
 				name: `${interaction.user.username}‘s anonymous question (${question.questionId})'`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked an anonymous question`,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				type: `GUILD_PRIVATE_THREAD`
 			});
 		} else {
@@ -84,7 +86,7 @@ export default class extends Command {
 
 		embed.setDescription(`${question.messageLink}`);
 		embed.setTitle(`${asker.user.tag}'s Question`);
-		embed.setFooter(`When you're done with this question, you can send \`/archive\` to close it`);
+		embed.setFooter({ text: `When you're done with this question, you can send \`/archive\` to close it` });
 		await privThread.send({
 			embeds: [embed]
 		});
@@ -92,7 +94,7 @@ export default class extends Command {
 		const threadEmbed = new MessageEmbed()
 			.setAuthor(`${interaction.user.tag}`, interaction.user.avatarURL())
 			.setDescription(response)
-			.setFooter(`Please have any further conversation in this thread!`);
+			.setFooter({ text: `Please have any further conversation in this thread!` });
 
 		return privThread.send({ embeds: [threadEmbed] });
 	}
