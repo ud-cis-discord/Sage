@@ -57,6 +57,9 @@ export default class extends Command {
 		const timespan = parse(interaction.options.getString('timespan'));
 		const question = interaction.options.getString('question');
 		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
+		if (new Set(choices).size !== choices.length) {
+			return interaction.reply({ content: `All poll options must be unique.`, ephemeral: true });
+		}
 		if (!args.includes(interaction.options.getString('optiontype'))) {
 			throw `poll option types must be one of ${args.join(', ')}`;
 		}
