@@ -1,12 +1,16 @@
-import { Collection, Client, CommandInteraction, ApplicationCommand, GuildMember, MessageSelectMenu, SelectMenuInteraction, ModalSubmitInteraction, TextChannel,
-	GuildMemberRoleManager } from 'discord.js';
-import { isCmdEqual, isPermissionEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
+import { Collection, Client, CommandInteraction, ApplicationCommand,
+	GuildMember, MessageSelectMenu, SelectMenuInteraction,
+	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
+	ButtonInteraction, Modal, TextInputComponent, MessageActionRow,
+	ModalActionRowComponent } from 'discord.js';
+import { isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
 import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
 import { CommandError } from '../lib/types/errors';
+import { verify } from '../pieces/verification';
 
 const DELETE_DELAY = 10000;
 
@@ -33,6 +37,7 @@ async function register(bot: Client): Promise<void> {
 		if (interaction.isCommand() || interaction.isContextMenu()) runCommand(interaction as CommandInteraction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
 		if (interaction.isModalSubmit()) handleModal(interaction, bot);
+		if (interaction.isButton()) handleButton(interaction);
 	});
 
 	bot.on('messageCreate', async msg => {
@@ -99,6 +104,9 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 
 async function handleModal(interaction: ModalSubmitInteraction, bot: Client) {
 	const { customId, fields } = interaction;
+	const guild = await bot.guilds.fetch(GUILDS.MAIN);
+	guild.members.fetch();
+
 	switch (customId) {
 		case 'announce': {
 			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
@@ -119,6 +127,45 @@ async function handleModal(interaction: ModalSubmitInteraction, bot: Client) {
 			await message.edit(content);
 			interaction.reply({ content: `Your message was edited.` });
 			break;
+		}
+		case 'verify': {
+			const givenHash = fields.getTextInputValue('verifyPrompt');
+			const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ hash: givenHash });
+			const enrollStr = entry.courses.length > 0
+				? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or to unenroll from your current course,` +
+			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
+				: '';
+
+			if (!entry) {
+				interaction.user.send(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
+				break;
+			}
+			await verify(interaction, bot, guild, entry, givenHash);
+			interaction.reply({ content: `Thank you for verifying! You can now access the rest of the server. ${enrollStr}`, ephemeral: true });
+			break;
+		}
+	}
+}
+
+export async function handleButton(interaction: ButtonInteraction): Promise<void> {
+	const { customId } = interaction;
+
+	switch (customId) {
+		case 'verify': {
+			const verifyModal = new Modal()
+				.setTitle('User Verification')
+				.setCustomId('verify');
+			const verifyPrompt = new TextInputComponent()
+				.setCustomId('verifyPrompt')
+				.setLabel('Please enter your unigue hash code here: ')
+				.setStyle('SHORT')
+				.setMinLength(44)
+				.setMaxLength(44)
+				.setRequired(true);
+			const verifyActionRow = new MessageActionRow<ModalActionRowComponent>().addComponents(verifyPrompt);
+
+			verifyModal.addComponents(verifyActionRow);
+			await interaction.showModal(verifyModal);
 		}
 	}
 }
