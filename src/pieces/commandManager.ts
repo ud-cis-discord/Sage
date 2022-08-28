@@ -131,16 +131,16 @@ async function handleModal(interaction: ModalSubmitInteraction, bot: Client) {
 		case 'verify': {
 			const givenHash = fields.getTextInputValue('verifyPrompt');
 			const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ hash: givenHash });
-			const enrollStr = entry.courses.length > 0
-				? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or to unenroll from your current course,` +
-			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
-				: '';
 
 			if (!entry) {
 				interaction.user.send(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
 				break;
 			}
 			await verify(interaction, bot, guild, entry, givenHash);
+			const enrollStr = entry.courses.length > 0
+				? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or to unenroll from your current course,` +
+			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
+				: '';
 			interaction.reply({ content: `Thank you for verifying! You can now access the rest of the server. ${enrollStr}`, ephemeral: true });
 			break;
 		}
