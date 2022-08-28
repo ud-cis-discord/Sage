@@ -30,7 +30,7 @@ export default class extends Command {
 	},
 	{
 		name: 'style',
-		description: 'The button/s style type',
+		description: 'The button\'s style type',
 		type: 'STRING',
 		required: true,
 		choices: STYLES.map((status) => ({
