@@ -21,13 +21,12 @@ const MESSAGE = `<!DOCTYPE html>
 	<p>For further information about the UD CIS <span style="color:#738ADB">Discord</span>, see <a href="https://ud-cis-discord.github.io/">this page.</a></p>
 	<p><strong>If you don't have a <span style="color:#738ADB">Discord</span> account already, click <a href="https://discord.com/register">here</a> to sign up for one.</strong></p>
 	<p>
-		Click <a href="https://discord.gg/$invCode">here</a> for the verification site.
-	<p>Once you're on the guild, right click Sage's name on the right side of the screen and select 'Message'. 
-	<br>Send just your hash code and join the official guild using the link that Sage sends back.
+		Once you are ready, click <a href="https://discord.gg/$invCode">here</a> to join the server and get yourself verified.
+	<p>Once you're on the server, follow the instructions given to you in the channel called "getting-verified". Make sure you have your hash code (given below) ready!
 	</p>
+
 	<p>Your hash code is: <span style="color:blueviolet">$hash</span></p>
-	<p><br>We hope to see you on the guild soon!<br>- The <span style="color:#738ADB">Discord</span> Admin Team</p>
-	
+	<p><br>We hope to see you on the server soon!<br>- The <span style="color:#738ADB">Discord</span> Admin Team</p>
 
 </body>
 
