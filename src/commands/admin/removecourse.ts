@@ -65,38 +65,42 @@ export default class extends Command {
 			}
 
 			if (i.customId === 'y') {
-				await interaction.editReply('<a:loading:755121200929439745> working...');
+				try {
+					await interaction.editReply('<a:loading:755121200929439745> working...');
 
-				//	removing course roles
-				await interaction.guild.members.fetch();
-				const staffRole = await interaction.guild.roles.cache.find(role => role.name === `${courseId} Staff`);
-				const studentRole = await interaction.guild.roles.cache.find(role => role.name === `CISC ${courseId}`);
+					//	removing course roles
+					await interaction.guild.members.fetch();
+					const staffRole = await interaction.guild.roles.cache.find(role => role.name === `${courseId} Staff`);
+					const studentRole = await interaction.guild.roles.cache.find(role => role.name === `CISC ${courseId}`);
 
-				//	archving the course channels
-				for (const channel of [...course.children.values()]) {
-					await channel.setParent(CHANNELS.ARCHIVE, { reason });
-					await channel.lockPermissions();
-					await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
+					//	archving the course channels
+					for (const channel of [...course.children.values()]) {
+						await channel.setParent(CHANNELS.ARCHIVE, { reason });
+						await channel.lockPermissions();
+						await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
+					}
+					await course.delete();
+
+					for (const [, member] of staffRole.members) {
+						if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
+					}
+					for (const [, member] of studentRole.members) {
+						if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
+					}
+
+					if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
+
+					staffRole.delete(reason);
+					studentRole.delete(reason);
+
+					// update and remove from database
+					await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
+					await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
+
+					await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from CISC ${courseId}`);
+				} catch (error) {
+					interaction.channel.send(`An error occured: ${error.message}`);
 				}
-				await course.delete();
-
-				for (const [, member] of staffRole.members) {
-					if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
-				}
-				for (const [, member] of studentRole.members) {
-					if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
-				}
-
-				if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
-
-				staffRole.delete(reason);
-				studentRole.delete(reason);
-
-				// update and remove from database
-				await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
-				await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
-
-				await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from CISC ${courseId}`);
 			} else {
 				await interaction.editReply({
 					components: [],

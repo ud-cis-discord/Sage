@@ -240,7 +240,7 @@ export function reminderTime({ expires: date, repeat }: Reminder): string {
 }
 
 export function calcNeededExp(levelExp: number, direction: string): number {
-	const xpRatio = 1.25;
+	const xpRatio = 1.75;
 	if (direction === '+') { // calculate exp for next level
 		return Math.floor(levelExp * xpRatio);
 	}
