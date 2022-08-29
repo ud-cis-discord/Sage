@@ -9,15 +9,15 @@ async function memberAdd(member: GuildMember): Promise<void> {
 
 	const entry: SageUser = await member.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 
-	if (!entry) {
-		await member.send(`We couldn't find you in our database, you likely used the invite link with a different account than the one you verified with.
-Please join the server with the account you used to send your hash, or contact ${MAINTAINERS} if you think this is an error.`);
-		await member.kick('This person wasn\'t in the database, they probably used a different account to verify than they used the invite with');
-		throw new DatabaseError(`User ${member.user.tag} (${member.id}) does not exist in the database.`);
-	}
-	if (!entry.isVerified) {
-		throw new Error(`User ${member.user.tag} (${member.id}) is not verified.`);
-	}
+	// 	if (!entry) {
+	// 		await member.send(`We couldn't find you in our database, you likely used the invite link with a different account than the one you verified with.
+	// Please join the server with the account you used to send your hash, or contact ${MAINTAINERS} if you think this is an error.`);
+	// 		await member.kick('This person wasn\'t in the database, they probably used a different account to verify than they used the invite with');
+	// 		throw new DatabaseError(`User ${member.user.tag} (${member.id}) does not exist in the database.`);
+	// 	}
+	// 	if (!entry.isVerified) {
+	// 		throw new Error(`User ${member.user.tag} (${member.id}) is not verified.`);
+	// 	}
 
 	entry.roles.forEach(role => {
 		// This might happen if a course was removed between when they left and when they re-joined.
