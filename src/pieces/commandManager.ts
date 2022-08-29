@@ -61,11 +61,12 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 		const removedRoleNames = [];
 		for (const id of removed) {
 			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
-			if (!role.name.includes('CISC')) {
+			if (!role.name.includes('CISC') && member.roles.cache.some(r => r.id === id.value)) {
 				member.roles.remove(id.value);
 				removedRoleNames.push(role.name);
+				responseContent = `Your enrollments have been updated.`;
 			}
-			if (member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
+			if (role.name.includes('CISC') && member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
 				const course = courses.find(c => c.name === role.name.substring(5));
 				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 				user.courses = user.courses.filter(c => c !== course.name);
@@ -78,12 +79,11 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 		}
 		for (const id of values) {
 			const role = interaction.guild.roles.cache.find(r => r.id === id);
-			if (!role.name.includes('CISC')) {
+			if (!role.name.includes('CISC') && !member.roles.cache.some(r => r.id === id)) {
 				member.roles.add(id);
 				addedRoleNames.push(role.name);
-				continue;
 			}
-			if (!member.roles.cache.some(r => r.id === id)) { // does user have this role?
+			if (role.name.includes('CISC') && !member.roles.cache.some(r => r.id === id)) { // does user not have this role?
 				const course = courses.find(c => c.name === role.name.substring(5));
 				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
 				user.courses.push(course.name);
