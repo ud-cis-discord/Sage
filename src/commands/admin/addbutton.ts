@@ -1,7 +1,7 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageActionRow, MessageButton, MessageButtonOptions, MessageButtonStyle, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageActionRow, MessageButton, MessageButtonStyle, TextChannel } from 'discord.js';
 
 const STYLES = ['primary', 'secondary', 'success', 'danger'];
 

@@ -1,5 +1,5 @@
 import { CHANNELS, DB } from '@root/config';
-import { Client, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Client, MessageEmbed, TextChannel } from 'discord.js';
 import { schedule } from 'node-cron';
 import { Reminder } from '@lib/types/Reminder';
 import { Poll, PollResult } from '@lib/types/Poll';

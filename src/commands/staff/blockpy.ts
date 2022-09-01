@@ -1,7 +1,7 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
+import { CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
@@ -29,10 +29,10 @@ export default class extends Command {
 		}
 
 		const sender: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-    this.sendEmail(sender.email, member.displayName, user.tag, entry);
-    return interaction.reply(
-      { content: `An email has been sent to you containing the requested data about \`${user.tag}\`.`,
-        ephemeral: true });
+		this.sendEmail(sender.email, member.displayName, user.tag, entry);
+		return interaction.reply(
+			{ content: `An email has been sent to you containing the requested data about \`${user.tag}\`.`,
+				ephemeral: true });
 	}
 
 	sendEmail(recipient: string, displayName: string, username: string, entry: SageUser): void {
@@ -50,7 +50,8 @@ export default class extends Command {
 			<html>
 				<body>
 					<h4>Your requested user information:</h4>
-          <a href="https://blockpy.cis.udel.edu/blockpy/recent_submissions?email=${entry.email}">BlockPy submissions for this student (${displayName}, also known as ${username}). Their email is ${entry.email}</a>
+          <a href="https://blockpy.cis.udel.edu/blockpy/recent_submissions?email=${entry.email}"
+		  >BlockPy submissions for this student (${displayName}, also known as ${username}). Their email is ${entry.email}</a>
 					<p><br>Thank you for using the UD CIS Discord Server and Sage!</p>
 				</body>
 			</html>`
