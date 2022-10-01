@@ -54,15 +54,25 @@ async function main() {
 
 	bot.once('ready', async () => {
 		// I'm mad about this - Josh </3
-		const team = (await bot.application.fetch()).owner as Team;
-		setBotmasterPerms(team.members.map(value => {
-			const permData: ApplicationCommandPermissionData = {
-				id: value.id,
+		// Don't worry Josh, I fix - Ben <3
+		const owners = (await bot.application.fetch()).owner; // as Team;
+		if ('members' in owners) {
+			setBotmasterPerms(owners.members.map(value => {
+				const permData: ApplicationCommandPermissionData = {
+					id: value.id,
+					permission: true,
+					type: 'USER'
+				};
+				return permData;
+			}));
+		} else {
+			setBotmasterPerms([{
+				id: owners.id,
 				permission: true,
 				type: 'USER'
-			};
-			return permData;
-		}));
+			}])
+		}
+		
 
 		const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
 		for (const file of pieceFiles) {
