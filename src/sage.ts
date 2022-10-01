@@ -54,8 +54,8 @@ async function main() {
 
 	bot.once('ready', async () => {
 		// I'm mad about this - Josh </3
-		// Don't worry Josh, I fix - Ben <3
-		const owners = (await bot.application.fetch()).owner; // as Team;
+		// Don't worry Josh, I fix - Ben <3 
+		const owners = (await bot.application.fetch()).owner;
 		if ('members' in owners) {
 			setBotmasterPerms(owners.members.map(value => {
 				const permData: ApplicationCommandPermissionData = {
