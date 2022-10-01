@@ -1,7 +1,7 @@
 import 'module-alias/register';
 import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
-import { ApplicationCommandPermissionData, Client, ExcludeEnum, Intents, PartialTypes, Team } from 'discord.js';
+import { ApplicationCommandPermissionData, Client, ExcludeEnum, Intents, PartialTypes } from 'discord.js';
 import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
 import { Octokit } from '@octokit/rest';
@@ -70,9 +70,9 @@ async function main() {
 				id: owners.id,
 				permission: true,
 				type: 'USER'
-			}])
+			}]);
 		}
-		
+
 
 		const pieceFiles = readdirRecursive(`${__dirname}/pieces`);
 		for (const file of pieceFiles) {
