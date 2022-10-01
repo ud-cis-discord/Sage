@@ -4,15 +4,13 @@ import { schedule } from 'node-cron';
 
 async function register(bot: Client): Promise<void> {
 	// Runs of the first of October at midnight
-	// schedule('0 0 1 10 *', () => {
-	schedule('24 * * * *', () => {
+	schedule('0 0 1 10 *', () => {
 		enableSpook(bot)
 			.catch(async error => bot.emit('error', error));
 	});
 
 	// Runs on the first of November at midnight
-	// schedule('0 0 1 11 *', () => {
-	schedule('25 * * * *', () => {
+	schedule('0 0 1 11 *', () => {
 		disableSpook(bot)
 			.catch(async error => bot.emit('error', error));
 	});
