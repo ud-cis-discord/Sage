@@ -24,13 +24,3 @@ export class CommandError extends Error {
 	}
 
 }
-
-export class SpookyError extends Error {
-
-	constructor(message: string) {
-		super(message);
-		this.name = 'Spoopification has taken place';
-		this.stack = undefined;
-	}
-
-}
