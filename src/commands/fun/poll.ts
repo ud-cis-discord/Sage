@@ -1,11 +1,11 @@
 import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, Client,
-	CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+	CommandInteraction, CommandInteractionOptionResolver, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
-import { dateToTimestamp, generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
+import { dateToTimestamp, generateErrorEmbed } from '@lib/utils/generalUtils';
 import { Poll, PollResult } from '@lib/types/Poll';
-import { SageInteractionType } from '@root/src/lib/types/InteractionType';
+import { SageInteractionType } from '@lib/types/InteractionType';
 
 const QUESTION_CHAR_LIMIT = 256;
 const args = ['Single', 'Multiple'];
@@ -28,12 +28,6 @@ export default class extends Command {
 			required: true
 		},
 		{
-			name: 'choices',
-			description: `A poll can have 2-10 choices. Separate choices with '|' (no spaces/quotes).`,
-			type: 'STRING',
-			required: true
-		},
-		{
 			name: 'optiontype',
 			description: `Whether participants can only select one choice or multiple.`,
 			type: 'STRING',
@@ -42,7 +36,68 @@ export default class extends Command {
 				name: arg,
 				value: arg
 			}))
-		}
+		},
+		{
+			name: 'choice1',
+			description: 'The first choice that appears on the poll',
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'choice2',
+			description: 'The second choice that appears on the poll',
+			type: 'STRING',
+			required: true
+		},
+		{
+			name: 'choice3',
+			description: 'The third choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice4',
+			description: 'The fourth choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice5',
+			description: 'The fifth choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice6',
+			description: 'The sixth choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice7',
+			description: 'The seventh choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice8',
+			description: 'The eighth choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice9',
+			description: 'The ninth choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		{
+			name: 'choice10',
+			description: 'The tenth choice that appears on the poll',
+			type: 'STRING',
+			required: false
+		},
+		
 	]
 	runInDM = false;
 
@@ -56,7 +111,8 @@ export default class extends Command {
 	async run(interaction: CommandInteraction): Promise<void> {
 		const timespan = parse(interaction.options.getString('timespan'));
 		const question = interaction.options.getString('question');
-		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
+		const choices = this.getChoices(interaction.options);
+		console.log(choices)
 		if (new Set(choices).size !== choices.length) {
 			return interaction.reply({ content: `All poll options must be unique.`, ephemeral: true });
 		}
@@ -140,6 +196,18 @@ export default class extends Command {
 			channel: interaction.channelId,
 			type: pollType
 		});
+	}
+
+	getChoices(options: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>): string[] {
+		const choices = [];
+
+		this.options.forEach(option => {
+			if (option.name.startsWith('choice')) {
+				choices.push(options.getString(option.name))
+			}
+		})
+
+		return choices.filter(choice => choice);
 	}
 
 	winMessage = (options: Array<string>, votes: number): string => options.length === 1
