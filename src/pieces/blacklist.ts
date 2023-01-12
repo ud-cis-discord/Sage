@@ -12,7 +12,7 @@ const NORMALIZE: [RegExp, string][] = [
 	[/Ғ|ғ|₣|🅵|🅕|\uD83C\uDDEB/g, 'F'],
 	[/₲|Ꮆ|Ᏻ|Ᏽ|🅶|🅖|\uD83C\uDDEC/g, 'G'],
 	[/Η|Н|н|Ӊ|ӊ|Ң|ң|Ӈ|ӈ|Ҥ|ҥ|Ꮋ|🅷|🅗|\uD83C\uDDED/g, 'H'],
-	[/Ι|І|Ӏ|ӏ|Ⅰ|Ꮖ|Ꮠ|🅸|🅘|\uD83C\uDDEE/g, 'I'],
+	[/Ι|І|Ӏ|ӏ|Ⅰ|Ꮖ|Ꮠ|🅸|🅘|!|\uD83C\uDDEE/g, 'I'],
 	[/Ј|Ꭻ|🅹|🅙|\uD83C\uDDEF/g, 'J'],
 	[/Κ|κ|К|к|Қ|қ|Ҟ|ҟ|Ҡ|ҡ|Ӄ|ӄ|Ҝ|ҝ|₭|Ꮶ|🅺|🅚|\uD83C\uDDF0/g, 'K'],
 	[/Ⅼ|£|Ł|Ꮮ|🅻|🅛|\uD83C\uDDF1/g, 'L'],
@@ -37,7 +37,7 @@ const NORMALIZE: [RegExp, string][] = [
 	[/ε|е|Ҽ|ҽ|Ҿ|ҿ|Є|є|€/g, 'e'],
 	[/ƒ/g, 'f'],
 	[/Ћ|ћ|Һ|һ|Ꮒ|Ꮵ/g, 'h'],
-	[/ι|і|ⅰ|Ꭵ|¡/g, 'i'],
+	[/ι|і|ⅰ|Ꭵ|!|¡/g, 'i'],
 	[/ј/g, 'j'],
 	[/ⅼ|£|₤/g, 'l'],
 	[/ⅿ|₥/g, 'm'],
@@ -110,9 +110,14 @@ async function filterMessages(msg: Message): Promise<Message | void> {
 	const cleanLowercaseMessage = cleanMessage.toLowerCase();
 	const cleanNormalizedLowercaseMessage = cleanNormalizedMessage.toLowerCase();
 
+	// strip of any special characters and spaces
+	const finalMessage = cleanNormalizedLowercaseMessage.replace(/[^a-zA-Z0-9 ]/g, '');
+	const finalMessagenoSpaces = finalMessage.replace(/\s/g, '');
+
 	for (const word of BLACKLIST) {
 		const simpleContains = lowercaseMessage.includes(word);
-		if (simpleContains || cleanLowercaseMessage.includes(word) || cleanNormalizedLowercaseMessage.includes(word)) {
+		if (simpleContains || cleanLowercaseMessage.includes(word) || cleanNormalizedLowercaseMessage.includes(word)
+		|| finalMessage.includes(word) || finalMessagenoSpaces.includes(word)) {
 			msg.delete();
 
 			return msg.author.send(`You used a restricted word. Please refrain from doing so again.`)
