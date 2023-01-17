@@ -25,6 +25,7 @@ async function handleCron(bot: Client): Promise<void> {
 		port: 25
 	});
 
+	// send the "lite" course reports to professors
 	const reportProfs: Array<SageUser> = users.filter(user => EMAIL.REPORT_ADDRESSES.includes(user.email));
 	reportProfs.forEach(prof => {
 		const reports: Attachment[] = [];
@@ -49,6 +50,32 @@ async function handleCron(bot: Client): Promise<void> {
 	</html>`,
 			attachments: reports
 		});
+	});
+
+	// send the full report to admins
+	let fullReport = `Email,Count,${courses.join(',')}\n`;
+	users.forEach(user => {
+		fullReport += `${user.email},${user.count}`;
+		courses.forEach(course => {
+			fullReport += `,${user.courses.includes(course.name)}`;
+		});
+		fullReport += '\n';
+	});
+
+	mailer.sendMail({
+		from: EMAIL.SENDER,
+		replyTo: EMAIL.REPLY_TO,
+		bcc: EMAIL.REPORT_ADDRESSES,
+		subject: 'Discord weekly Report',
+		html: `<!doctype html>
+<html>
+	<p> Here is your weekly Discord participation report. </p>
+	<p>- The <span style="color:#738ADB">Discord</span> Admin Team </p>
+</html>`,
+		attachments: [{
+			filename: `report${moment().format('M-D-YY_HH-mm-ss')}.csv`,
+			content: fullReport
+		}]
 	});
 
 	bot.mongo.collection(DB.USERS).updateMany({}, { $set: { count: 0 } });
