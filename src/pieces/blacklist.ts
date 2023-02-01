@@ -24,7 +24,7 @@ const NORMALIZE: [RegExp, string][] = [
 	[/Я|я|Ꭱ|Ꮢ|🆁|🅡|\uD83C\uDDF7/g, 'R'],
 	[/Ѕ|\$|Ꭶ|Ꮥ|Ꮪ|🆂|🅢|\uD83C\uDDF8/g, 'S'],
 	[/Τ|Т|т|Ҭ|ҭ|₮|₸|Ꭲ|🆃|🅣|\uD83C\uDDF9/g, 'T'],
-	[/🆄|🅤|\uD83C\uDDFA/g, 'U'],
+	[/🆄|🅤|\*|\uD83C\uDDFA/g, 'U'],
 	[/Ⅴ|Ꮴ|Ꮙ|Ꮩ|🆅|🅥|\uD83C\uDDFB/g, 'V'],
 	[/₩|Ꮃ|Ꮤ|🆆|🅦|\uD83C\uDDFC/g, 'W'],
 	[/Χ|χ|Х|Ҳ|🆇|🅧|\uD83C\uDDFD/g, 'X'],
@@ -84,7 +84,7 @@ async function register(bot: Client): Promise<void> {
 		filterMessages(msg).catch(async error => bot.emit('error', error));
 	});
 	bot.on('messageUpdate', async (_, msg) => {
-		// Handel partials
+		// Handle partials
 		if (msg.partial) {
 			msg = await msg.fetch();
 		}
