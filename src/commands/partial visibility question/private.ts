@@ -44,6 +44,8 @@ export default class extends Command {
 				const desc = 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
 				`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;
 				return interaction.reply({ embeds: [generateErrorEmbed(desc)], ephemeral: true });
+			} else if (!user.courses.includes(inputtedCourse.name)) {
+				return interaction.reply({ embeds: [generateErrorEmbed(`You aren't enrolled in this course!\n\nIf you believe this message is in error, please contact the admins.`)], ephemeral: true });
 			}
 			course = inputtedCourse;
 		}
