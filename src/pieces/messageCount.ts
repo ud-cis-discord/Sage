@@ -67,7 +67,7 @@ async function handleExpDetract(msg: Message | PartialMessage) {
 			{ discordId: msg.author.id },
 			{ $inc: { count: 0, curExp: +1 } }
 		);
-	} else { // if exp for this level exceeds the max, roll back a level.
+	} else if (user.level > 1) { // if exp for this level exceeds the max, roll back a level.
 		bot.mongo.collection(DB.USERS).findOneAndUpdate(
 			{ discordId: msg.author.id },
 			{ $set: { curExp: 1, levelExp: calcNeededExp(user.levelExp, '-') }, $inc: { level: -1 } }
