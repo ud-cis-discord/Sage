@@ -4,7 +4,7 @@ import { ApplicationCommandOptionData, ApplicationCommandPermissionData, Categor
 
 export default class extends Command {
 
-	description = 'Count channels in a category';
+	description = 'Count channels in a category, use during archiving';
 	runInDM = false;
 	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
@@ -21,9 +21,9 @@ export default class extends Command {
 		let channelCount = 0;
 		try {
 			channelCount = category.children.size;
-			return interaction.reply(`**${category}** has **${channelCount}** channel(s)!`);
+			return interaction.reply({ content: `**${category}** has **${channelCount}** channel(s)!`, ephemeral: true });
 		} catch (error) {
-			return interaction.reply(`That's not a valid channel category.`);
+			return interaction.reply({ content: `That's not a valid channel category.`, ephemeral: true });
 		}
 	}
 
