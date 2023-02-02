@@ -4,6 +4,7 @@ import { SageUser } from '../lib/types/SageUser';
 import { schedule } from 'node-cron';
 
 async function register(bot: Client): Promise<void> {
+	handleCron(bot);
 	schedule('0 3 * * *', () => { // run every day at 3:00am (time chosen because of low activity)
 		handleCron(bot)
 			.catch(async error => bot.emit('error', error));
@@ -11,7 +12,6 @@ async function register(bot: Client): Promise<void> {
 }
 
 async function handleCron(bot: Client) {
-	console.log('now syncing roles...');
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
 	await guild.members.fetch();
 	guild.members.cache.forEach(async (member) => {
