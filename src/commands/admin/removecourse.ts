@@ -68,10 +68,14 @@ export default class extends Command {
 				try {
 					await interaction.editReply('<a:loading:755121200929439745> working...');
 
-					//	removing course roles
+					//	fetching course roles
 					await interaction.guild.members.fetch();
 					const staffRole = await interaction.guild.roles.cache.find(role => role.name === `${courseId} Staff`);
 					const studentRole = await interaction.guild.roles.cache.find(role => role.name === `CISC ${courseId}`);
+					const allStaffRole = await interaction.guild.roles.cache.find(role => role.name === 'Staff');
+					const profRole = await interaction.guild.roles.cache.find(role => role.name === 'Prof');
+					const TARole = await interaction.guild.roles.cache.find(role => role.name === 'TA');
+					const LARole = await interaction.guild.roles.cache.find(role => role.name === 'LA');
 
 					//	archving the course channels
 					for (const channel of [...course.children.values()]) {
@@ -82,7 +86,20 @@ export default class extends Command {
 					await course.delete();
 
 					for (const [, member] of staffRole.members) {
+						// removing COURSE SPECIFIC staff role
 						if (member.roles.cache.has(staffRole.id)) await member.roles.remove(staffRole.id, reason);
+						// check if member is an LA and remove LA role if so
+						if (member.roles.cache.has(LARole.id)) {
+							await member.roles.remove(LARole.id, reason);
+						}
+						// check if member is a TA and remove TA role if so
+						if (member.roles.cache.has(TARole.id)) {
+							await member.roles.remove(TARole.id, reason);
+						}
+						// check if member is a prof, if not, remove Staff role
+						if (member.roles.cache.has(allStaffRole.id) && !member.roles.cache.has(profRole.id)) {
+							await member.roles.remove(allStaffRole.id, reason);
+						}
 					}
 					for (const [, member] of studentRole.members) {
 						if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
