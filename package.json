@@ -2,7 +2,7 @@
 	"name": "sage",
 	"version": "3.1.1",
 	"engines": {
-		"node": ">=16.0.0"
+		"node": ">=16.9.0"
 	},
 	"engineStrict": true,
 	"description": "A purpose build Discord bot to manage the UD CIS Discord server.",
