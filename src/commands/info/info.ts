@@ -8,7 +8,7 @@ export default class extends Command {
 
 	async run(interaction: CommandInteraction): Promise<void> {
 		const info
-		= `Welcome to ${BOT.NAME}! A wonderful, magical bot that has been custom-coded to assist you while you use this discord server.
+		= `Welcome to ${BOT.NAME}, a wonderful, magical bot that has been custom-coded to assist you while you use this Discord server!
 			
 	Some features of ${BOT.NAME} include: 
 		• :man_mage:  Self-assignable roles
@@ -16,7 +16,7 @@ export default class extends Command {
 		• :ninja: Private and anonymous questions
 		• :fire:  And many more! (use /help for the full list of commands)
 	
-	Our friend ${BOT.NAME} was originally created by Ben Segal, Josh Lyon, and Ren Ross and is is actively maintained by ${MAINTAINERS}.
+	Our friend ${BOT.NAME} was originally created by Ben Segal, Josh Lyon, and Ren Ross and is actively maintained by ${MAINTAINERS}.
 	 
 	Please let any of us know if you have any issues! We try to fix bugs as soon as possible and are still adding new features.
 	
