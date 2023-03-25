@@ -1,4 +1,4 @@
-import { MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
 import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -27,7 +27,7 @@ export default class extends Command {
 		const members = memberStrs.join(', ').length > 1000
 			? await sendToFile(memberStrs.join('\n'), 'txt', 'MemberList', true) : memberStrs.join(', ');
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setColor(role.color)
 			.setTitle(`${role.name} | ${memberList.size} members`)
 			.setFooter({ text: `Role ID: ${role.id}` });

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, EmbedBuilder } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
@@ -84,7 +84,7 @@ export default class extends Command {
 			}
 		];
 
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 			.setColor(Math.floor(Math.random() * 16777215))
 			.setTitle('Random Integer Generator')
 			.setFields(embedFields)

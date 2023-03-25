@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, MessageAttachment } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, MessageAttachment } from 'discord.js';
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
 import { Command } from '@lib/types/Command';
@@ -85,7 +85,7 @@ export default class extends Command {
 		}
 
 		const file = new MessageAttachment(canvas.toBuffer(), 'tex.png');
-		const embed = new MessageEmbed().setImage('attachment://tex.png');
+		const embed = new EmbedBuilder().setImage('attachment://tex.png');
 
 		interaction.editReply({ embeds: [embed], files: [file] });
 	}

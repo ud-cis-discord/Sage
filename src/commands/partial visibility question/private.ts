@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, EmbedBuilder, TextChannel, ThreadChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
@@ -81,7 +81,7 @@ export default class extends Command {
 		});
 		privThread.members.add(interaction.user.id);
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
 			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
 

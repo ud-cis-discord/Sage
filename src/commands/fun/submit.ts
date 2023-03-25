@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -25,7 +25,7 @@ export default class extends Command {
 		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
 		const description = (interaction.options as CommandInteractionOptionResolver).getString('description');
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))
 			.setTitle('New contest submission')
 			.addField('URL', file.url)

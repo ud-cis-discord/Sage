@@ -1,4 +1,4 @@
-import { Client, TextChannel, EmbedField, MessageEmbed, GuildMember, PartialGuildMember, GuildBan } from 'discord.js';
+import { Client, TextChannel, EmbedField, EmbedBuilder, GuildMember, PartialGuildMember, GuildBan } from 'discord.js';
 import { GUILDS, CHANNELS, ROLES } from '@root/config';
 
 async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> {
@@ -18,7 +18,7 @@ async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> 
 		});
 	}
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${user.tag} was banned.`)
 		.addFields(fields)
@@ -45,7 +45,7 @@ async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<voi
 		});
 	}
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${user.tag} was unbanned.`)
 		.addFields(fields)
@@ -75,7 +75,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 	}
 
 	if (muted !== null) {
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle(`${member.user.tag} ${muted} by ${logEntry.executor.tag}`)
 			.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 			.setColor('DARK_RED')
@@ -96,7 +96,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 		|| logEntry.target.id !== member.id
 		|| (Date.now() - logEntry.createdTimestamp) > 10e3) return;
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
 		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 		.setColor('YELLOW')

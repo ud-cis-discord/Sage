@@ -3,7 +3,7 @@ import {
 	GuildChannel,
 	DMChannel,
 	TextChannel,
-	MessageEmbed,
+	EmbedBuilder,
 	EmbedField,
 	Permissions,
 	GuildEmoji,
@@ -53,7 +53,7 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 		});
 	});
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Created new ${channel.type} channel, #${channel.name}`)
 		.setDescription(`${channel.name} is in the ${channel.parent ? channel.parent.name : 'none'} category.`)
@@ -79,7 +79,7 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 		});
 	}
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted ${channel.type} channel, #${channel.name}`)
 		.addFields(fields)
@@ -99,7 +99,7 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 	const [logEntry] = [...logs.values()];
 	if (!logEntry) return;
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setFooter({ text: `Channel ID: ${newChannel.id}` })
 		.setColor('PURPLE')
@@ -171,7 +171,7 @@ async function processEmojiCreate(emote: GuildEmoji, serverLog: TextChannel): Pr
 	const logs = (await emote.guild.fetchAuditLogs({ type: 'EMOJI_CREATE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${emote.name} <:${emote.name}:${emote.id}> emote created`)
 		.setImage(emote.url)
@@ -186,7 +186,7 @@ async function processEmojiDelete(emote: GuildEmoji, serverLog: TextChannel): Pr
 	const logs = (await emote.guild.fetchAuditLogs({ type: 'EMOJI_DELETE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${emote.name} emote deleted`)
 		.setImage(emote.url)
@@ -201,7 +201,7 @@ async function processEmojiUpdate(oldEmote: GuildEmoji, newEmote: GuildEmoji, se
 	const logs = (await newEmote.guild.fetchAuditLogs({ type: 'EMOJI_UPDATE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`<:${newEmote.name}:${newEmote.id}> ${oldEmote.name} is now called ${newEmote.name}`)
 		.setColor('DARK_VIVID_PINK')
@@ -253,7 +253,7 @@ async function processInviteCreate(invite: Invite, serverLog: TextChannel): Prom
 		inline: true
 	});
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`New invite created`)
 		.setDescription(invite.temporary ? 'This invite has temporary on.' : '')
@@ -273,7 +273,7 @@ async function processInviteDelete(invite: Invite, serverLog: TextChannel): Prom
 	if (logEntry.reason?.startsWith('[no log]')) return;
 	if (logEntry.changes.find(change => change.key === 'code').old !== invite.code) return;
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Invite to ${invite.channel.name} deleted`)
 		.setColor('GREEN')
@@ -286,7 +286,7 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 
 	let embed;
 	if (msg.partial) { // this message is a partial, so author/content information is not available.
-		embed = new MessageEmbed()
+		embed = new EmbedBuilder()
 			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
 				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
 			.setFooter(`Message ID: ${msg.id}`)
@@ -295,7 +295,7 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 		serverLog.send({ embeds: [embed] });
 		return;
 	} else {
-		embed = new MessageEmbed()
+		embed = new EmbedBuilder()
 			.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
 			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
 				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
@@ -349,7 +349,7 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 		}
 	});
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
 		.setDescription(logEntry.reason ? `**Reason**\n${logEntry.reason}` : '')
@@ -389,7 +389,7 @@ async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<vo
 		inline: false
 	});
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(`${logEntry.executor.tag}`, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Created new role @${role.name}`)
 		.addFields(fields)
@@ -415,7 +415,7 @@ async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<vo
 		});
 	}
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Deleted role @${role.name}`)
 		.addFields(fields)
@@ -431,7 +431,7 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 	const logs = (await newRole.guild.fetchAuditLogs({ type: 'ROLE_UPDATE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 	let toSend = false;
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`@${newRole.name} role updated`)
 		.setColor('DARK_BLUE')
@@ -466,7 +466,7 @@ async function processThreadCreate(thread: ThreadChannel, serverLog: TextChannel
 
 	const logs = (await thread.guild.fetchAuditLogs({ type: 'THREAD_CREATE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Thread created: "${thread.name}"`)
 		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
@@ -483,7 +483,7 @@ async function processThreadDelete(thread: ThreadChannel, serverLog: TextChannel
 
 	const logs = (await thread.guild.fetchAuditLogs({ type: 'THREAD_DELETE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Thread deleted: "${thread.name}"`)
 		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
@@ -499,7 +499,7 @@ async function processThreadUpdate(oldThread: ThreadChannel, newThread: ThreadCh
 
 	const logs = (await newThread.guild.fetchAuditLogs({ type: 'THREAD_UPDATE', limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
 		.setTitle(`Thread updated: "${newThread.name}"`)
 		.setFields([{ name: 'Thread type', inline: false, value: `${newThread.type}` }])

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, Message, EmbedBuilder, TextChannel } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
@@ -37,7 +37,7 @@ export default class extends Command {
 
 			if (course) {
 				const staffChannel = interaction.guild.channels.cache.get(course.channels.staff) as TextChannel;
-				const embed = new MessageEmbed()
+				const embed = new EmbedBuilder()
 					.setTitle(`${interaction.user.tag} Warned ${target.author.tag}`)
 					.setFooter({ text: `${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}` })
 					.addFields([{

@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { CommandInteraction, EmbedBuilder } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -10,7 +10,7 @@ export default class extends Command {
 		const membersWithRoles = interaction.guild.members.cache.filter(m => m.roles.cache.size > 1).size;
 		const percentage = Math.floor((interaction.guild.members.cache.filter(m => m.roles.cache.size > 1).size / interaction.guild.memberCount) * 100);
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.addFields([
 				{ name: 'Total Members', value: interaction.guild.memberCount.toString(), inline: true },
 				{ name: 'Humans', value: interaction.guild.members.cache.filter(m => !m.user.bot).size.toString(), inline: true },

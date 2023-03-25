@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { CommandInteraction, EmbedBuilder } from 'discord.js';
 import { execSync } from 'child_process';
 import { homepage as github } from '@root/package.json';
 import { Command } from '@lib/types/Command';
@@ -10,7 +10,7 @@ export default class extends Command {
 	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setAuthor(author)
 			.setTitle(message)
 			.setDescription(`Commit [${hash.slice(0, 8)}](${github}/commit/${hash}) on ${branch}`)

@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { MessageEmbed, EmbedField, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, EmbedField, CommandInteraction } from 'discord.js';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import { Command } from '@lib/types/Command';
@@ -41,7 +41,7 @@ export default class extends Command {
 			});
 		}
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle(currentStatus.status.description)
 			.setDescription(`[Discord Status](${currentStatus.page.url})\n\n${currentStatus.incidents[0]
 				? `Current incidents:\n${currentStatus.incidents.map(i => i.name).join('\n')}`

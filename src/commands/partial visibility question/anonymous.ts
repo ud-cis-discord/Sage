@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, TextChannel } from 'discord.js';
 import { generateErrorEmbed, generateQuestionId } from '@lib/utils/generalUtils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
@@ -61,7 +61,7 @@ export default class extends Command {
 
 		const questionId = await generateQuestionId(interaction);
 
-		const studentEmbed = new MessageEmbed()
+		const studentEmbed = new EmbedBuilder()
 			.setAuthor(`Anonymous asked Question ${questionId}`, interaction.client.user.avatarURL())
 			.setDescription(question);
 
@@ -71,7 +71,7 @@ export default class extends Command {
 		const questionMessage = await generalChannel.send({ embeds: [studentEmbed] });
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
-		const staffEmbed = new MessageEmbed()
+		const staffEmbed = new EmbedBuilder()
 			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
 			.setDescription(`[Click to jump](${messageLink})
 	It is recommended you reply in public, but sudoreply can be used **in a staff channel** to reply in private if necessary.`);

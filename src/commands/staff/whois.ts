@@ -1,5 +1,5 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, EmbedBuilder } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
@@ -31,7 +31,7 @@ export default class extends Command {
 		const memberSince = `${member.joinedAt.getMonth()}/${member.joinedAt.getDate()}/${member.joinedAt.getFullYear()}
 		(${prettyMilliseconds(Date.now() - member.joinedTimestamp)} ago)`;
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setAuthor(`${member.user.username}`, member.user.displayAvatarURL())
 			.setColor(member.displayColor)
 			.setTimestamp()

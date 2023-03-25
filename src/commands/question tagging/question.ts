@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
@@ -66,13 +66,13 @@ export default class extends Command {
 		entries.forEach(doc => {
 			fields.push({ name: doc.header.replace(/\n/g, ' '), value: `[Click to view](${doc.link})`, inline: false });
 		});
-		const embeds: Array<MessageEmbed> = [new MessageEmbed()
+		const embeds: Array<EmbedBuilder> = [new EmbedBuilder()
 			.setTitle(`Questions for ${course} ${assignment}`)
 			.addFields(fields.splice(0, 25))
 			.setColor('DARK_AQUA')];
 
 		while (fields.length > 0) {
-			embeds.push(new MessageEmbed()
+			embeds.push(new EmbedBuilder()
 				.addFields(fields.splice(0, 25))
 				.setColor('DARK_AQUA'));
 		}

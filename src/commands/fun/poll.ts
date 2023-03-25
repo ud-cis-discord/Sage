@@ -1,6 +1,6 @@
 import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, Client,
-	CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+	CommandInteraction, ActionRowBuilder, MessageButton, EmbedBuilder } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 import { dateToTimestamp, generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
@@ -94,12 +94,12 @@ export default class extends Command {
 		const pollFooter = pollType === 'Multiple'
 			? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
 			: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
-		const pollEmbed = new MessageEmbed()
+		const pollEmbed = new EmbedBuilder()
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
 			.addField('Choices', choiceText)
 			.setFooter({ text: pollFooter })
-			.setColor('RANDOM');
+			.setColor('Random');;
 
 		const choiceBtns = []; // first 5 choices
 		const choiceBtns2 = []; // next 5
@@ -120,9 +120,9 @@ export default class extends Command {
 		});
 
 		if (choiceBtns2.length === 0) {
-			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns })] });
+			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder({ components: choiceBtns })] });
 		} else {
-			interaction.reply({ embeds: [pollEmbed], components: [new MessageActionRow({ components: choiceBtns }), new MessageActionRow({ components: choiceBtns2 })] });
+			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder({ components: choiceBtns }), new ActionRowBuilder({ components: choiceBtns2 })] });
 		}
 
 		let replyId: string;
@@ -192,15 +192,15 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 	const pollFooter = newPoll.type === 'Multiple'
 		? 'You can select multiple options. You can remove your vote for a choice simply by pressing the choice\'s button again.'
 		: 'You can only select one option. You can change your vote by pressing another button or remove your vote for a choice simply by pressing the choice\'s button again.';
-	const pollEmbed = new MessageEmbed()
+	const pollEmbed = new EmbedBuilder()
 		.setTitle(newPoll.question)
 		.setDescription(`This poll was created by ${pollOwner.displayName} and ends **${dateToTimestamp(newPoll.expires, 'R')}**`)
 		.addField('Choices', choiceText)
 		.setFooter(pollFooter)
-		.setColor('RANDOM');
+		.setColor('Random');;
 
-	const msgComponents = [new MessageActionRow({ components: choiceBtns.slice(0, 5) })];
-	if (choiceBtns.length > 5) msgComponents.push(new MessageActionRow({ components: choiceBtns.slice(5) }));
+	const msgComponents = [new ActionRowBuilder({ components: choiceBtns.slice(0, 5) })];
+	if (choiceBtns.length > 5) msgComponents.push(new ActionRowBuilder({ components: choiceBtns.slice(5) }));
 
 	await pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
 	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {

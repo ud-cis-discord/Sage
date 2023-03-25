@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { EmbedBuilder, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { generateErrorEmbed } from '@lib/utils/generalUtils';
 
 
@@ -44,7 +44,7 @@ export default class extends Command {
 		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
 		const channel = await interaction.client.channels.fetch(channelId) as TextChannel;
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setAuthor(`Anonymous responded to ${question.questionId}`, interaction.client.user.avatarURL())
 			.setDescription(`${(interaction.options as CommandInteractionOptionResolver).getString('response')}\n\n[Jump to question](${question.messageLink})`);
 

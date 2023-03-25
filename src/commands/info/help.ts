@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder, Util, GuildMember } from 'discord.js';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -70,13 +70,13 @@ export default class extends Command {
 				inline: false
 			});
 
-			const embed = new MessageEmbed()
+			const embed = new EmbedBuilder()
 				.setTitle(command.name)
 				.setDescription(command.description ? command.description : '')
 				.addFields(fields)
 				.setThumbnail(interaction.client.user.avatarURL())
 				.setTimestamp(Date.now())
-				.setColor('RANDOM');
+				.setColor('Random');;
 
 			return interaction.reply({ embeds: [embed] });
 		} else {
@@ -115,10 +115,10 @@ export default class extends Command {
 
 			let notified = false;
 			splitStr.forEach((helpMsg) => {
-				const embed = new MessageEmbed()
+				const embed = new EmbedBuilder()
 					.setTitle(`-- Commands --`)
 					.setDescription(helpMsg)
-					.setColor('RANDOM');
+					.setColor('Random');;
 				interaction.user.send({ embeds: [embed] })
 					.then(() => {
 						if (!notified) {

@@ -2,7 +2,7 @@ import { SageUser } from '@lib/types/SageUser';
 import { Leaderboard } from '@lib/enums';
 import { Command } from '@lib/types/Command';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
-import { MessageEmbed, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
@@ -95,7 +95,7 @@ export default class extends Command {
 		const content = `You are #${askerRank} and at level ${askerLevel} with ${askerExp} exp.`;
 
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('UD CIS Discord Leaderboard')
 			.setFooter({ text: `Showing page ${page} (${start + 1} - ${end || users.length})` })
 			.setColor(interaction.guild.members.cache.get(displUsers[0].discordId).displayHexColor)

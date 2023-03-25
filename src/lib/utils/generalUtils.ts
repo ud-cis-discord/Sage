@@ -1,7 +1,7 @@
 import {
 	ApplicationCommandOptionData, Client, CommandInteraction, Message, MessageAttachment,
-	MessageEmbed, Role, TextChannel, MessageActionRow, ApplicationCommandPermissions,
-	MessageSelectMenu, MessageSelectOptionData
+	EmbedBuilder, Role, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
+	StringSelectMenuBuilder, MessageSelectOptionData
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
@@ -44,8 +44,8 @@ export function isPermissionEqual(perm1: ApplicationCommandPermissions, perm2: A
 		&& perm1.type === perm2.type;
 }
 
-export function generateErrorEmbed(msg: string): MessageEmbed {
-	const responseEmbed = new MessageEmbed()
+export function generateErrorEmbed(msg: string): EmbedBuilder {
+	const responseEmbed = new EmbedBuilder()
 		.setColor('#ff0000')
 		.setTitle('Error')
 		.setDescription(msg);
@@ -62,7 +62,7 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 	let rolesMsg: Message;
 	const channel = await interaction.guild.channels.fetch(CHANNELS.ROLE_SELECT) as TextChannel;
 	if (!channel || channel.type !== 'GUILD_TEXT') {
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
 			.setDescription(`Could not find channel.`);
@@ -74,7 +74,7 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 			isCourse ? ROLE_DROPDOWNS.COURSE_ROLES : ROLE_DROPDOWNS.ASSIGN_ROLES, { cache: true, force: true }
 		);
 	} catch (error) {
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
 			.setDescription(`Unknown message, make sure your channel and message ID are correct.`);
@@ -82,7 +82,7 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 		return false;
 	}
 	if (rolesMsg.author.id !== BOT.CLIENT_ID) {
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
 			.setDescription(`You must tag a message that was sent by ${BOT.NAME} (me!).`);
@@ -91,12 +91,12 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 	}
 
 	// the message component row that the dropdown is in
-	let dropdownRow = rolesMsg.components[0] as MessageActionRow;
-	if (!dropdownRow) dropdownRow = new MessageActionRow();
+	let dropdownRow = rolesMsg.components[0] as ActionRowBuilder;
+	if (!dropdownRow) dropdownRow = new ActionRowBuilder();
 
 	const option: MessageSelectOptionData = { label: role.name, value: role.id };
 
-	const menu = dropdownRow.components[0] as MessageSelectMenu;
+	const menu = dropdownRow.components[0] as StringSelectMenuBuilder;
 	switch (dropdownAction) {
 		case 'ADD':
 			return addRole(interaction, rolesMsg, menu, option, dropdownRow, isCourse);
@@ -112,14 +112,14 @@ export function dateToTimestamp(date: Date, type: TimestampType = 't'): string {
 
 function addRole(interaction: CommandInteraction,
 	rolesMsg: Message,
-	menu: MessageSelectMenu,
+	menu: StringSelectMenuBuilder,
 	option: MessageSelectOptionData,
-	dropdownRow: MessageActionRow,
+	dropdownRow: ActionRowBuilder,
 	isCourse: boolean): boolean {
 	if (menu) {
 		menu.options.forEach(menuOption => {
 			if (menuOption.value === option.value) {
-				const responseEmbed = new MessageEmbed()
+				const responseEmbed = new EmbedBuilder()
 					.setColor('#ff0000')
 					.setTitle('Argument error')
 					.setDescription(`${option.label} is in this message's role select menu already.`);
@@ -132,7 +132,7 @@ function addRole(interaction: CommandInteraction,
 		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
 	} else {
 		dropdownRow.addComponents(
-			new MessageSelectMenu()
+			new StringSelectMenuBuilder()
 				.setCustomId('roleselect')
 				.setMinValues(0)
 				.setMaxValues(1)
@@ -146,12 +146,12 @@ function addRole(interaction: CommandInteraction,
 
 function removeRole(interaction: CommandInteraction,
 	rolesMsg: Message,
-	menu: MessageSelectMenu,
+	menu: StringSelectMenuBuilder,
 	option: MessageSelectOptionData,
-	dropdownRow: MessageActionRow): boolean {
+	dropdownRow: ActionRowBuilder): boolean {
 	let cont = true;
 	if (!menu) {
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
 			.setDescription(`This message does not have a role dropdown menu.`);
@@ -171,7 +171,7 @@ function removeRole(interaction: CommandInteraction,
 
 	if (!cont) return true;
 
-	const responseEmbed = new MessageEmbed()
+	const responseEmbed = new EmbedBuilder()
 		.setColor('#ff0000')
 		.setTitle('Argument error')
 		.setDescription(`${option.label} was not found in that message's role select menu. The role, however, has still been removed from the server and the database.`);

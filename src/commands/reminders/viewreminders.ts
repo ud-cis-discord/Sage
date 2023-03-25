@@ -1,6 +1,6 @@
 import { DB } from '@root/config';
 import { Reminder } from '@lib/types/Reminder';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { CommandInteraction, EmbedBuilder } from 'discord.js';
 import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
@@ -18,11 +18,11 @@ export default class extends Command {
 			interaction.reply({ content: 'You don\'t have any pending reminders!', ephemeral: true });
 		}
 
-		const embeds: Array<MessageEmbed> = [];
+		const embeds: Array<EmbedBuilder> = [];
 
 		reminders.forEach((reminder, i) => {
 			if (i % 25 === 0) {
-				embeds.push(new MessageEmbed()
+				embeds.push(new EmbedBuilder()
 					.setTitle('Pending reminders')
 					.setColor('DARK_AQUA'));
 			}

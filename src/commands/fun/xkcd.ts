@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, ActionRowBuilder, MessageButton, EmbedBuilder } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
@@ -51,11 +51,11 @@ export default class extends Command {
 
 		let actionRow;
 		if (comicNum === 1) {
-			actionRow = new MessageActionRow({ components: [randButton, nextButton] });
+			actionRow = new ActionRowBuilder({ components: [randButton, nextButton] });
 		} else if (comicNum === latest.num) {
-			actionRow = new MessageActionRow({ components: [prevButton, randButton] });
+			actionRow = new ActionRowBuilder({ components: [prevButton, randButton] });
 		} else {
-			actionRow = new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+			actionRow = new ActionRowBuilder({ components: [prevButton, randButton, nextButton] });
 		}
 		interaction.reply({
 			embeds: [this.createComicEmbed(comic)],
@@ -82,25 +82,25 @@ export default class extends Command {
 				if (comicNum - 1 > 0) {
 					comic = await fetch(`http://xkcd.com/${--comicNum}/info.0.json`).then(r => r.json());
 					actionRow = comicNum === 1
-						? new MessageActionRow({ components: [randButton, nextButton] })
-						: new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+						? new ActionRowBuilder({ components: [randButton, nextButton] })
+						: new ActionRowBuilder({ components: [prevButton, randButton, nextButton] });
 				}
 			} else if (i.customId === 'next') {
 				if (comicNum + 1 <= latest.num) {
 					comic = await fetch(`http://xkcd.com/${++comicNum}/info.0.json`).then(r => r.json());
 					actionRow = comicNum === latest.num
-						? new MessageActionRow({ components: [prevButton, randButton] })
-						: new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+						? new ActionRowBuilder({ components: [prevButton, randButton] })
+						: new ActionRowBuilder({ components: [prevButton, randButton, nextButton] });
 				}
 			} else if (i.customId === 'rand') {
 				comicNum = Math.trunc((Math.random() * (latest.num - 1)) + 1);
 				comic = await fetch(`http://xkcd.com/${comicNum}/info.0.json`).then(r => r.json());
 				if (comicNum === 1) {
-					actionRow = new MessageActionRow({ components: [randButton, nextButton] });
+					actionRow = new ActionRowBuilder({ components: [randButton, nextButton] });
 				} else if (comicNum === latest.num) {
-					actionRow = new MessageActionRow({ components: [prevButton, randButton] });
+					actionRow = new ActionRowBuilder({ components: [prevButton, randButton] });
 				} else {
-					actionRow = new MessageActionRow({ components: [prevButton, randButton, nextButton] });
+					actionRow = new ActionRowBuilder({ components: [prevButton, randButton, nextButton] });
 				}
 			}
 			interaction.editReply({
@@ -110,7 +110,7 @@ export default class extends Command {
 		});
 	}
 
-	createComicEmbed(comic: XkcdComic): MessageEmbed {
+	createComicEmbed(comic: XkcdComic): EmbedBuilder {
 		let comicDescription = (comic.alt || comic.transcript)
 			.replace(/{{/g, '{')
 			.replace(/}}/g, '}')
@@ -122,7 +122,7 @@ export default class extends Command {
 			comicDescription = `${comicDescription.slice(0, 2000)}...`;
 		}
 
-		return new MessageEmbed()
+		return new EmbedBuilder()
 			.setColor('GREYPLE')
 			.setDescription(`[View on xkcd.com](https://xkcd.com/${comic.num}/)`)
 			.setFooter({ text: comicDescription })

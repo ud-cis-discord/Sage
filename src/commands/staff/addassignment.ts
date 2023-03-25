@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, EmbedField, EmbedBuilder } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
@@ -59,7 +59,7 @@ export default class extends Command {
 				inline: true
 			});
 		}
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle(`Course ${course}`)
 			.addFields(fields)
 			.setColor('GOLD');

@@ -1,11 +1,11 @@
-import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField, User, PartialUser } from 'discord.js';
+import { Client, GuildMember, TextChannel, EmbedBuilder, PartialGuildMember, EmbedField, User, PartialUser } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { GUILDS, CHANNELS } from '@root/config';
 
 async function processMemberAdd(member: GuildMember, channel: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setTitle(`${member.user.tag} just joined.`)
 		.setThumbnail(member.user.avatarURL({ dynamic: true }))
 		.addField('Account created', `${member.user.createdAt.toLocaleString()}, ` +
@@ -65,7 +65,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 		});
 	}
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setTitle(`${member.user.tag} just left.`)
 		.setThumbnail(member.user.avatarURL({ dynamic: true }))
 		.addFields(fields)
@@ -77,7 +77,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember, channel: TextChannel): Promise<void> {
 	if (newMember.guild.id !== GUILDS.MAIN) return;
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setFooter({ text: `Discord ID: ${newMember.id}` })
 		.setTimestamp();
 	let toSend = false;
@@ -147,7 +147,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 
 async function processUserUpdate(oldUser: User | PartialUser, newUser: User, channel: TextChannel): Promise<void> {
 	let toSend = false;
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setAuthor(newUser.tag, newUser.avatarURL({ dynamic: true }))
 		.setColor('DARK_GOLD')
 		.setFooter({ text: `Discord ID: ${newUser.id}` })

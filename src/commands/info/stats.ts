@@ -1,4 +1,4 @@
-import { EmbedField, CommandInteraction, MessageEmbed, version as discordVersion } from 'discord.js';
+import { EmbedField, CommandInteraction, EmbedBuilder, version as discordVersion } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { version as sageVersion } from '@root/package.json';
 import { BOT } from '@root/config';
@@ -48,7 +48,7 @@ export default class extends Command {
 			inline: true
 		});
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setColor('DARK_GREEN')
 			.setAuthor(`${BOT.NAME} Stats`, bot.user.displayAvatarURL())
 			.setThumbnail(bot.user.displayAvatarURL())

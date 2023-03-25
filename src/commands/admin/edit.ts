@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, MessageActionRow, Modal, ModalActionRowComponent, TextChannel, TextInputComponent } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, Modal, ModalActionRowComponentBuilder, TextChannel, TextInputComponent } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -37,7 +37,7 @@ export default class extends Command {
 					ephemeral: true });
 		}
 
-		const modal = new Modal()
+		const modal = new ModalBuilder()
 			.setTitle('Edit')
 			.setCustomId('edit');
 
@@ -61,14 +61,14 @@ export default class extends Command {
 			.setRequired(true)
 			.setValue(message.channelId);
 
-		const modalRows: MessageActionRow<ModalActionRowComponent>[] = [
-			new MessageActionRow<ModalActionRowComponent>().addComponents(contentsComponent),
-			new MessageActionRow<ModalActionRowComponent>().addComponents(messageComponent),
-			new MessageActionRow<ModalActionRowComponent>().addComponents(channelComponent)
+		const modalRows: ActionRowBuilder<ModalActionRowComponentBuilder>[] = [
+			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(contentsComponent),
+			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(messageComponent),
+			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(channelComponent)
 		];
 		modal.addComponents(...modalRows);
 
-		await interaction.showModal(modal);
+		await interaction.showModalBuilder(modal);
 	}
 
 }

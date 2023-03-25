@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, Modal, TextInputComponent, MessageActionRow, ModalActionRowComponent } from 'discord.js';
+import { TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, Modal, TextInputComponent, ActionRowBuilder, ModalActionRowComponentBuilder } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -28,7 +28,7 @@ export default class extends Command {
 
 		const channel = (channelOption || announceChannel) as TextChannel;
 
-		const modal = new Modal()
+		const modal = new ModalBuilder()
 			.setTitle('Announce')
 			.setCustomId('announce');
 
@@ -52,14 +52,14 @@ export default class extends Command {
 			.setRequired(false)
 			.setValue(file ? file.url : '');
 
-		const modalRows: MessageActionRow<ModalActionRowComponent>[] = [
-			new MessageActionRow<ModalActionRowComponent>().addComponents(contentsComponent),
-			new MessageActionRow<ModalActionRowComponent>().addComponents(channelComponent),
-			new MessageActionRow<ModalActionRowComponent>().addComponents(fileComponent)
+		const modalRows: ActionRowBuilder<ModalActionRowComponentBuilder>[] = [
+			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(contentsComponent),
+			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(channelComponent),
+			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(fileComponent)
 		];
 		modal.addComponents(...modalRows);
 
-		await interaction.showModal(modal);
+		await interaction.showModalBuilder(modal);
 	}
 
 }

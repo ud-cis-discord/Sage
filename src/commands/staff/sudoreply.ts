@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, GuildChannel, Message, EmbedBuilder, TextChannel, ThreadChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 
@@ -79,7 +79,7 @@ export default class extends Command {
 		privThread.members.add(interaction.user.id);
 		privThread.members.add(question.owner);
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setDescription(`I've sent your response to this thread: <#${privThread.id}>\n\n Please have any further conversation there.`);
 
 		await interaction.reply({
@@ -93,7 +93,7 @@ export default class extends Command {
 			embeds: [embed]
 		});
 
-		const threadEmbed = new MessageEmbed()
+		const threadEmbed = new EmbedBuilder()
 			.setAuthor(`${interaction.user.tag}`, interaction.user.avatarURL())
 			.setDescription(response)
 			.setFooter({ text: `Please have any further conversation in this thread!` });

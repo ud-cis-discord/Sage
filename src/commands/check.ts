@@ -1,4 +1,4 @@
-import { MessageEmbed, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { EmbedBuilder, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -23,7 +23,7 @@ export default class extends Command {
 			return;
 		}
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle(`${interaction.user.username}'s Progress`)
 			.setThumbnail(interaction.user.avatarURL())
 			.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, true)

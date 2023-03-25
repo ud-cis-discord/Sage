@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { CommandInteraction, EmbedBuilder } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -8,14 +8,14 @@ export default class extends Command {
 
 	run(interaction: CommandInteraction): Promise<void> {
 		// 5 is a random number I chose to be the blindfolded Roosen, no other meaning
-		let responseEmbed: MessageEmbed;
+		let responseEmbed: EmbedBuilder;
 		if (Math.floor(Math.random() * 6) === 5) {
-			responseEmbed = new MessageEmbed()
+			responseEmbed = new EmbedBuilder()
 				.setColor('#ff0000')
 				.setTitle('Battle results')
 				.setDescription('Ooooooooooooh... ouch! Blindfolded Roosen has killed you! You lose.');
 		} else {
-			responseEmbed = new MessageEmbed()
+			responseEmbed = new EmbedBuilder()
 				.setColor('#00ff00')
 				.setTitle('Battle results')
 				.setDescription('You\'ve won the fight against blindfolded Roosen. You live another day!');

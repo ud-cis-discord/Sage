@@ -1,7 +1,7 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { MessageEmbed, CommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData } from 'discord.js';
+import { EmbedBuilder, CommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
@@ -28,7 +28,7 @@ export default class extends Command {
 			return interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
 		}
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle(`Looking Up:	${member.displayName}`)
 			.setThumbnail(user.avatarURL())
 			.setColor('GREEN')

@@ -1,4 +1,4 @@
-import { Client, TextChannel, MessageEmbed, MessageAttachment } from 'discord.js';
+import { Client, TextChannel, EmbedBuilder, MessageAttachment } from 'discord.js';
 import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { CommandError } from '@lib/types/errors';
 import { CHANNELS } from '@root/config';
@@ -7,15 +7,15 @@ async function register(bot: Client): Promise<void> {
 	const errLog = await bot.channels.fetch(CHANNELS.ERROR_LOG) as TextChannel;
 	bot.on('error', async error => {
 		const [embed, attachments] = await generateLogEmbed(error);
-		errLog.send({ embeds: [embed as MessageEmbed], files: attachments as MessageAttachment[] });
+		errLog.send({ embeds: [embed as EmbedBuilder], files: attachments as MessageAttachment[] });
 	});
 }
 
 export default register;
 
-async function generateLogEmbed(error: CommandError): Promise<Array<MessageEmbed | MessageAttachment[]>> {
+async function generateLogEmbed(error: CommandError): Promise<Array<EmbedBuilder | MessageAttachment[]>> {
 	console.error(error);
-	const embed = new MessageEmbed();
+	const embed = new EmbedBuilder();
 	const attachments: MessageAttachment[] = [];
 
 	embed.setTitle(error.name ? error.name : error.toString());

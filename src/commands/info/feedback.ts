@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { EmbedBuilder, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { BOT, CHANNELS, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -26,7 +26,7 @@ export default class extends Command {
 		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))
 			.setTitle('New Feedback')
 			.setDescription(feedback)

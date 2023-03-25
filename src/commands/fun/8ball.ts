@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const MAGIC8BALL_RESPONSES = [
@@ -43,7 +43,7 @@ export default class extends Command {
 		const response = question.length !== 0 && question[question.length - 1].endsWith('?')
 			?	MAGIC8BALL_RESPONSES[Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]
 			:	'The 8-ball only responds to questions smh';
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 			.setColor('#000000')
 			.setTitle('The magic 8-ball says...')
 			.setDescription(response)
