@@ -1,5 +1,6 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, Modal, TextInputComponent, ActionRowBuilder, ModalActionRowComponentBuilder } from 'discord.js';
+import { TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, ModalBuilder, ActionRowBuilder,
+	ModalActionRowComponentBuilder, InteractionResponse, CommandInteractionOptionResolver, TextInputBuilder, TextInputStyle, ApplicationCommandOptionType } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -11,13 +12,13 @@ export default class extends Command {
 	options: ApplicationCommandOptionData[] = [{
 		name: 'channel',
 		description: 'The channel to send the announcement in',
-		type: 'CHANNEL',
+		type: ApplicationCommandOptionType.Channel,
 		required: true
 	},
 	{
 		name: 'file',
 		description: 'A file to be posted with the announcement',
-		type: 'ATTACHMENT',
+		type: ApplicationCommandOptionType.Attachment,
 		required: false
 	}]
 
@@ -32,23 +33,23 @@ export default class extends Command {
 			.setTitle('Announce')
 			.setCustomId('announce');
 
-		const contentsComponent = new TextInputComponent()
+		const contentsComponent = new TextInputBuilder()
 			.setCustomId('content')
 			.setLabel('Content to send with this announcement')
-			.setStyle('PARAGRAPH')
+			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true);
 
-		const channelComponent = new TextInputComponent()
+		const channelComponent = new TextInputBuilder()
 			.setCustomId('channel')
 			.setLabel('ID of receiving channel (auto-filled)')
-			.setStyle('SHORT')
+			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setValue(channel.id);
 
-		const fileComponent = new TextInputComponent()
+		const fileComponent = new TextInputBuilder()
 			.setCustomId('file')
 			.setLabel('URL to attached file (auto-filled)')
-			.setStyle('SHORT')
+			.setStyle(TextInputStyle.Short)
 			.setRequired(false)
 			.setValue(file ? file.url : '');
 

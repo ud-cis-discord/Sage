@@ -1,4 +1,4 @@
-import { ApplicationCommandPermissions, CommandInteraction, Formatters } from 'discord.js';
+import { ApplicationCommandPermissions, CommandInteraction, Formatters, InteractionResponse } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 

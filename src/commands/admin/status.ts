@@ -1,6 +1,7 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, PresenceStatusData } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse, 
+	PresenceStatusData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const STATUSES = ['online', 'idle', 'dnd', 'invisible'];

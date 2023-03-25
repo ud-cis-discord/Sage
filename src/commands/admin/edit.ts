@@ -1,5 +1,6 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, Modal, ModalActionRowComponentBuilder, TextChannel, TextInputComponent } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, ModalActionRowComponentBuilder, TextChannel,
+	TextInputBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ModalBuilder, TextInputStyle } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -41,23 +42,23 @@ export default class extends Command {
 			.setTitle('Edit')
 			.setCustomId('edit');
 
-		const contentsComponent = new TextInputComponent()
+		const contentsComponent = new TextInputBuilder()
 			.setCustomId('content')
 			.setLabel('New message content')
-			.setStyle('PARAGRAPH')
+			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true);
 
-		const messageComponent = new TextInputComponent()
+		const messageComponent = new TextInputBuilder()
 			.setCustomId('message')
 			.setLabel('ID of message to be edited (auto-filled)')
-			.setStyle('SHORT')
+			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setValue(message.id);
 
-		const channelComponent = new TextInputComponent()
+		const channelComponent = new TextInputBuilder()
 			.setCustomId('channel')
 			.setLabel('The channel this message is in (auto-filled)')
-			.setStyle('SHORT')
+			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setValue(message.channelId);
 

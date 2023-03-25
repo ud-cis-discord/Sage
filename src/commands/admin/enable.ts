@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, Formatters } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, Formatters,
+	InteractionResponse } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { DB } from '@root/config';

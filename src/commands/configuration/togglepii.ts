@@ -1,6 +1,6 @@
 import { DB, MAINTAINERS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, InteractionResponse } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
 import { Command } from '@lib/types/Command';
 

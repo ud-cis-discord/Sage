@@ -1,17 +1,15 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissionsBitField, CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonBuilderStyle, 
-	TextChannel, 
-	CommandInteractionOptionResolver,
-	InteractionResponse} from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, ButtonBuilder,
+	ButtonStyle, TextChannel, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 
-const STYLES = ['primary', 'secondary', 'success', 'danger'];
+const STYLES = ['Primary', 'Secondary', 'Success', 'Danger'];
 
 export default class extends Command {
 
 	description = `Edits a message sent by ${BOT.NAME} to include a button.`;
-	permissions: ApplicationCommandPermissionsBitField[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'msg_link',
@@ -46,7 +44,24 @@ export default class extends Command {
 		const msg = (interaction.options as CommandInteractionOptionResolver).getString('msg_link');
 		const buttonLabel = (interaction.options as CommandInteractionOptionResolver).getString('label');
 		const customID = (interaction.options as CommandInteractionOptionResolver).getString('custom_id');
-		const buttonStyle = (interaction.options as CommandInteractionOptionResolver).getString('style').toUpperCase() as ButtonBuilderStyle;
+		const buttonStyleInput = (interaction.options as CommandInteractionOptionResolver).getString('style').toUpperCase();
+
+		// TODO: this is dumb
+		let buttonStyle;
+		switch (buttonStyleInput) {
+			case 'Primary':
+				buttonStyle = ButtonStyle.Primary;
+				break;
+			case 'Secondary':
+				buttonStyle = ButtonStyle.Secondary;
+				break;
+			case 'Success':
+				buttonStyle = ButtonStyle.Success;
+				break;
+			case 'Danger':
+				buttonStyle = ButtonStyle.Danger;
+				break;
+		}
 
 		//	for discord canary users, links are different
 		const newLink = msg.replace('canary.', '');

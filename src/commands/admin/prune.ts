@@ -1,7 +1,7 @@
 import { Command } from '@lib/types/Command';
 import { ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandPermissions, ButtonInteraction, CommandInteraction, GuildMember, Message, ActionRowBuilder, MessageButton, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandPermissions, ButtonInteraction, CommandInteraction, GuildMember, Message, ActionRowBuilder, MessageButton, EmbedBuilder, ActionRow } from 'discord.js';
 
 const PRUNE_TIMEOUT = 30;
 
@@ -20,7 +20,7 @@ export default class extends Command {
 
 		const confirmEmbed = new EmbedBuilder()
 			.setTitle(`Server prune will kick ${toKick.size} members from the guild. Proceed?`)
-			.setColor('RED')
+			.setColor('Red')
 			.setFooter({ text: `This command will expire in ${PRUNE_TIMEOUT}s` });
 
 		const confirmBtns = [

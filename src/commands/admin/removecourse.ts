@@ -15,7 +15,7 @@ export default class extends Command {
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
 		description: 'The course ID of the course to be removed (ex: 108).',
-		type: 'CHANNEL',
+		type: ApplicationCommandOptionType.Channel,
 		required: true
 	}]
 

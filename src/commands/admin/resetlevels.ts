@@ -1,7 +1,7 @@
 import { DB, FIRST_LEVEL, LEVEL_TIER_ROLES, ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
+import { ApplicationCommandPermissions, CommandInteraction, InteractionResponse } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 
 export default class extends Command {

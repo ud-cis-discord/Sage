@@ -1,4 +1,5 @@
-import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType,
+	CommandInteractionOptionResolver, InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
@@ -47,25 +48,26 @@ export default class extends Command {
 		//	set permissions for the course
 		const standardPerms: Array<OverwriteResolvable> = [{
 			id: ROLES.ADMIN,
-			allow: 'VIEW_CHANNEL'
+			allow: 'ViewChannel'
 		}, {
 			id: staffRole.id,
-			allow: 'VIEW_CHANNEL'
+			allow: 'ViewChannel'
 		}, {
 			id: GUILDS.MAIN,
-			deny: 'VIEW_CHANNEL'
+			deny: 'ViewChannel'
 		}, {
 			id: studentRole.id,
-			allow: 'VIEW_CHANNEL'
+			allow: 'ViewChannel'
 		}, {
 			id: ROLES.MUTED,
-			deny: 'SEND_MESSAGES'
+			deny: 'SendMessages'
 		}];
 		const staffPerms = [standardPerms[0], standardPerms[1], standardPerms[2]];
 
 		//	create course category
-		const categoryChannel = await interaction.guild.channels.create(`CISC ${course}`, {
-			type: 'GUILD_CATEGORY',
+		const categoryChannel = await interaction.guild.channels.create({
+			name: `CISC ${course}`,
+			type: ChannelType.GuildCategory,
 			permissionOverwrites: standardPerms,
 			reason
 		});
@@ -75,15 +77,17 @@ export default class extends Command {
 		await this.createTextChannel(interaction.guild, `${course}_homework`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(interaction.guild, `${course}_labs`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(interaction.guild, `${course}_projects`, standardPerms, categoryChannel.id, reason);
-		const staffChannel = await interaction.guild.channels.create(`${course}_staff`, {
-			type: 'GUILD_TEXT',
+		const staffChannel = await interaction.guild.channels.create({
+			name: `${course}_staff`,
+			type: ChannelType.GuildText,
 			parent: categoryChannel.id,
 			topic: '[no message count]',
 			permissionOverwrites: staffPerms,
 			reason
 		});
-		const privateQuestionChannel = await interaction.guild.channels.create(`${course}_private_qs`, {
-			type: 'GUILD_TEXT',
+		const privateQuestionChannel = await interaction.guild.channels.create({
+			name: `${course}_private_qs`,
+			type: ChannelType.GuildText,
 			parent: categoryChannel.id,
 			topic: '[no message count]',
 			permissionOverwrites: staffPerms,
@@ -113,8 +117,9 @@ export default class extends Command {
 	}
 
 	async createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {
-		return guild.channels.create(name, {
-			type: 'GUILD_TEXT',
+		return guild.channels.create({
+			name,
+			type: ChannelType.GuildText,
 			parent,
 			permissionOverwrites,
 			reason

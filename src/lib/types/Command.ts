@@ -1,5 +1,6 @@
 import { ROLES } from '@root/config';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ApplicationCommandType, CommandInteraction, InteractionResponse, MessageContextMenuInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ApplicationCommandPermissionType, ApplicationCommandType, CommandInteraction, InteractionResponse,
+	MessageContextMenuCommandInteraction } from 'discord.js';
 
 
 export abstract class Command {
@@ -18,12 +19,12 @@ export abstract class Command {
 	type?: ApplicationCommandType;
 	permissions?: ApplicationCommandPermissions[] = [{
 		id: ROLES.VERIFIED,
-		type: 'ROLE',
+		type: ApplicationCommandPermissionType.Role,
 		permission: true
 	}];
 
 	// functions
-	abstract run(interaction: CommandInteraction | MessageContextMenuInteraction): Promise<InteractionResponse<boolean> | void>;
+	abstract run(interaction: CommandInteraction | MessageContextMenuCommandInteraction): Promise<InteractionResponse<boolean> | void>;
 
 }
 
