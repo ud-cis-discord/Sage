@@ -2,7 +2,7 @@ import { SageUser } from '@lib/types/SageUser';
 import { Leaderboard } from '@lib/enums';
 import { Command } from '@lib/types/Command';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
-import { EmbedBuilder, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandOptionData, CommandInteraction, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ImageURLOptions } from 'discord.js';
 
 export default class extends Command {
 
@@ -14,7 +14,7 @@ export default class extends Command {
 		{
 			name: 'pagenumber',
 			description: 'leaderboard page to view',
-			type: 'NUMBER',
+			type: ApplicationCommandOptionType.Number,
 			required: false
 		}
 	]
@@ -55,7 +55,7 @@ export default class extends Command {
 			ctx.fillStyle = Leaderboard.userPillColor;
 			this.roundedRect(ctx, cursor.x, cursor.y, Leaderboard.width, Leaderboard.userPillHeight, 10);
 
-			const pfp = await loadImage(discUser.user.displayAvatarURL({ format: 'png' }));
+			const pfp = await loadImage(discUser.user.displayAvatarURL({ format: 'png' } as ImageURLOptions));
 			ctx.drawImage(pfp, 0, cursor.y, Leaderboard.userPillHeight, Leaderboard.userPillHeight);
 			cursor.x += Leaderboard.userPillHeight + 15;
 			cursor.y += Leaderboard.userPillHeight / 2;

@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder, Util, GuildMember } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder, GuildMember, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+	InteractionResponse } from 'discord.js';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -76,7 +77,7 @@ export default class extends Command {
 				.addFields(fields)
 				.setThumbnail(interaction.client.user.avatarURL())
 				.setTimestamp(Date.now())
-				.setColor('Random');;
+				.setColor('Random');
 
 			return interaction.reply({ embeds: [embed] });
 		} else {
@@ -111,14 +112,14 @@ export default class extends Command {
 				}
 			});
 
-			const splitStr = Util.splitMessage(helpStr, { char: '\n' });
+			const splitStr = helpStr.split('\n');
 
 			let notified = false;
 			splitStr.forEach((helpMsg) => {
 				const embed = new EmbedBuilder()
 					.setTitle(`-- Commands --`)
 					.setDescription(helpMsg)
-					.setColor('Random');;
+					.setColor('Random');
 				interaction.user.send({ embeds: [embed] })
 					.then(() => {
 						if (!notified) {

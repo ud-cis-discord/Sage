@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
@@ -69,12 +69,12 @@ export default class extends Command {
 		const embeds: Array<EmbedBuilder> = [new EmbedBuilder()
 			.setTitle(`Questions for ${course} ${assignment}`)
 			.addFields(fields.splice(0, 25))
-			.setColor('DARK_AQUA')];
+			.setColor('DarkAqua')];
 
 		while (fields.length > 0) {
 			embeds.push(new EmbedBuilder()
 				.addFields(fields.splice(0, 25))
-				.setColor('DARK_AQUA'));
+				.setColor('DarkAqua'));
 		}
 
 		return interaction.reply({ embeds: embeds, ephemeral: true });

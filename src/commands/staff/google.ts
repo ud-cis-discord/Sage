@@ -16,7 +16,7 @@ export default class extends Command {
 		}
 	];
 
-	run(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const query = (interaction.options as CommandInteractionOptionResolver).getString('query');
 		const formatted = query.replace(new RegExp(' ', 'g'), '+').replace('%', '%25');
 		const link = `https://letmegooglethat.com/?q=${formatted}`;

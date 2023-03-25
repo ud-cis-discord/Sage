@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
@@ -13,31 +13,31 @@ export default class extends Command {
 		{
 			name: 'minimum',
 			description: `Minimum of the roll range (defaults to ${DEFAULT_RANGE[0]})`,
-			type: 'NUMBER',
+			type: ApplicationCommandOptionType.Number,
 			required: false
 		},
 		{
 			name: 'maximum',
 			description: `Maximum of the roll range (defaults to ${DEFAULT_RANGE[1]})`,
-			type: 'NUMBER',
+			type: ApplicationCommandOptionType.Number,
 			required: false
 		},
 		{
 			name: 'numdice',
 			description: `Number of dice to roll (1-10) (defaults to ${DEFAULT_ROLLS})`,
-			type: 'NUMBER',
+			type: ApplicationCommandOptionType.Number,
 			required: false
 		},
 		{
 			name: 'keephighest',
 			description: `How many dice to keep/total (defaults to the number of dice you're rolling)`,
-			type: 'NUMBER',
+			type: ApplicationCommandOptionType.Number,
 			required: false
 		}
 
 	]
 
-	run(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		let min = (interaction.options as CommandInteractionOptionResolver).getNumber('minimum');
 		let max = (interaction.options as CommandInteractionOptionResolver).getNumber('maximum');
 		const numRolls = (interaction.options as CommandInteractionOptionResolver).getNumber('numdice') || DEFAULT_ROLLS;
@@ -72,7 +72,7 @@ export default class extends Command {
 			: `The total of the ${keepHighest} highest dice is **${total}**`;
 
 		const nums = results.join(', ');
-		const embedFields: EmbedFieldData[] = [
+		const embedFields = [
 			{
 				name: `Roll${results.length === 1 ? '' : 's'}`,
 				value: `Your random number${results.length === 1 ? ' is' : 's are'} ${nums}.`,

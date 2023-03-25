@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { execSync } from 'child_process';
 import { homepage as github } from '@root/package.json';
 import { Command } from '@lib/types/Command';
@@ -11,7 +11,6 @@ export default class extends Command {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
 		const embed = new EmbedBuilder()
-			.setAuthor(author)
 			.setTitle(message)
 			.setDescription(`Commit [${hash.slice(0, 8)}](${github}/commit/${hash}) on ${branch}`)
 			.setColor('#fbb848')

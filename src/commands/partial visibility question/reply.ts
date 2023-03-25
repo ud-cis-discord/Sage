@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { EmbedBuilder, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { EmbedBuilder, TextChannel, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { generateErrorEmbed } from '@lib/utils/generalUtils';
 
 
@@ -24,7 +24,7 @@ export default class extends Command {
 		{
 			name: 'file',
 			description: 'A file to be posted with the reply',
-			type: 'ATTACHMENT',
+			type: ApplicationCommandOptionType.Attachment,
 			required: false
 		}
 	]
@@ -45,7 +45,7 @@ export default class extends Command {
 		const channel = await interaction.client.channels.fetch(channelId) as TextChannel;
 
 		const embed = new EmbedBuilder()
-			.setAuthor(`Anonymous responded to ${question.questionId}`, interaction.client.user.avatarURL())
+			.setAuthor({ name: `Anonymous responded to ${question.questionId}`, iconURL: interaction.client.user.avatarURL() })
 			.setDescription(`${(interaction.options as CommandInteractionOptionResolver).getString('response')}\n\n[Jump to question](${question.messageLink})`);
 
 		if (file) embed.setImage(file.url);

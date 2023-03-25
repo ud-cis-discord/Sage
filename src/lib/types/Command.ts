@@ -1,5 +1,6 @@
 import { ROLES } from '@root/config';
 import { ApplicationCommandOptionData, ApplicationCommandPermissions, ApplicationCommandPermissionType, ApplicationCommandType, CommandInteraction, InteractionResponse,
+	Message,
 	MessageContextMenuCommandInteraction } from 'discord.js';
 
 
@@ -24,7 +25,10 @@ export abstract class Command {
 	}];
 
 	// functions
-	abstract run(interaction: CommandInteraction | MessageContextMenuCommandInteraction): Promise<InteractionResponse<boolean> | void>;
+	abstract run(interaction: CommandInteraction | MessageContextMenuCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>>;
+	// void: Does not return anything (i.e. no interaction; rarely used)
+	// InteractionResponse<boolean>: usually means 'return interaction.reply('Text');
+	// Message<boolean>: usually means 'return interaction.followUp('text');
 
 }
 

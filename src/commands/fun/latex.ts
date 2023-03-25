@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, MessageAttachment } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, AttachmentBuilder, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
+	InteractionResponse, Message } from 'discord.js';
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
 import { Command } from '@lib/types/Command';
@@ -23,7 +24,7 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<unknown> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>> {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
@@ -84,7 +85,7 @@ export default class extends Command {
 			return interaction.followUp({ embeds: [generateErrorEmbed(errorResponse)] });
 		}
 
-		const file = new MessageAttachment(canvas.toBuffer(), 'tex.png');
+		const file = new AttachmentBuilder(canvas.toBuffer(), { name: 'tex.png' });
 		const embed = new EmbedBuilder().setImage('attachment://tex.png');
 
 		interaction.editReply({ embeds: [embed], files: [file] });

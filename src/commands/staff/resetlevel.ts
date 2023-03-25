@@ -22,7 +22,7 @@ export default class extends Command {
 		{
 			name: 'value',
 			description: 'value to use (positive to set, negative to subtract, none to set to 0)',
-			type: 'INTEGER',
+			type: ApplicationCommandOptionType.Integer,
 			required: false
 		}
 	];

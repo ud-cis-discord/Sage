@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 const MAGIC8BALL_RESPONSES = [
@@ -38,7 +38,7 @@ export default class extends Command {
 		}
 	]
 
-	run(interaction: CommandInteraction): Promise<void> {
+	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const question = (interaction.options as CommandInteractionOptionResolver).getString('question');
 		const response = question.length !== 0 && question[question.length - 1].endsWith('?')
 			?	MAGIC8BALL_RESPONSES[Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]

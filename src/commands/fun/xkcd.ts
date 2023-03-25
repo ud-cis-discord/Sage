@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, ActionRowBuilder, MessageButton, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionData, ButtonInteraction, CommandInteraction, ActionRowBuilder, EmbedBuilder, ApplicationCommandOptionType,
+	CommandInteractionOptionResolver, InteractionResponse, ButtonBuilder, ButtonStyle } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';
@@ -22,9 +23,9 @@ export default class extends Command {
 
 		let comic: XkcdComic;
 
-		const prevButton = new MessageButton({ label: 'Previous Comic', customId: 'previous', style: 'SECONDARY', emoji: '◀' });
-		const randButton = new MessageButton({ label: 'Random', customId: 'rand', style: 'SECONDARY', emoji: '🔀' });
-		const nextButton = new MessageButton({ label: 'Next Comic', customId: 'next', style: 'SECONDARY', emoji: '▶' });
+		const prevButton = new ButtonBuilder({ label: 'Previous Comic', customId: 'previous', style: ButtonStyle.Secondary, emoji: '◀' });
+		const randButton = new ButtonBuilder({ label: 'Random', customId: 'rand', style: ButtonStyle.Secondary, emoji: '🔀' });
+		const nextButton = new ButtonBuilder({ label: 'Next Comic', customId: 'next', style: ButtonStyle.Secondary, emoji: '▶' });
 		let comicNum = 0;
 
 		if (comicChoice.toLowerCase() === 'random') {
@@ -123,7 +124,7 @@ export default class extends Command {
 		}
 
 		return new EmbedBuilder()
-			.setColor('GREYPLE')
+			.setColor('Greyple')
 			.setDescription(`[View on xkcd.com](https://xkcd.com/${comic.num}/)`)
 			.setFooter({ text: comicDescription })
 			.setImage(comic.img)

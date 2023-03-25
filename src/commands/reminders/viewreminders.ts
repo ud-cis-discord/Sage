@@ -1,6 +1,6 @@
 import { DB } from '@root/config';
 import { Reminder } from '@lib/types/Reminder';
-import { CommandInteraction, EmbedBuilder } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
@@ -24,12 +24,11 @@ export default class extends Command {
 			if (i % 25 === 0) {
 				embeds.push(new EmbedBuilder()
 					.setTitle('Pending reminders')
-					.setColor('DARK_AQUA'));
+					.setColor('DarkAqua'));
 			}
 			const hidden = reminder.mode === 'private';
-			embeds[Math.floor(i / 25)].addField(
-				`${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
-				hidden ? 'Some time in the future.' : reminderTime(reminder));
+			embeds[Math.floor(i / 25)].addFields({ name: `${i + 1}. ${hidden ? 'Private reminder' : reminder.content}`,
+				value: hidden ? 'Some time in the future.' : reminderTime(reminder) });
 		});
 
 		interaction.reply({ embeds });

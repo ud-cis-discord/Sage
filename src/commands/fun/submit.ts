@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -9,7 +9,7 @@ export default class extends Command {
 		{
 			name: 'file',
 			description: 'A file to be submitted',
-			type: 'ATTACHMENT',
+			type: ApplicationCommandOptionType.Attachment,
 			required: true
 		},
 		{
@@ -26,11 +26,10 @@ export default class extends Command {
 		const description = (interaction.options as CommandInteractionOptionResolver).getString('description');
 
 		const embed = new EmbedBuilder()
-			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))
-			.setTitle('New contest submission')
-			.addField('URL', file.url)
+			.setTitle(`New contest submission from ${interaction.user.tag}`)
+			.addFields({ name: 'URL', value: file.url })
 			.setImage(file.url)
-			.setColor('BLUE')
+			.setColor('Blue')
 			.setTimestamp();
 
 		if (description) embed.setDescription(description);

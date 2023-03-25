@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { EmbedBuilder, EmbedField, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, EmbedField, CommandInteraction, InteractionResponse } from 'discord.js';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import { Command } from '@lib/types/Command';
@@ -50,7 +50,7 @@ export default class extends Command {
 			.setThumbnail('https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png')
 			.setTimestamp()
 			.setFooter({ text: `Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}` })
-			.setColor('BLURPLE');
+			.setColor('Blurple');
 
 		interaction.editReply({ embeds: [embed] });
 	}

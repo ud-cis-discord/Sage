@@ -16,7 +16,7 @@ export default class extends Command {
 		{
 			name: 'file',
 			description: 'A file to be posted with the feedback',
-			type: 'ATTACHMENT',
+			type: ApplicationCommandOptionType.Attachment,
 			required: false
 		}
 	]

@@ -1,5 +1,5 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
 import { reminderTime } from '@root/src/lib/utils/generalUtils';
@@ -32,7 +32,7 @@ export default class extends Command {
 		}
 	]
 
-	run(interaction: CommandInteraction): Promise<unknown> {
+	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const content = (interaction.options as CommandInteractionOptionResolver).getString('content');
 		const rawDuration = (interaction.options as CommandInteractionOptionResolver).getString('duration');
 		const duration = parse(rawDuration);

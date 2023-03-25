@@ -1,6 +1,6 @@
 import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, Client,
-	CommandInteraction, ActionRowBuilder, MessageButton, EmbedBuilder } from 'discord.js';
+	CommandInteraction, ActionRowBuilder, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ButtonBuilder, ButtonStyle } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 import { dateToTimestamp, generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
@@ -70,7 +70,8 @@ export default class extends Command {
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
 		if (!timespan) {
-			return interaction.reply({ embeds: [generateErrorEmbed(`${(interaction.options as CommandInteractionOptionResolver).getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', 
+			return interaction.reply(
+				{ embeds: [generateErrorEmbed(`${(interaction.options as CommandInteractionOptionResolver).getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', 
 			'5h', '5h30m', '7h30m15s'...`)], ephemeral: true });
 		}
 		if (question.length > QUESTION_CHAR_LIMIT) {
@@ -97,32 +98,36 @@ export default class extends Command {
 		const pollEmbed = new EmbedBuilder()
 			.setTitle(question)
 			.setDescription(`This poll was created by ${interaction.user.username} and ends **${mdTimestamp}**`)
-			.addField('Choices', choiceText)
+			.addFields({ name: 'Choices', value: choiceText })
 			.setFooter({ text: pollFooter })
-			.setColor('Random');;
+			.setColor('Random');
 
 		const choiceBtns = []; // first 5 choices
 		const choiceBtns2 = []; // next 5
 		choices.forEach((choice, index) => {
 			if (index < 5) {
-				choiceBtns.push(new MessageButton({ label: `${choice}`,
+				choiceBtns.push(new ButtonBuilder({ label: `${choice}`,
 					customId: `${SageInteractionType.POLL}_${choice}`,
-					style: 'SECONDARY',
+					style: ButtonStyle.Secondary,
 					emoji: `${emotes[index]}` }));
 			} else {
-				choiceBtns2.push(new MessageButton({
+				choiceBtns2.push(new ButtonBuilder({
 					label: `${choice}`,
 					customId: `${SageInteractionType.POLL}_${choice}`,
-					style: 'SECONDARY',
+					style: ButtonStyle.Secondary,
 					emoji: `${emotes[index]}`
 				}));
 			}
 		});
 
 		if (choiceBtns2.length === 0) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore: you are literally the right type shut up
 			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder({ components: choiceBtns })] });
 		} else {
-			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder({ components: choiceBtns }), new ActionRowBuilder({ components: choiceBtns2 })] });
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore: you are literally the right type shut up
+			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder().addComponents(choiceBtns), new ActionRowBuilder().addComponents(choiceBtns2)] });
 		}
 
 		let replyId: string;
@@ -176,13 +181,13 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 
 	let choiceText = '';
 	let count = 0;
-	const choiceBtns: MessageButton[] = [];
+	const choiceBtns: ButtonBuilder[] = [];
 	resultMap.forEach((value, key) => {
 		choiceText += `${emotes[count]} ${key}: ${value} vote${value === 1 ? '' : 's'}\n`;
-		choiceBtns.push(new MessageButton({
+		choiceBtns.push(new ButtonBuilder({
 			label: `${key}`,
 			customId: `${SageInteractionType.POLL}_${key}`,
-			style: 'SECONDARY',
+			style: ButtonStyle.Secondary,
 			emoji: `${emotes[count++]}`
 		}));
 	});
@@ -195,13 +200,15 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 	const pollEmbed = new EmbedBuilder()
 		.setTitle(newPoll.question)
 		.setDescription(`This poll was created by ${pollOwner.displayName} and ends **${dateToTimestamp(newPoll.expires, 'R')}**`)
-		.addField('Choices', choiceText)
-		.setFooter(pollFooter)
-		.setColor('Random');;
+		.addFields({ name: 'Choices', value: choiceText })
+		.setFooter({ text: pollFooter })
+		.setColor('Random');
 
 	const msgComponents = [new ActionRowBuilder({ components: choiceBtns.slice(0, 5) })];
 	if (choiceBtns.length > 5) msgComponents.push(new ActionRowBuilder({ components: choiceBtns.slice(5) }));
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore: you are literally the right type shut up
 	await pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
 	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
 		await i.reply({ ephemeral: true, content: `Vote for ***${newChoice}*** recorded. To remove it, click the same option again.` });
