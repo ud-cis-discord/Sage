@@ -15,15 +15,15 @@ export default class extends Command {
 		{
 			name: 'description',
 			description: 'Description of your submission',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const submissionChannel = await interaction.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
-		const file = interaction.options.getAttachment('file');
-		const description = interaction.options.getString('description');
+		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
+		const description = (interaction.options as CommandInteractionOptionResolver).getString('description');
 
 		const embed = new MessageEmbed()
 			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))

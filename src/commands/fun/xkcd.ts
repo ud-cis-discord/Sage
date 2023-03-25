@@ -11,14 +11,14 @@ export default class extends Command {
 		{
 			name: 'comic',
 			description: `The comic to send. Can be 'latest', 'random', or a number.`,
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const latest: XkcdComic = await await fetch('http://xkcd.com/info.0.json').then(r => r.json());
-		const comicChoice = interaction.options.getString('comic');
+		const comicChoice = (interaction.options as CommandInteractionOptionResolver).getString('comic');
 
 		let comic: XkcdComic;
 

@@ -11,7 +11,7 @@ export default class extends Command {
 
 	description = `The ultimate battle of human vs program. Can you best ${BOT.NAME} in a round of rock paper scissors?`;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const choiceEmbed = new MessageEmbed()
 			.setTitle(`Make your choice, ${interaction.user.username}...`)
 			.setColor('RED')

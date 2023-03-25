@@ -9,7 +9,7 @@ export default class extends Command {
 	description = `Re-loads all of ${BOT.NAME}'s commands. WARNING: This takes forever`;
 	permissions = BOTMASTER_PERMS;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const commandFiles = readdirRecursive(`${__dirname}/..`).filter(file => file.endsWith('.js'));
 		interaction.deferReply();
 

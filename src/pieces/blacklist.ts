@@ -121,7 +121,9 @@ async function filterMessages(msg: Message): Promise<Message | void> {
 			msg.delete();
 
 			return msg.author.send(`You used a restricted word. Please refrain from doing so again.`)
-				.catch(() => msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`));
+				.catch(() => {
+					msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`);
+				});
 		}
 	}
 }

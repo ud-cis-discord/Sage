@@ -15,7 +15,7 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.user.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -29,7 +29,7 @@ export default class extends Command {
 			.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, true)
 			.addField('Level Progress', `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
 			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
-		if (interaction.options.getBoolean('hide') === true) {
+		if ((interaction.options as CommandInteractionOptionResolver).getBoolean('hide') === true) {
 			interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
 			interaction.reply({ embeds: [embed] });

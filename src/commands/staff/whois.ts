@@ -1,5 +1,5 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, MessageEmbed } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
@@ -15,10 +15,10 @@ export default class extends Command {
 			required: true
 		}
 	];
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const user = interaction.options.getUser('user');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const user = (interaction.options as CommandInteractionOptionResolver).getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 
 		const roles = member.roles.cache.size > 1

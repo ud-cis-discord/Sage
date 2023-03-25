@@ -1,7 +1,7 @@
 import { Command } from '@lib/types/Command';
 import { ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandPermissionData, ButtonInteraction, CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ApplicationCommandPermissions, ButtonInteraction, CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 
 const PRUNE_TIMEOUT = 30;
 
@@ -9,9 +9,9 @@ export default class extends Command {
 
 	description = `Prunes all members who don't have the <@&${ROLES.VERIFIED}> role`;
 	runInDM = false;
-	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		let timeout = PRUNE_TIMEOUT;
 
 		await interaction.guild.members.fetch();

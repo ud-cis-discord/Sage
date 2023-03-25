@@ -18,7 +18,7 @@ export default class extends Command {
 		{
 			name: 'input',
 			description: 'The LaTeX expression to render',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
@@ -27,7 +27,7 @@ export default class extends Command {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
-		const tex = encodeURIComponent(interaction.options.getString('input'));
+		const tex = encodeURIComponent((interaction.options as CommandInteractionOptionResolver).getString('input'));
 		const errorResponse = "Sorry, I couldn't render that LaTeX expression.";
 		let usingBackup = false;
 		let image;

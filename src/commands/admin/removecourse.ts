@@ -1,7 +1,7 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
 import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
 
 const DECISION_TIMEOUT = 30;
@@ -10,7 +10,7 @@ export default class extends Command {
 
 	description = 'Remove a course';
 	runInDM = false;
-	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
@@ -19,9 +19,9 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		let timeout = DECISION_TIMEOUT;
-		const course = interaction.options.getChannel('course') as CategoryChannel;
+		const course = (interaction.options as CommandInteractionOptionResolver).getChannel('course') as CategoryChannel;
 
 		//	 grabbing course data
 		let channelCount;

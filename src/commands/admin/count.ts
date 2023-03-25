@@ -1,12 +1,12 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CategoryChannel, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CategoryChannel, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
 	description = 'Count channels in a category, use during archiving';
 	runInDM = false;
-	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'category',
@@ -15,9 +15,9 @@ export default class extends Command {
 		required: true
 	}];
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		// grab channel from command parameter
-		const category = interaction.options.getChannel('category') as CategoryChannel;
+		const category = (interaction.options as CommandInteractionOptionResolver).getChannel('category') as CategoryChannel;
 		let channelCount = 0;
 		try {
 			channelCount = category.children.size;

@@ -8,13 +8,13 @@ export default class extends Command {
 		{
 			name: 'word',
 			description: 'The word to define',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
 
 	run(interaction: CommandInteraction): Promise<void> {
-		const input = interaction.options.getString('word');
+		const input = (interaction.options as CommandInteractionOptionResolver).getString('word');
 
 		// Get the first word in the sentence and make it URL-friendly
 		if (input.indexOf(' ') !== -1) {

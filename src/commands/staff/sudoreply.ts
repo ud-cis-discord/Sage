@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 
@@ -14,27 +14,27 @@ export default class extends Command {
 		{
 			name: 'questionid',
 			description: 'ID of question you are replying to',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'response',
 			description: 'Response to the question',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
 	async run(interaction: CommandInteraction): Promise<Message | void> {
-		const idArg = interaction.options.getString('questionid');
+		const idArg = (interaction.options as CommandInteractionOptionResolver).getString('questionid');
 		if (isNaN(Number.parseInt(idArg))) return interaction.reply({ content: `**${idArg}** is not a valid question ID`, ephemeral: true });
 
 		const question: PVQuestion = await interaction.client.mongo.collection<PVQuestion>(DB.PVQ)
-			.findOne({ questionId: `${interaction.options.getString('questionid')}` });
+			.findOne({ questionId: `${(interaction.options as CommandInteractionOptionResolver).getString('questionid')}` });
 		if (!question) return interaction.reply({ content: `I could not find a question with ID **${idArg}**.`, ephemeral: true });
 
-		const response = interaction.options.getString('response');
+		const response = (interaction.options as CommandInteractionOptionResolver).getString('response');
 		const bot = interaction.client;
 		const asker = await interaction.guild.members.fetch(question.owner);
 

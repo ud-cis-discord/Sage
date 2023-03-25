@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = `Toggles whether your email (pii) will be sent to instructors over Discord.`;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!entry) {

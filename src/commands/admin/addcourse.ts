@@ -1,4 +1,4 @@
-import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
@@ -9,19 +9,19 @@ export default class extends Command {
 
 	description = 'Creates a courses category and adds all necessary channels/roles.';
 	runInDM = false;
-	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
 		description: 'The three-digit course ID of the course to be added (ex: 108).',
-		type: 'STRING',
+		type: ApplicationCommandOptionType.String,
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		interaction.reply('<a:loading:755121200929439745> working...');
 
-		const course = interaction.options.getString('course');
+		const course = (interaction.options as CommandInteractionOptionResolver).getString('course');
 		//	make sure course does not exist already
 		if (await interaction.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) > 0) {
 			interaction.reply({ content: `${course} has already been registered as a course.`, ephemeral: true });

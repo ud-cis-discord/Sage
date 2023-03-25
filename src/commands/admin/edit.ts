@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageActionRow, Modal, ModalActionRowComponent, TextChannel, TextInputComponent } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, MessageActionRow, Modal, ModalActionRowComponent, TextChannel, TextInputComponent } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -7,17 +7,17 @@ export default class extends Command {
 
 	description = `Edits a message sent by ${BOT.NAME}.`;
 	usage = '<messageLink>|<content>';
-	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'msg_link',
 		description: 'A message link',
-		type: 'STRING',
+		type: ApplicationCommandOptionType.String,
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const link = interaction.options.getString('msg_link');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const link = (interaction.options as CommandInteractionOptionResolver).getString('msg_link');
 
 		//	for discord canary users, links are different
 		const newLink = link.replace('canary.', '');

@@ -1,13 +1,13 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Looks up information about a given user';
 	runInDM = false;
 	options: ApplicationCommandOptionData[] = [
@@ -19,8 +19,8 @@ export default class extends Command {
 		}
 	];
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const user = interaction.options.getUser('user');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const user = (interaction.options as CommandInteractionOptionResolver).getUser('user');
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 		const member = await interaction.guild.members.fetch(user.id);
 

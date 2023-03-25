@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = 'Check Discord\'s current status.';
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		await interaction.deferReply();
 		const url = 'https://srhpyqt94yxb.statuspage.io/api/v2/summary.json';
 		const currentStatus = await fetch(url, { method: 'Get' }).then(r => r.json()) as DiscordStatus;

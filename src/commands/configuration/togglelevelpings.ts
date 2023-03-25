@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = `Toggles whether or not you will receive notifications from Sage on a level up.`;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!entry) {

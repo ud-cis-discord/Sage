@@ -19,7 +19,7 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		await interaction.deferReply();
 		await interaction.guild.members.fetch();
 
@@ -31,7 +31,7 @@ export default class extends Command {
 		const dbAuthor = users.find(user => interaction.user.id === user.discordId);
 		const askerRank = users.indexOf(dbAuthor) + 1;
 
-		let page = interaction.options.getNumber('pagenumber') ?? Math.floor((askerRank - 1) / 10) + 1;
+		let page = (interaction.options as CommandInteractionOptionResolver).getNumber('pagenumber') ?? Math.floor((askerRank - 1) / 10) + 1;
 
 		page = page * 10 > users.length ? Math.floor(users.length / 10) + 1 : page;
 

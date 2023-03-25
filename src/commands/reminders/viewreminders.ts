@@ -9,7 +9,7 @@ export default class extends Command {
 	description = 'See your upcoming reminders.';
 	extendedHelp = 'Don\'t worry, private reminders will be hidden if you use this command publicly.';
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)
 			.find({ owner: interaction.user.id }).toArray();
 		reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());

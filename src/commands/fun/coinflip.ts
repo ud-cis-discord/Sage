@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = 'Have Sage flip a coin for you!';
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		await interaction.reply('Flipping...');
 		const result = COIN_FLIP[Math.floor(Math.random() * COIN_FLIP.length)];
 

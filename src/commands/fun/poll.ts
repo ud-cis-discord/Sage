@@ -18,25 +18,25 @@ export default class extends Command {
 		{
 			name: 'timespan',
 			description: `How long your poll should last. Acceptable formats include '5s', '5m', '5h', '5h30m', '7h30m15s'...`,
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'question',
 			description: `What would you like to ask?`,
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'choices',
 			description: `A poll can have 2-10 choices. Separate choices with '|' (no spaces/quotes).`,
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'optiontype',
 			description: `Whether participants can only select one choice or multiple.`,
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true,
 			choices: args.map((arg) => ({
 				name: arg,
@@ -53,24 +53,24 @@ export default class extends Command {
 		return array;
 	}
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const timespan = parse(interaction.options.getString('timespan'));
-		const question = interaction.options.getString('question');
-		const choices = interaction.options.getString('choices').split('|').map(choice => choice.trim());
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const timespan = parse((interaction.options as CommandInteractionOptionResolver).getString('timespan'));
+		const question = (interaction.options as CommandInteractionOptionResolver).getString('question');
+		const choices = (interaction.options as CommandInteractionOptionResolver).getString('choices').split('|').map(choice => choice.trim());
 		if (new Set(choices).size !== choices.length) {
 			return interaction.reply({ content: `All poll options must be unique.`, ephemeral: true });
 		}
-		if (!args.includes(interaction.options.getString('optiontype'))) {
+		if (!args.includes((interaction.options as CommandInteractionOptionResolver).getString('optiontype'))) {
 			throw `poll option types must be one of ${args.join(', ')}`;
 		}
-		const pollType = interaction.options.getString('optiontype') as 'Single' | 'Multiple';
+		const pollType = (interaction.options as CommandInteractionOptionResolver).getString('optiontype') as 'Single' | 'Multiple';
 
 		const choiceQuantities = Array.from({ length: choices.length }, () => 0); // number of selections for each choice
 
 		const emotes = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].slice(0, choices.length);
 
 		if (!timespan) {
-			return interaction.reply({ embeds: [generateErrorEmbed(`${interaction.options.getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', 
+			return interaction.reply({ embeds: [generateErrorEmbed(`${(interaction.options as CommandInteractionOptionResolver).getString('timespan')} is not a valid timespan. Acceptable formats include '5s', '5m', 
 			'5h', '5h30m', '7h30m15s'...`)], ephemeral: true });
 		}
 		if (question.length > QUESTION_CHAR_LIMIT) {

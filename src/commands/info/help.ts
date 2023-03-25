@@ -12,13 +12,13 @@ export default class extends Command {
 		{
 			name: 'cmd',
 			description: 'command you would like to know more about',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const cmd = interaction.options.getString('cmd');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const cmd = (interaction.options as CommandInteractionOptionResolver).getString('cmd');
 		const { commands } = interaction.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
 

@@ -7,7 +7,7 @@ export default class extends Command {
 	description = 'Get info about the most recent commit that is currently running.';
 	extendedHelp = 'Merge commits and version bumps are ignored.';
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
 		const embed = new MessageEmbed()

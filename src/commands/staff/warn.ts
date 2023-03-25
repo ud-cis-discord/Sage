@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
@@ -16,21 +16,21 @@ export default class extends Command {
 		{
 			name: 'msglink',
 			description: 'Link to the offending message',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'reason',
 			description: 'Reason for warning the user',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
 	async run(interaction: CommandInteraction): Promise<Message> {
-		const target = await interaction.channel.messages.fetch(getMsgIdFromLink(interaction.options.getString('msglink')));
-		const reason = interaction.options.getString('reason') || 'Breaking server rules';
+		const target = await interaction.channel.messages.fetch(getMsgIdFromLink((interaction.options as CommandInteractionOptionResolver).getString('msglink')));
+		const reason = (interaction.options as CommandInteractionOptionResolver).getString('reason') || 'Breaking server rules';
 		if ('parentId' in interaction.channel) {
 			const course: Course = await interaction.client.mongo.collection(DB.COURSES)
 				.findOne({ 'channels.category': interaction.channel.parentId });

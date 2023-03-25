@@ -1,16 +1,16 @@
 import { DB, FIRST_LEVEL, LEVEL_TIER_ROLES, ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 
 export default class extends Command {
 
 	description = 'Resets every user in the guild\'s level to 1';
 	enabled = false;
-	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		await interaction.reply('loading... <a:loading:928003042954059888>');
 		await interaction.guild.roles.fetch();
 		const lvl1 = interaction.guild.roles.cache.find(role => role.id === ROLES.LEVEL_ONE);

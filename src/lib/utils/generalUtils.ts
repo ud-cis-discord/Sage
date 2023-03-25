@@ -1,6 +1,6 @@
 import {
 	ApplicationCommandOptionData, Client, CommandInteraction, Message, MessageAttachment,
-	MessageEmbed, Role, TextChannel, MessageActionRow, ApplicationCommandPermissionData,
+	MessageEmbed, Role, TextChannel, MessageActionRow, ApplicationCommandPermissions,
 	MessageSelectMenu, MessageSelectOptionData
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
@@ -38,7 +38,7 @@ function checkOptions(list1Option: ApplicationCommandOptionData, list2Option: Ap
 	return false;
 }
 
-export function isPermissionEqual(perm1: ApplicationCommandPermissionData, perm2: ApplicationCommandPermissionData): boolean {
+export function isPermissionEqual(perm1: ApplicationCommandPermissions, perm2: ApplicationCommandPermissions): boolean {
 	return perm1.id === perm2.id
 		&& perm1.permission === perm2.permission
 		&& perm1.type === perm2.type;

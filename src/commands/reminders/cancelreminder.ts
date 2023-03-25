@@ -18,7 +18,7 @@ export default class extends Command {
 	]
 
 	async run(interaction: CommandInteraction): Promise<unknown> {
-		const remindNum = interaction.options.getInteger('remindernumber') - 1;
+		const remindNum = (interaction.options as CommandInteractionOptionResolver).getInteger('remindernumber') - 1;
 
 		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)
 			.find({ owner: interaction.user.id }).toArray();

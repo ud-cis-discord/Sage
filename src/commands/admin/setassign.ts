@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = `Adds a role to the assignable collection of the database, or removes it if it's there already`;
 	runInDM = false;
-	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'role',
@@ -18,8 +18,8 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const apiRole = interaction.options.getRole('role');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const apiRole = (interaction.options as CommandInteractionOptionResolver).getRole('role');
 		const role = await interaction.guild.roles.fetch(apiRole.id);
 
 		const assignables = interaction.client.mongo.collection(DB.ASSIGNABLE);

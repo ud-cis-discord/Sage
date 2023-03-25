@@ -14,7 +14,7 @@ export default class extends Command {
 	]
 
 	run(interaction: CommandInteraction): Promise<void> {
-		const target = interaction.options.getMember('target') as GuildMember;
+		const target = (interaction.options as CommandInteractionOptionResolver).getMember('target') as GuildMember;
 		const replyContent = `${interaction.user.username} paid their respects ${target ? `to ${target.user.username}` : ``}`;
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/f.png`,

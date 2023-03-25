@@ -14,29 +14,29 @@ export default class extends Command {
 		{
 			name: 'content',
 			description: 'What you\'d like to be reminded of',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'duration',
 			description: 'When you\'d like to be reminded',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'repeat',
 			description: 'How often you want the reminder to repeat',
 			choices: [{ name: 'Daily', value: 'daily' }, { name: 'Weekly', value: 'weekly' }],
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
 
 	run(interaction: CommandInteraction): Promise<unknown> {
-		const content = interaction.options.getString('content');
-		const rawDuration = interaction.options.getString('duration');
+		const content = (interaction.options as CommandInteractionOptionResolver).getString('content');
+		const rawDuration = (interaction.options as CommandInteractionOptionResolver).getString('duration');
 		const duration = parse(rawDuration);
-		const repeat = interaction.options.getString('repeat') as 'daily' | 'weekly' || null;
+		const repeat = (interaction.options as CommandInteractionOptionResolver).getString('repeat') as 'daily' | 'weekly' || null;
 
 		if (!duration) {
 			return interaction.reply({

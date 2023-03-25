@@ -10,7 +10,7 @@ export default class extends Command {
 		{
 			name: 'feedback',
 			description: 'feedback to be sent to the admins',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
@@ -22,8 +22,8 @@ export default class extends Command {
 	]
 
 	async run(interaction:CommandInteraction): Promise<void> {
-		const feedback = interaction.options.getString('feedback');
-		const file = interaction.options.getAttachment('file');
+		const feedback = (interaction.options as CommandInteractionOptionResolver).getString('feedback');
+		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
 		const embed = new MessageEmbed()

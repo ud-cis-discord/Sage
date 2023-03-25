@@ -7,7 +7,7 @@ export default class extends Command {
 	description = `Archive a private question thread.`;
 	extendedHelp = `This command only works in private question threads.`;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		if (!interaction.channel.isThread()) {
 			return interaction.reply({ embeds: [generateErrorEmbed('You must run this command in a private question thread.')], ephemeral: true });
 		}

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
@@ -8,27 +8,27 @@ export default class extends Command {
 
 	// Never assume staff are not dumb (the reason this is so long)
 
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Adds an assignment to a given course ID\'s assignment list';
 	runInDM = false;
 	options: ApplicationCommandOptionData[] =[
 		{
 			name: 'course',
 			description: 'The course ID to add an assignment to',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'newassignments',
 			description: 'A | separated list of new assignments',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const course = interaction.options.getString('course');
-		const newAssignments = interaction.options.getString('newassignments').split('|').map(assign => assign.trim());
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const course = (interaction.options as CommandInteractionOptionResolver).getString('course');
+		const newAssignments = (interaction.options as CommandInteractionOptionResolver).getString('newassignments').split('|').map(assign => assign.trim());
 		const entry: Course = await interaction.client.mongo.collection(DB.COURSES).findOne({ name: course });
 
 		const added: Array<string> = [];

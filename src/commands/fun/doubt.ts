@@ -14,7 +14,7 @@ export default class extends Command {
 	]
 
 	run(interaction: CommandInteraction): Promise<void> {
-		const target = interaction.options.getMember('target') as GuildMember;
+		const target = (interaction.options as CommandInteractionOptionResolver).getMember('target') as GuildMember;
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/doubt.jpg`,
 			name: 'doubt.jpg'

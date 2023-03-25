@@ -6,7 +6,7 @@ export default class extends Command {
 
 	description = `Provides information about ${BOT.NAME}.`;
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const info
 		= `Welcome to ${BOT.NAME}, a wonderful, magical bot that has been custom-coded to assist you while you use this Discord server!
 			

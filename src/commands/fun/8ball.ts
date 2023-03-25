@@ -33,13 +33,13 @@ export default class extends Command {
 		{
 			name: 'question',
 			description: 'The question you want to ask',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
 
 	run(interaction: CommandInteraction): Promise<void> {
-		const question = interaction.options.getString('question');
+		const question = (interaction.options as CommandInteractionOptionResolver).getString('question');
 		const response = question.length !== 0 && question[question.length - 1].endsWith('?')
 			?	MAGIC8BALL_RESPONSES[Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]
 			:	'The 8-ball only responds to questions smh';

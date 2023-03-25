@@ -12,21 +12,21 @@ export default class extends Command {
 		{
 			name: 'message',
 			description: 'The link of the message you want to tag',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'assignmentid',
 			description: 'The assignment name tag to add to this message',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
 
 	// never assume that students are not dumb
-	async run(interaction: CommandInteraction): Promise<void> {
-		const msgLink = interaction.options.getString('message');
-		const assignmentId = interaction.options.getString('assignmentid');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const msgLink = (interaction.options as CommandInteractionOptionResolver).getString('message');
+		const assignmentId = (interaction.options as CommandInteractionOptionResolver).getString('assignmentid');
 
 		if (!('parentId' in interaction.channel)) return interaction.reply({ embeds: [generateErrorEmbed('This command is only available in text channels.')], ephemeral: true });
 		// eslint-disable-next-line no-extra-parens

@@ -2,36 +2,36 @@ import { ADMIN_PERMS } from '@lib/permissions';
 import { RequestError } from '@octokit/types';
 import { BOT, GITHUB_PROJECT } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
 
 export default class extends Command {
 
 	description = `Creates an issue in ${BOT.NAME}'s repository.`;
-	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'title',
 		description: 'What\'s the issue?',
-		type: 'STRING',
+		type: ApplicationCommandOptionType.String,
 		required: true
 	},
 	{
 		name: 'labels',
 		description: 'The issue labels, in a comma-separated list (if multiple).',
-		type: 'STRING',
+		type: ApplicationCommandOptionType.String,
 		required: false
 	},
 	{
 		name: 'body',
 		description: 'The issue body',
-		type: 'STRING',
+		type: ApplicationCommandOptionType.String,
 		required: false
 	}]
 
-	async run(interaction: CommandInteraction): Promise<void> {
-		const title = interaction.options.getString('title');
-		const label = interaction.options.getString('labels');
-		const body = interaction.options.getString('body');
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const title = (interaction.options as CommandInteractionOptionResolver).getString('title');
+		const label = (interaction.options as CommandInteractionOptionResolver).getString('labels');
+		const body = (interaction.options as CommandInteractionOptionResolver).getString('body');
 
 		const labels = label ? label.split(', ') : [];
 
