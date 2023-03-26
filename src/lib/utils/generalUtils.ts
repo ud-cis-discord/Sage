@@ -1,13 +1,14 @@
 import {
-	ApplicationCommandOptionData, Client, CommandInteraction, Message, AttachmentBuilder,
-	EmbedBuilder, Role, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
-	SelectMenuBuilder, StringSelectMenuOptionBuilder, ChannelType, ActionRow
+	ApplicationCommandOptionData, Client, CommandInteraction, AttachmentBuilder,
+	EmbedBuilder, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
+	StringSelectMenuBuilder
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
 import { DB, CHANNELS, ROLE_DROPDOWNS, BOT } from '@root/config';
 import moment from 'moment';
 import { Reminder } from '@lib/types/Reminder';
+import { Course } from '../types/Course';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -58,145 +59,69 @@ export function getMsgIdFromLink(link: string): string {
 	return msgId;
 }
 
-export async function modifyRoleDD(interaction: CommandInteraction, role: Role, isCourse: boolean, dropdownAction: 'ADD' | 'REMOVE'): Promise<boolean> {
-	let rolesMsg: Message;
+export async function updateDropdowns(interaction: CommandInteraction): Promise<void> {
+	/*
+	Here in this function lies the genius ideas of Ben Segal, the OG admin
+	Thank you Ben for making v14 refactoring so much easier, now I'll just find some more hair having pulled all of mine out
+	- S
+	*/
 	const channel = await interaction.guild.channels.fetch(CHANNELS.ROLE_SELECT) as TextChannel;
-	if (!channel || channel.type !== ChannelType.GuildText) {
-		const responseEmbed = new EmbedBuilder()
-			.setColor('#ff0000')
-			.setTitle('Argument error')
-			.setDescription(`Could not find channel.`);
-		interaction.channel.send({ embeds: [responseEmbed] });
-		return false;
-	}
+	let coursesMsg, assignablesMsg;
+
 	try {
-		rolesMsg = await channel.messages.fetch(
-			isCourse ? ROLE_DROPDOWNS.COURSE_ROLES : ROLE_DROPDOWNS.ASSIGN_ROLES
-		);
+		coursesMsg = await channel.messages.fetch(ROLE_DROPDOWNS.COURSE_ROLES);
+		assignablesMsg = await channel.messages.fetch(ROLE_DROPDOWNS.ASSIGN_ROLES);
 	} catch (error) {
 		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
-			.setDescription(`Unknown message, make sure your channel and message ID are correct.`);
+			.setDescription(`Unknown message(s), make sure your channel and message ID are correct.`);
 		interaction.channel.send({ embeds: [responseEmbed] });
-		return false;
 	}
-	if (rolesMsg.author.id !== BOT.CLIENT_ID) {
+	if (coursesMsg.author.id !== BOT.CLIENT_ID || assignablesMsg.author.id !== BOT.CLIENT_ID) {
 		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
 			.setDescription(`You must tag a message that was sent by ${BOT.NAME} (me!).`);
 		interaction.channel.send({ embeds: [responseEmbed] });
-		return false;
 	}
 
-	// the message component row that the dropdown is in
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	let dropdownRow = rolesMsg.components[0] as ActionRowBuilder;
-	if (!dropdownRow) dropdownRow = new ActionRowBuilder();
+	let courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
+	const assignableRoles = await interaction.client.mongo.collection(DB.ASSIGNABLE).find().toArray();
+	let assignables = [];
 
-	const option: StringSelectMenuOptionBuilder = new StringSelectMenuOptionBuilder()
-		.setLabel(role.name)
-		.setValue(role.id);
-
-	const menu = dropdownRow.components[0] as SelectMenuBuilder;
-	switch (dropdownAction) {
-		case 'ADD':
-			return addRole(interaction, rolesMsg, menu, option, dropdownRow, isCourse);
-		case 'REMOVE':
-			return removeRole(interaction, rolesMsg, menu, option, dropdownRow);
+	for (const role of assignableRoles) {
+		const { name } = await interaction.guild.roles.fetch(role.id);
+		assignables.push({ name, id: role.id });
 	}
+
+	courses = courses.sort((a, b) => a.name > b.name ? 1 : -1);
+	assignables = assignables.sort((a, b) => a.name > b.name ? 1 : -1);
+
+	const coursesDropdown = new StringSelectMenuBuilder()
+		.setCustomId('roleselect')
+		.setMaxValues(courses.length);
+
+	const assignablesDropdown = new StringSelectMenuBuilder()
+		.setCustomId('roleselect')
+		.setMaxValues(assignables.length);
+
+	console.log(assignables);
+	coursesDropdown.addOptions(courses.map(c => ({ label: `CISC ${c.name}`, value: c.roles.student })));
+	assignablesDropdown.addOptions(assignables.map(a => ({ label: a.name, value: a.id })));
+
+	const coursesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(coursesDropdown);
+	const assignablesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(assignablesDropdown);
+
+	coursesMsg.edit({ components: [coursesRow] });
+	assignablesMsg.edit({ components: [assignablesRow] });
+
+	return;
 }
 
 export type TimestampType = 't' | 'T' | 'd' | 'D' | 'f' | 'F' | 'R';
 export function dateToTimestamp(date: Date, type: TimestampType = 't'): string {
 	return `<t:${Math.round(date.valueOf() / 1e3)}:${type}>`;
-}
-
-function addRole(interaction: CommandInteraction,
-	rolesMsg: Message,
-	menu: SelectMenuBuilder,
-	option: StringSelectMenuOptionBuilder,
-	dropdownRow: ActionRowBuilder,
-	isCourse: boolean): boolean {
-	if (menu) {
-		menu.options.forEach(menuOption => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			if (menuOption.value === option.value) {
-				const responseEmbed = new EmbedBuilder()
-					.setColor('#ff0000')
-					.setTitle('Argument error')
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					.setDescription(`${option.label} is in this message's role select menu already.`);
-				interaction.channel.send({ embeds: [responseEmbed] });
-				return false;
-			}
-		});
-		menu.addOptions(option);
-		menu.setMaxValues(menu.options.length);
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
-	} else {
-		dropdownRow.addComponents(
-			new SelectMenuBuilder()
-				.setCustomId('roleselect')
-				.setMinValues(0)
-				.setMaxValues(1)
-				.setPlaceholder(`Select your ${isCourse ? 'course' : 'role'}(s)`)
-				.addOptions([option])
-		);
-	}
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore: you are Field.All the right type shut up
-	rolesMsg.edit({ components: [dropdownRow] });
-	return true;
-}
-
-function removeRole(interaction: CommandInteraction,
-	rolesMsg: Message,
-	menu: SelectMenuBuilder,
-	option: StringSelectMenuOptionBuilder,
-	dropdownRow: ActionRowBuilder): boolean {
-	let cont = true;
-	if (!menu) {
-		const responseEmbed = new EmbedBuilder()
-			.setColor('#ff0000')
-			.setTitle('Argument error')
-			.setDescription(`This message does not have a role dropdown menu.`);
-		interaction.channel.send({ embeds: [responseEmbed] });
-		return false;
-	}
-
-	menu.options.forEach((menuOption, index) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (menuOption.value !== option.value) return;
-
-		menu.spliceOptions(index, 1);
-		menu.setMaxValues(menu.options.length);
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: you are Field.All the right type shut up
-		rolesMsg.edit({ components: menu.options.length > 0 ? [dropdownRow] : [] });
-		cont = false;
-	});
-
-	if (!cont) return true;
-
-	const responseEmbed = new EmbedBuilder()
-		.setColor('#ff0000')
-		.setTitle('Argument error')
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		.setDescription(`${option.label} was not found in that message's role select menu. The role, however, has still been removed from the server and the database.`);
-	interaction.editReply({ embeds: [responseEmbed] });
-	return false;
 }
 
 export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<AttachmentBuilder> {

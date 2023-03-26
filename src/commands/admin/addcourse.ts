@@ -4,7 +4,7 @@ import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
+import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
 
 export default class extends Command {
 
@@ -94,8 +94,6 @@ export default class extends Command {
 			reason
 		});
 
-		if (!await modifyRoleDD(interaction, studentRole, true, 'ADD')) return;
-
 		//	adding the course to the database
 		const newCourse: Course = {
 			name: course,
@@ -112,6 +110,8 @@ export default class extends Command {
 			assignments: ['hw1', 'hw2', 'hw3', 'hw4', 'hw5', 'lab1', 'lab2', 'lab3', 'lab4', 'lab5']
 		};
 		await interaction.client.mongo.collection(DB.COURSES).insertOne(newCourse);
+
+		await updateDropdowns(interaction);
 
 		interaction.editReply(`Successfully added course with ID ${course}`);
 	}

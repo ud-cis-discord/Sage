@@ -3,7 +3,7 @@ import { AssignableRole } from '@lib/types/AssignableRole';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
+import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
 
 export default class extends Command {
 
@@ -27,18 +27,14 @@ export default class extends Command {
 
 		if (await assignables.countDocuments(newRole) > 0) {
 			await interaction.reply('Removing role...');
-			let responseMsg = `The role \`${role.name}\` has been removed.`;
-			if (!await modifyRoleDD(interaction, role, false, 'REMOVE')) {
-				responseMsg = `The role \`${role.name}\` has been removed. However, I couldn't remove it from the assignables dropdown (it probably wasn't on there to begin with)`;
-			}
+			const responseMsg = `The role \`${role.name}\` has been removed.`;
 			await assignables.findOneAndDelete(newRole);
+			await updateDropdowns(interaction);
 			interaction.editReply(responseMsg);
 		} else {
 			await interaction.reply('Adding role...');
-			if (!await modifyRoleDD(interaction, role, false, 'ADD')) {
-				return;
-			}
 			await assignables.insertOne(newRole);
+			await updateDropdowns(interaction);
 			interaction.editReply(`The role \`${role.name}\` has been added.`);
 			return;
 		}

@@ -3,7 +3,7 @@ import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, CommandInteraction, ActionRowBuilder, ButtonBuilder,
 	ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ButtonStyle } from 'discord.js';
-import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
+import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
 
 const DECISION_TIMEOUT = 30;
 
@@ -108,14 +108,14 @@ export default class extends Command {
 						if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
 					}
 
-					if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
-
-					staffRole.delete(reason);
-					studentRole.delete(reason);
-
 					// update and remove from database
 					await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
 					await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
+
+					await updateDropdowns(interaction);
+
+					staffRole.delete(reason);
+					studentRole.delete(reason);
 
 					await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from CISC ${courseId}`);
 				} catch (error) {
