@@ -84,12 +84,8 @@ async function main() {
 		const activity = status?.name || `${PREFIX}help`;
 
 		// TODO: fix this so supports all types
-
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: type's typing not properly inferred
-		const type: ActivityType.Playing;
-		bot.user.setActivity(`${activity} (v${sageVersion})`, { type });
-		setTimeout(() => bot.user.setActivity(activity, { type }), 30e3);
+		bot.user.setActivity(`${activity} (v${sageVersion})`, { type: ActivityType.Playing });
+		setTimeout(() => bot.user.setActivity(activity, { type: ActivityType.Playing }), 30e3);
 	});
 }
 

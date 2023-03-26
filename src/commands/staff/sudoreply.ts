@@ -1,7 +1,8 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, GuildChannel, Message, EmbedBuilder, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, GuildChannel, Message, EmbedBuilder, TextChannel, ThreadChannel,
+	ApplicationCommandOptionType, CommandInteractionOptionResolver, ChannelType, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 
@@ -26,7 +27,7 @@ export default class extends Command {
 	]
 	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<Message | void> {
+	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>> {
 		const idArg = (interaction.options as CommandInteractionOptionResolver).getString('questionid');
 		if (isNaN(Number.parseInt(idArg))) return interaction.reply({ content: `**${idArg}** is not a valid question ID`, ephemeral: true });
 
@@ -38,7 +39,7 @@ export default class extends Command {
 		const bot = interaction.client;
 		const asker = await interaction.guild.members.fetch(question.owner);
 
-		if (interaction.channel.type !== 'GUILD_TEXT') {
+		if (interaction.channel.type !== ChannelType.GuildText) {
 			return interaction.reply({
 				content: `You must use this command in a regular text channel. If you think there is a problem, please contact ${MAINTAINERS} for help.`,
 				ephemeral: true
@@ -60,7 +61,7 @@ export default class extends Command {
 
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
-		if (courseGeneral.isText()) {
+		if (courseGeneral.type === ChannelType.GuildText) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			privThread = await courseGeneral.threads.create({
@@ -94,7 +95,7 @@ export default class extends Command {
 		});
 
 		const threadEmbed = new EmbedBuilder()
-			.setAuthor(`${interaction.user.tag}`, interaction.user.avatarURL())
+			.setAuthor({ name: `${interaction.user.tag}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(response)
 			.setFooter({ text: `Please have any further conversation in this thread!` });
 

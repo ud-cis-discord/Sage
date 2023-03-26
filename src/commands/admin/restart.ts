@@ -1,6 +1,6 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ActivityType, ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
+import { ActivityType, ApplicationCommandPermissions, CommandInteraction, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {

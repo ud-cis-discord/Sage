@@ -1,4 +1,5 @@
-import { EmbedBuilder, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, Role, AttachmentBuilder, ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionType,
+	CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -11,7 +12,7 @@ export default class extends Command {
 		{
 			name: 'role',
 			description: 'Role to get the info of',
-			type: 'ROLE',
+			type: ApplicationCommandOptionType.Role,
 			required: true
 		}
 	];
@@ -32,13 +33,13 @@ export default class extends Command {
 			.setTitle(`${role.name} | ${memberList.size} members`)
 			.setFooter({ text: `Role ID: ${role.id}` });
 
-		const attachments: MessageAttachment[] = [];
+		const attachments: AttachmentBuilder[] = [];
 
-		if (members instanceof MessageAttachment) {
-			embed.addField('Members', 'Too many to display, see attached file.', true);
+		if (members instanceof AttachmentBuilder) {
+			embed.addFields({ name: 'Members', value: 'Too many to display, see attached file.' });
 			attachments.push(members);
 		} else {
-			embed.addField('Members', memberList.size < 1 ? 'None' : members, true);
+			embed.addFields({ name: 'Members', value: memberList.size < 1 ? 'None' : members, inline: true });
 		}
 		return interaction.reply({ embeds: [embed], files: attachments });
 	}

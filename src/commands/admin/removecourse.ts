@@ -1,7 +1,8 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, CommandInteraction, ActionRowBuilder, MessageButton } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, CommandInteraction, ActionRowBuilder, ButtonBuilder,
+	ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ButtonStyle } from 'discord.js';
 import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
 
 const DECISION_TIMEOUT = 30;
@@ -22,11 +23,12 @@ export default class extends Command {
 	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		let timeout = DECISION_TIMEOUT;
 		const course = (interaction.options as CommandInteractionOptionResolver).getChannel('course') as CategoryChannel;
+		console.log(course.id);
 
 		//	 grabbing course data
 		let channelCount;
 		try {
-			channelCount = course.children.size;
+			channelCount = course.children.cache.size;
 		} catch (error) {
 			return interaction.reply('You have to tag a valid course category.');
 		}
@@ -36,13 +38,15 @@ export default class extends Command {
 		`${interaction.user.tag}\` \`(${interaction.user.id})\``;
 
 		const confirmBtns = [
-			new MessageButton({ label: 'Yes', customId: 'y', style: 'SECONDARY' }),
-			new MessageButton({ label: 'No', customId: 'n', style: 'DANGER' })
+			new ButtonBuilder({ label: 'Yes', customId: 'y', style: ButtonStyle.Secondary }),
+			new ButtonBuilder({ label: 'No', customId: 'n', style: ButtonStyle.Danger })
 		];
 
 		//	a warning gets issued for this command
 		const baseText = `Are you sure you want to delete ${course}? ` +
 		`This action will archive ${channelCount} channels and unenroll ${userCount} users. `;
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: you are literally the right type shut up
 		await interaction.reply({ content: `${baseText} Press 'yes' in the next 30 seconds to confirm.`, components: [new ActionRowBuilder({ components: confirmBtns })] });
 
 		let replyId;
@@ -76,9 +80,8 @@ export default class extends Command {
 					const profRole = await interaction.guild.roles.cache.find(role => role.name === 'Prof');
 					const TARole = await interaction.guild.roles.cache.find(role => role.name === 'TA');
 					const LARole = await interaction.guild.roles.cache.find(role => role.name === 'LA');
-
 					//	archving the course channels
-					for (const channel of [...course.children.values()]) {
+					for (const channel of [...course.children.cache.values()]) {
 						await channel.setParent(CHANNELS.ARCHIVE, { reason });
 						await channel.lockPermissions();
 						await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
@@ -116,6 +119,7 @@ export default class extends Command {
 
 					await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from CISC ${courseId}`);
 				} catch (error) {
+					interaction.client.emit('error', error);
 					interaction.channel.send(`An error occured: ${error.message}`);
 				}
 			} else {
@@ -147,11 +151,13 @@ export default class extends Command {
 		return;
 	}
 
-	countdown(interaction: CommandInteraction, timeout: number, btns: MessageButton[], baseText: string): void {
+	countdown(interaction: CommandInteraction, timeout: number, btns: ButtonBuilder[], baseText: string): void {
 		const extraText = timeout > 1
 			? `Press 'yes' in the next ${timeout} seconds to confirm.`
 			: `Press 'yes' in the next ${timeout} seconds to confirm.`;
 		interaction.editReply({ content: baseText +
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: you are literally the right type shut up
 		extraText, components: [new ActionRowBuilder({ components: btns })] });
 	}
 

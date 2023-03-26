@@ -1,4 +1,4 @@
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import prettyMilliseconds from 'pretty-ms';
 

@@ -2,7 +2,7 @@ import { Collection, Client, CommandInteraction, ApplicationCommand,
 	GuildMember, SelectMenuInteraction,
 	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
 	ButtonInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder,
-	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType } from 'discord.js';
+	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle } from 'discord.js';
 import { isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -158,14 +158,17 @@ export async function handleButton(interaction: ButtonInteraction): Promise<void
 			const verifyPrompt = new TextInputBuilder()
 				.setCustomId('verifyPrompt')
 				.setLabel('Please enter your unigue hash code here: ')
-				.setStyle('SHORT')
+				.setStyle(TextInputStyle.Short)
 				.setMinLength(44)
 				.setMaxLength(44)
 				.setRequired(true);
 			const verifyActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(verifyPrompt);
 
 			verifyModal.addComponents(verifyActionRow);
-			await interaction.showModalBuilder(verifyModal);
+
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore - apparently doesn't exist, but if i ignore it it works!
+			await interaction.showModal(verifyModal);
 		}
 	}
 }
@@ -285,8 +288,8 @@ async function runCommand(interaction: CommandInteraction, bot: Client): Promise
 		try {
 			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => {
-					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 					bot.emit('error', new CommandError(error, interaction));
+					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 				});
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));

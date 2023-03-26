@@ -67,8 +67,8 @@ async function checkPolls(bot: Client): Promise<void> {
 		const pollEmbed = new EmbedBuilder()
 			.setTitle(poll.question)
 			.setDescription(`This poll was created by ${owner.displayName} and ended **${mdTimestamp}**`)
-			.addFields(`Winner${winners.length === 1 ? '' : 's'}`, winMessage)
-			.addFields('Choices', choiceText)
+			.addFields({ name: `Winner${winners.length === 1 ? '' : 's'}`, value: winMessage })
+			.addFields({ name: 'Choices', value: choiceText })
 			.setColor('Random');
 
 		pollMsg.edit({ embeds: [pollEmbed], components: [] });
@@ -77,8 +77,8 @@ async function checkPolls(bot: Client): Promise<void> {
 		pollMsg.channel.send({ embeds: [new EmbedBuilder()
 			.setTitle(poll.question)
 			.setDescription(`${owner}'s poll has ended!`)
-			.addFields(`Winner${winners.length === 1 ? '' : 's'}`, winMessage)
-			.addFields('Original poll', `Click [here](${pollMsg.url}) to see the original poll.`)
+			.addFields({ name: `Winner${winners.length === 1 ? '' : 's'}`, value: winMessage })
+			.addFields({ name: 'Original poll', value: `Click [here](${pollMsg.url}) to see the original poll.` })
 			.setColor('Random')
 		] });
 

@@ -25,7 +25,7 @@ export default class extends Command {
 		const course = (interaction.options as CommandInteractionOptionResolver).getString('course');
 		//	make sure course does not exist already
 		if (await interaction.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) > 0) {
-			interaction.reply({ content: `${course} has already been registered as a course.`, ephemeral: true });
+			interaction.editReply({ content: `${course} has already been registered as a course.` });
 		}
 		const reason = `Creating new course \`${course}\` as requested 
 		by \`${interaction.user.username}\` \`(${interaction.user.id})\`.`;

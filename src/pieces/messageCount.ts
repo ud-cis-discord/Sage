@@ -145,7 +145,7 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 		.setThumbnail(msg.author.avatarURL())
 		.setTitle('<:steve_peace:883541149032267816> Level up!')
 		.setDescription(embedText)
-		.addFields('XP to next level:', user.levelExp.toString(), true)
+		.addFields({ name: 'XP to next level:', value: user.levelExp.toString(), inline: true })
 		.setColor(createLevelRgb(user.level))
 		.setFooter({ text: 'You can turn the messages off by using the `/togglelevelpings` command' })
 		.setTimestamp();

@@ -69,7 +69,9 @@ export default class extends Command {
 		];
 		modal.addComponents(...modalRows);
 
-		await interaction.showModalBuilder(modal);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore - apparently doesn't exist, but if i ignore it it works!
+		await interaction.showModal(modal);
 	}
 
 }

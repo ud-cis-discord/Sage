@@ -55,7 +55,7 @@ export default class extends Command {
 			ctx.fillStyle = Leaderboard.userPillColor;
 			this.roundedRect(ctx, cursor.x, cursor.y, Leaderboard.width, Leaderboard.userPillHeight, 10);
 
-			const pfp = await loadImage(discUser.user.displayAvatarURL({ format: 'png' } as ImageURLOptions));
+			const pfp = await loadImage(discUser.user.displayAvatarURL({ extension: 'png' } as ImageURLOptions));
 			ctx.drawImage(pfp, 0, cursor.y, Leaderboard.userPillHeight, Leaderboard.userPillHeight);
 			cursor.x += Leaderboard.userPillHeight + 15;
 			cursor.y += Leaderboard.userPillHeight / 2;

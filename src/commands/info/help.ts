@@ -113,6 +113,7 @@ export default class extends Command {
 			});
 
 			const splitStr = helpStr.split('\n');
+			console.log(splitStr);
 
 			let notified = false;
 			splitStr.forEach((helpMsg) => {

@@ -67,9 +67,7 @@ export default class extends Command {
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked a private question`,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore: typescript throws a fit for some reason now, claims type is of type 'never'. Problem since djs v13.6
-				type: 'GUILD_PRIVATE_THREAD'
+				type: ChannelType.PrivateThread
 			});
 		} else {
 			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;

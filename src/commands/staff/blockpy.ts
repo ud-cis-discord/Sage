@@ -1,7 +1,7 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { CommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData } from 'discord.js';
+import { CommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
@@ -13,7 +13,7 @@ export default class extends Command {
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
-			type: 'USER',
+			type: ApplicationCommandOptionType.User,
 			description: 'The member to look up',
 			required: true
 		}

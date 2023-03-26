@@ -1,7 +1,8 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { BOT } from '@root/config';
-import { EmbedBuilder, ApplicationCommandPermissions, ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandPermissions, ApplicationCommandOptionData, CommandInteraction, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+	InteractionResponse } from 'discord.js';
 
 export default class extends Command {
 
@@ -20,10 +21,10 @@ export default class extends Command {
 		const query = (interaction.options as CommandInteractionOptionResolver).getString('query');
 		const formatted = query.replace(new RegExp(' ', 'g'), '+').replace('%', '%25');
 		const link = `https://letmegooglethat.com/?q=${formatted}`;
-		const embed = new EmbedBuilder({
-			description: `[Let me Google that for you!](${link})`,
-			color: 'LUMINOUS_VIVID_PINK'
-		});
+		const embed = new EmbedBuilder()
+			.setTitle('Let me Google that for you!')
+			.setURL(link)
+			.setColor('LuminousVividPink');
 		return interaction.reply({ embeds: [embed] });
 	}
 

@@ -1,7 +1,7 @@
 import {
-	ApplicationCommandOptionData, Client, CommandInteraction, Message, MessageAttachment,
+	ApplicationCommandOptionData, Client, CommandInteraction, Message, AttachmentBuilder,
 	EmbedBuilder, Role, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
-	StringSelectMenuBuilder, MessageSelectOptionData
+	SelectMenuBuilder, StringSelectMenuOptionBuilder, ChannelType, ActionRow
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
@@ -61,7 +61,7 @@ export function getMsgIdFromLink(link: string): string {
 export async function modifyRoleDD(interaction: CommandInteraction, role: Role, isCourse: boolean, dropdownAction: 'ADD' | 'REMOVE'): Promise<boolean> {
 	let rolesMsg: Message;
 	const channel = await interaction.guild.channels.fetch(CHANNELS.ROLE_SELECT) as TextChannel;
-	if (!channel || channel.type !== 'GUILD_TEXT') {
+	if (!channel || channel.type !== ChannelType.GuildText) {
 		const responseEmbed = new EmbedBuilder()
 			.setColor('#ff0000')
 			.setTitle('Argument error')
@@ -71,7 +71,7 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 	}
 	try {
 		rolesMsg = await channel.messages.fetch(
-			isCourse ? ROLE_DROPDOWNS.COURSE_ROLES : ROLE_DROPDOWNS.ASSIGN_ROLES, { cache: true, force: true }
+			isCourse ? ROLE_DROPDOWNS.COURSE_ROLES : ROLE_DROPDOWNS.ASSIGN_ROLES
 		);
 	} catch (error) {
 		const responseEmbed = new EmbedBuilder()
@@ -91,12 +91,16 @@ export async function modifyRoleDD(interaction: CommandInteraction, role: Role, 
 	}
 
 	// the message component row that the dropdown is in
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	let dropdownRow = rolesMsg.components[0] as ActionRowBuilder;
 	if (!dropdownRow) dropdownRow = new ActionRowBuilder();
 
-	const option: MessageSelectOptionData = { label: role.name, value: role.id };
+	const option: StringSelectMenuOptionBuilder = new StringSelectMenuOptionBuilder()
+		.setLabel(role.name)
+		.setValue(role.id);
 
-	const menu = dropdownRow.components[0] as StringSelectMenuBuilder;
+	const menu = dropdownRow.components[0] as SelectMenuBuilder;
 	switch (dropdownAction) {
 		case 'ADD':
 			return addRole(interaction, rolesMsg, menu, option, dropdownRow, isCourse);
@@ -112,27 +116,33 @@ export function dateToTimestamp(date: Date, type: TimestampType = 't'): string {
 
 function addRole(interaction: CommandInteraction,
 	rolesMsg: Message,
-	menu: StringSelectMenuBuilder,
-	option: MessageSelectOptionData,
+	menu: SelectMenuBuilder,
+	option: StringSelectMenuOptionBuilder,
 	dropdownRow: ActionRowBuilder,
 	isCourse: boolean): boolean {
 	if (menu) {
 		menu.options.forEach(menuOption => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			if (menuOption.value === option.value) {
 				const responseEmbed = new EmbedBuilder()
 					.setColor('#ff0000')
 					.setTitle('Argument error')
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
 					.setDescription(`${option.label} is in this message's role select menu already.`);
 				interaction.channel.send({ embeds: [responseEmbed] });
 				return false;
 			}
 		});
-		menu.addOptions([option]);
+		menu.addOptions(option);
 		menu.setMaxValues(menu.options.length);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
 	} else {
 		dropdownRow.addComponents(
-			new StringSelectMenuBuilder()
+			new SelectMenuBuilder()
 				.setCustomId('roleselect')
 				.setMinValues(0)
 				.setMaxValues(1)
@@ -140,14 +150,16 @@ function addRole(interaction: CommandInteraction,
 				.addOptions([option])
 		);
 	}
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore: you are Field.All the right type shut up
 	rolesMsg.edit({ components: [dropdownRow] });
 	return true;
 }
 
 function removeRole(interaction: CommandInteraction,
 	rolesMsg: Message,
-	menu: StringSelectMenuBuilder,
-	option: MessageSelectOptionData,
+	menu: SelectMenuBuilder,
+	option: StringSelectMenuOptionBuilder,
 	dropdownRow: ActionRowBuilder): boolean {
 	let cont = true;
 	if (!menu) {
@@ -160,11 +172,17 @@ function removeRole(interaction: CommandInteraction,
 	}
 
 	menu.options.forEach((menuOption, index) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		if (menuOption.value !== option.value) return;
 
 		menu.spliceOptions(index, 1);
 		menu.setMaxValues(menu.options.length);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		menu.options.sort((x, y) => x.label > y.label ? 1 : -1);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: you are Field.All the right type shut up
 		rolesMsg.edit({ components: menu.options.length > 0 ? [dropdownRow] : [] });
 		cont = false;
 	});
@@ -174,15 +192,17 @@ function removeRole(interaction: CommandInteraction,
 	const responseEmbed = new EmbedBuilder()
 		.setColor('#ff0000')
 		.setTitle('Argument error')
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		.setDescription(`${option.label} was not found in that message's role select menu. The role, however, has still been removed from the server and the database.`);
 	interaction.editReply({ embeds: [responseEmbed] });
 	return false;
 }
 
-export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<MessageAttachment> {
+export async function sendToFile(input: string, filetype = 'txt', filename: string = null, timestamp = false): Promise<AttachmentBuilder> {
 	const time = moment().format('M-D-YY_HH-mm');
 	filename = `${filename}${timestamp ? `_${time}` : ''}` || time;
-	return new MessageAttachment(Buffer.from(input.trim()), `${filename}.${filetype}`);
+	return new AttachmentBuilder(Buffer.from(input.trim()), { name: `${filename}.${filetype}` });
 }
 
 export async function generateQuestionId(interaction: CommandInteraction, depth = 1): Promise<string> {

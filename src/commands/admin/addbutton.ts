@@ -4,7 +4,7 @@ import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, ButtonBuilder,
 	ButtonStyle, TextChannel, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 
-const STYLES = ['Primary', 'Secondary', 'Success', 'Danger'];
+const STYLES = ['primary', 'secondary', 'success', 'danger'];
 
 export default class extends Command {
 
@@ -48,19 +48,14 @@ export default class extends Command {
 
 		// TODO: this is dumb
 		let buttonStyle;
-		switch (buttonStyleInput) {
-			case 'Primary':
-				buttonStyle = ButtonStyle.Primary;
-				break;
-			case 'Secondary':
-				buttonStyle = ButtonStyle.Secondary;
-				break;
-			case 'Success':
-				buttonStyle = ButtonStyle.Success;
-				break;
-			case 'Danger':
-				buttonStyle = ButtonStyle.Danger;
-				break;
+		if (buttonStyleInput === 'PRIMARY') {
+			buttonStyle = ButtonStyle.Primary;
+		} else if (buttonStyleInput === 'SECONDARY') {
+			buttonStyle = ButtonStyle.Secondary;
+		} else if (buttonStyleInput === 'SUCCESS') {
+			buttonStyle = ButtonStyle.Success;
+		} else if (buttonStyleInput === 'DANGER') {
+			buttonStyle = ButtonStyle.Danger;
 		}
 
 		//	for discord canary users, links are different
@@ -86,6 +81,8 @@ export default class extends Command {
 			.setCustomId(customID)
 			.setStyle(buttonStyle);
 
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: you are literally the right type shut up
 		await message.edit({ content: message.content, components: [new ActionRowBuilder({ components: [btn] })] });
 		interaction.reply({ content: 'Your message has been given a button', ephemeral: true });
 	}

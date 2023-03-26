@@ -1,5 +1,6 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
+	InteractionResponse } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
@@ -11,7 +12,7 @@ export default class extends Command {
 		{
 			name: 'user',
 			description: 'The user to lookup',
-			type: 'USER',
+			type: ApplicationCommandOptionType.User,
 			required: true
 		}
 	];
@@ -32,7 +33,7 @@ export default class extends Command {
 		(${prettyMilliseconds(Date.now() - member.joinedTimestamp)} ago)`;
 
 		const embed = new EmbedBuilder()
-			.setAuthor(`${member.user.username}`, member.user.displayAvatarURL())
+			.setAuthor({ name: `${member.user.username}`, iconURL: member.user.displayAvatarURL() })
 			.setColor(member.displayColor)
 			.setTimestamp()
 			.setFooter({ text: `Member ID: ${member.id}` })

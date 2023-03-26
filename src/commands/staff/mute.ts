@@ -1,6 +1,6 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { MAINTAINERS, ROLES } from '@root/config';
-import { ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -12,7 +12,7 @@ export default class extends Command {
 		{
 			name: 'user',
 			description: 'The user to mute',
-			type: 'USER',
+			type: ApplicationCommandOptionType.User,
 			required: true
 		}
 	]

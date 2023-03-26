@@ -1,11 +1,11 @@
-import { Client, TextChannel, EmbedField, EmbedBuilder, GuildMember, PartialGuildMember, GuildBan } from 'discord.js';
+import { Client, TextChannel, EmbedField, EmbedBuilder, GuildMember, PartialGuildMember, GuildBan, AuditLogEvent } from 'discord.js';
 import { GUILDS, CHANNELS, ROLES } from '@root/config';
 
 async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> {
 	const { guild, user } = ban;
 	if (guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD', limit: 1 })).entries;
+	const logs = (await guild.fetchAuditLogs({ type: AuditLogEvent.MemberBanAdd, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
@@ -19,10 +19,10 @@ async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> 
 	}
 
 	const embed = new EmbedBuilder()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`${user.tag} was banned.`)
 		.addFields(fields)
-		.setColor('GREYPLE')
+		.setColor('Greyple')
 		.setFooter({ text: `Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}` })
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
@@ -32,7 +32,7 @@ async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<voi
 	const { guild, user } = ban;
 	if (ban.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await guild.fetchAuditLogs({ type: 'MEMBER_BAN_REMOVE', limit: 1 })).entries;
+	const logs = (await guild.fetchAuditLogs({ type: AuditLogEvent.MemberBanRemove, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
@@ -46,10 +46,10 @@ async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<voi
 	}
 
 	const embed = new EmbedBuilder()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`${user.tag} was unbanned.`)
 		.addFields(fields)
-		.setColor('GREYPLE')
+		.setColor('Greyple')
 		.setFooter({ text: `Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}` })
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
@@ -58,7 +58,7 @@ async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<voi
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, member: GuildMember, modLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN || oldMember.roles.cache.equals(member.roles.cache)) return;
 
-	const logs = (await member.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 5 })).entries;
+	const logs = (await member.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 5 })).entries;
 	const logEntry = [...logs.values()].find(entry => {
 		if (!('id' in entry.target)) return false;
 		return entry.target.id === member.id;
@@ -78,7 +78,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 		const embed = new EmbedBuilder()
 			.setTitle(`${member.user.tag} ${muted} by ${logEntry.executor.tag}`)
 			.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
-			.setColor('DARK_RED')
+			.setColor('DarkRed')
 			.setFooter({ text: `TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}` })
 			.setTimestamp();
 		modLog.send({ embeds: [embed] });
@@ -88,7 +88,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 async function processMemberRemove(member: GuildMember | PartialGuildMember, modLog: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK', limit: 1 })).entries;
+	const logs = (await member.guild.fetchAuditLogs({ type: AuditLogEvent.MemberKick, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 	if (!logEntry) return;
 
@@ -99,7 +99,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 	const embed = new EmbedBuilder()
 		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
 		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
-		.setColor('YELLOW')
+		.setColor('Yellow')
 		.setFooter({ text: `TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}` })
 		.setTimestamp();
 	modLog.send({ embeds: [embed] });
