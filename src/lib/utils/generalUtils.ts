@@ -68,6 +68,7 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 	const channel = await interaction.guild.channels.fetch(CHANNELS.ROLE_SELECT) as TextChannel;
 	let coursesMsg, assignablesMsg;
 
+	// find both dropdown messages, based on what's in the config
 	try {
 		coursesMsg = await channel.messages.fetch(ROLE_DROPDOWNS.COURSE_ROLES);
 		assignablesMsg = await channel.messages.fetch(ROLE_DROPDOWNS.ASSIGN_ROLES);
@@ -86,33 +87,34 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 		interaction.channel.send({ embeds: [responseEmbed] });
 	}
 
+	// get roles from DB
 	let courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
 	const assignableRoles = await interaction.client.mongo.collection(DB.ASSIGNABLE).find().toArray();
 	let assignables = [];
-
 	for (const role of assignableRoles) {
 		const { name } = await interaction.guild.roles.fetch(role.id);
 		assignables.push({ name, id: role.id });
 	}
 
+	// sort alphabetically
 	courses = courses.sort((a, b) => a.name > b.name ? 1 : -1);
 	assignables = assignables.sort((a, b) => a.name > b.name ? 1 : -1);
 
+	// initialize dropdowns
 	const coursesDropdown = new StringSelectMenuBuilder()
 		.setCustomId('roleselect')
 		.setMaxValues(courses.length);
-
 	const assignablesDropdown = new StringSelectMenuBuilder()
 		.setCustomId('roleselect')
 		.setMaxValues(assignables.length);
 
-	console.log(assignables);
+	// add options to dropdowns
 	coursesDropdown.addOptions(courses.map(c => ({ label: `CISC ${c.name}`, value: c.roles.student })));
 	assignablesDropdown.addOptions(assignables.map(a => ({ label: a.name, value: a.id })));
 
+	// create component rows, add to messages
 	const coursesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(coursesDropdown);
 	const assignablesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(assignablesDropdown);
-
 	coursesMsg.edit({ components: [coursesRow] });
 	assignablesMsg.edit({ components: [assignablesRow] });
 
