@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, AttachmentBuilder, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, AttachmentBuilder, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
 	InteractionResponse, Message } from 'discord.js';
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
@@ -24,11 +24,11 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>> {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
-		const tex = encodeURIComponent((interaction.options as CommandInteractionOptionResolver).getString('input'));
+		const tex = encodeURIComponent(interaction.options.getString('input'));
 		const errorResponse = "Sorry, I couldn't render that LaTeX expression.";
 		let usingBackup = false;
 		let image;

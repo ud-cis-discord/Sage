@@ -1,7 +1,7 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, CommandInteraction, ActionRowBuilder, ButtonBuilder,
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder,
 	ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ButtonStyle } from 'discord.js';
 import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
 
@@ -20,9 +20,9 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		let timeout = DECISION_TIMEOUT;
-		const course = (interaction.options as CommandInteractionOptionResolver).getChannel('course') as CategoryChannel;
+		const course = interaction.options.getChannel('course') as CategoryChannel;
 		console.log(course.id);
 
 		//	 grabbing course data
@@ -151,7 +151,7 @@ export default class extends Command {
 		return;
 	}
 
-	countdown(interaction: CommandInteraction, timeout: number, btns: ButtonBuilder[], baseText: string): void {
+	countdown(interaction: ChatInputCommandInteraction, timeout: number, btns: ButtonBuilder[], baseText: string): void {
 		const extraText = timeout > 1
 			? `Press 'yes' in the next ${timeout} seconds to confirm.`
 			: `Press 'yes' in the next ${timeout} seconds to confirm.`;

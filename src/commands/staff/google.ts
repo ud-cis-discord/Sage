@@ -1,7 +1,7 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { BOT } from '@root/config';
-import { EmbedBuilder, ApplicationCommandPermissions, ApplicationCommandOptionData, CommandInteraction, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+import { EmbedBuilder, ApplicationCommandPermissions, ApplicationCommandOptionData, ChatInputCommandInteraction, ApplicationCommandOptionType, CommandInteractionOptionResolver,
 	InteractionResponse } from 'discord.js';
 
 export default class extends Command {
@@ -17,8 +17,8 @@ export default class extends Command {
 		}
 	];
 
-	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const query = (interaction.options as CommandInteractionOptionResolver).getString('query');
+	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const query = interaction.options.getString('query');
 		const formatted = query.replace(new RegExp(' ', 'g'), '+').replace('%', '%25');
 		const link = `https://letmegooglethat.com/?q=${formatted}`;
 		const embed = new EmbedBuilder()

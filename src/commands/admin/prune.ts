@@ -1,7 +1,7 @@
 import { Command } from '@lib/types/Command';
 import { ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandPermissions, CommandInteraction, InteractionResponse } from 'discord.js';
+import { ApplicationCommandPermissions, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 
 const PRUNE_TIMEOUT = 30;
 
@@ -11,7 +11,7 @@ export default class extends Command {
 	runInDM = false;
 	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		// let timeout = PRUNE_TIMEOUT;
 
 		// await interaction.guild.members.fetch();

@@ -1,13 +1,13 @@
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@lib/utils/generalUtils';
-import { CommandInteraction, InteractionResponse } from 'discord.js';
+import { ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 
 export default class extends Command {
 
 	description = `Archive a private question thread.`;
 	extendedHelp = `This command only works in private question threads.`;
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		if (!interaction.channel.isThread()) {
 			return interaction.reply({ embeds: [generateErrorEmbed('You must run this command in a private question thread.')], ephemeral: true });
 		}

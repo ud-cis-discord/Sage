@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteractionOptionResolver, InteractionResponse, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { DB } from '@root/config';
@@ -24,9 +24,9 @@ export default class extends Command {
 	]
 
 	// never assume that students are not dumb
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const msgLink = (interaction.options as CommandInteractionOptionResolver).getString('message');
-		const assignmentId = (interaction.options as CommandInteractionOptionResolver).getString('assignmentid');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const msgLink = interaction.options.getString('message');
+		const assignmentId = interaction.options.getString('assignmentid');
 
 		if (!('parentId' in interaction.channel)) return interaction.reply({ embeds: [generateErrorEmbed('This command is only available in text channels.')], ephemeral: true });
 		// eslint-disable-next-line no-extra-parens

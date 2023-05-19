@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -13,8 +13,8 @@ export default class extends Command {
 		}
 	]
 
-	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const input = (interaction.options as CommandInteractionOptionResolver).getString('word');
+	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const input = interaction.options.getString('word');
 
 		// Get the first word in the sentence and make it URL-friendly
 		if (input.indexOf(' ') !== -1) {

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, Message, EmbedBuilder, TextChannel, ApplicationCommandOptionType,
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, Message, EmbedBuilder, TextChannel, ApplicationCommandOptionType,
 	CommandInteractionOptionResolver } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
@@ -29,9 +29,9 @@ export default class extends Command {
 	]
 	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<Message> {
-		const target = await interaction.channel.messages.fetch(getMsgIdFromLink((interaction.options as CommandInteractionOptionResolver).getString('msglink')));
-		const reason = (interaction.options as CommandInteractionOptionResolver).getString('reason') || 'Breaking server rules';
+	async run(interaction: ChatInputCommandInteraction): Promise<Message> {
+		const target = await interaction.channel.messages.fetch(getMsgIdFromLink(interaction.options.getString('msglink')));
+		const reason = interaction.options.getString('reason') || 'Breaking server rules';
 		if ('parentId' in interaction.channel) {
 			const course: Course = await interaction.client.mongo.collection(DB.COURSES)
 				.findOne({ 'channels.category': interaction.channel.parentId });

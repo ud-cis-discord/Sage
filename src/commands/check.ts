@@ -1,4 +1,4 @@
-import { EmbedBuilder, CommandInteraction, ApplicationCommandOptionData, CommandInteractionOptionResolver, InteractionResponse, ApplicationCommandOptionType } from 'discord.js';
+import { EmbedBuilder, ChatInputCommandInteraction, ApplicationCommandOptionData, CommandInteractionOptionResolver, InteractionResponse, ApplicationCommandOptionType } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -15,7 +15,7 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.user.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -29,7 +29,7 @@ export default class extends Command {
 			.addFields({ name: 'Message Count', value: `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, inline: true })
 			.addFields({ name: 'Level Progress', value: `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
 			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, inline: false });
-		if ((interaction.options as CommandInteractionOptionResolver).getBoolean('hide') === true) {
+		if (interaction.options.getBoolean('hide') === true) {
 			interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
 			interaction.reply({ embeds: [embed] });

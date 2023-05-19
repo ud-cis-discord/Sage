@@ -1,7 +1,7 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, ButtonBuilder,
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder,
 	ButtonStyle, TextChannel, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 
 const STYLES = ['primary', 'secondary', 'success', 'danger'];
@@ -40,11 +40,11 @@ export default class extends Command {
 		}))
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const msg = (interaction.options as CommandInteractionOptionResolver).getString('msg_link');
-		const buttonLabel = (interaction.options as CommandInteractionOptionResolver).getString('label');
-		const customID = (interaction.options as CommandInteractionOptionResolver).getString('custom_id');
-		const buttonStyleInput = (interaction.options as CommandInteractionOptionResolver).getString('style').toUpperCase();
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const msg = interaction.options.getString('msg_link');
+		const buttonLabel = interaction.options.getString('label');
+		const customID = interaction.options.getString('custom_id');
+		const buttonStyleInput = interaction.options.getString('style').toUpperCase();
 
 		// TODO: this is dumb
 		let buttonStyle;

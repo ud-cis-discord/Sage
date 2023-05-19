@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { AssignableRole } from '@lib/types/AssignableRole';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB } from '@root/config';
@@ -18,8 +18,8 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const apiRole = (interaction.options as CommandInteractionOptionResolver).getRole('role');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const apiRole = interaction.options.getRole('role');
 		const role = await interaction.guild.roles.fetch(apiRole.id);
 
 		const assignables = interaction.client.mongo.collection(DB.ASSIGNABLE);

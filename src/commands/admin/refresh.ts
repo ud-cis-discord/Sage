@@ -2,14 +2,14 @@ import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@root/src/lib/permissions';
 import { Command } from '@root/src/lib/types/Command';
 import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
-import { ActivityType, ApplicationCommandData, ApplicationCommandType, CommandInteraction, InteractionResponse } from 'discord.js';
+import { ActivityType, ApplicationCommandData, ApplicationCommandType, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 
 export default class extends Command {
 
 	description = `Re-loads all of ${BOT.NAME}'s commands. WARNING: This takes forever`;
 	permissions = BOTMASTER_PERMS;
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const commandFiles = readdirRecursive(`${__dirname}/..`).filter(file => file.endsWith('.js'));
 		interaction.deferReply();
 

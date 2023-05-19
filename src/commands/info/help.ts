@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, EmbedBuilder, GuildMember, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, GuildMember, ApplicationCommandOptionType, CommandInteractionOptionResolver,
 	InteractionResponse } from 'discord.js';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { BOT, PREFIX } from '@root/config';
@@ -18,8 +18,8 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const cmd = (interaction.options as CommandInteractionOptionResolver).getString('cmd');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const cmd = interaction.options.getString('cmd');
 		const { commands } = interaction.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
 

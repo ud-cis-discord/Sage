@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { EmbedBuilder, TextChannel, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { EmbedBuilder, TextChannel, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { generateErrorEmbed } from '@lib/utils/generalUtils';
 
 
@@ -29,9 +29,9 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const id = (interaction.options as CommandInteractionOptionResolver).getString('questionid');
-		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const id = interaction.options.getString('questionid');
+		const file = interaction.options.getAttachment('file');
 		const question: PVQuestion = await interaction.client.mongo.collection(DB.PVQ).findOne({ questionId: id });
 
 		if (!question || question.type === 'private') {
@@ -46,7 +46,7 @@ export default class extends Command {
 
 		const embed = new EmbedBuilder()
 			.setAuthor({ name: `Anonymous responded to ${question.questionId}`, iconURL: interaction.client.user.avatarURL() })
-			.setDescription(`${(interaction.options as CommandInteractionOptionResolver).getString('response')}\n\n[Jump to question](${question.messageLink})`);
+			.setDescription(`${interaction.options.getString('response')}\n\n[Jump to question](${question.messageLink})`);
 
 		if (file) embed.setImage(file.url);
 

@@ -1,4 +1,4 @@
-import { EmbedBuilder, Role, AttachmentBuilder, ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionType,
+import { EmbedBuilder, Role, AttachmentBuilder, ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionType,
 	CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
@@ -18,8 +18,8 @@ export default class extends Command {
 	];
 	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const role = (interaction.options as CommandInteractionOptionResolver).getRole('role') as Role;
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const role = interaction.options.getRole('role') as Role;
 
 		const memberList = role.members || (await interaction.guild.roles.fetch(role.id)).members;
 

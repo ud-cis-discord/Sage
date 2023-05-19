@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, GuildMember, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteractionOptionResolver, GuildMember, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -13,8 +13,8 @@ export default class extends Command {
 		}
 	]
 
-	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const target = (interaction.options as CommandInteractionOptionResolver).getMember('target') as GuildMember;
+	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const target = interaction.options.getMember('target') as GuildMember;
 		return interaction.reply({ files: [{
 			attachment: `${__dirname}../../../../../assets/images/doubt.jpg`,
 			name: 'doubt.jpg'

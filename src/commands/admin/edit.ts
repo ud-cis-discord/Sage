@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, ActionRowBuilder, ModalActionRowComponentBuilder, TextChannel,
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, ActionRowBuilder, ModalActionRowComponentBuilder, TextChannel,
 	TextInputBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ModalBuilder, TextInputStyle } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -17,8 +17,8 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const link = (interaction.options as CommandInteractionOptionResolver).getString('msg_link');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const link = interaction.options.getString('msg_link');
 
 		//	for discord canary users, links are different
 		const newLink = link.replace('canary.', '');

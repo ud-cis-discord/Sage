@@ -1,4 +1,4 @@
-import { EmbedBuilder, TextChannel, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { EmbedBuilder, TextChannel, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { BOT, CHANNELS, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -21,9 +21,9 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction:CommandInteraction): Promise<InteractionResponse<boolean>> {
-		const feedback = (interaction.options as CommandInteractionOptionResolver).getString('feedback');
-		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
+	async run(interaction:ChatInputCommandInteraction): Promise<InteractionResponse<boolean>> {
+		const feedback = interaction.options.getString('feedback');
+		const file = interaction.options.getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
 		const embed = new EmbedBuilder()

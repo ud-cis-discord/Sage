@@ -1,4 +1,4 @@
-import { EmbedField, CommandInteraction, EmbedBuilder, version as discordVersion, InteractionResponse } from 'discord.js';
+import { EmbedField, ChatInputCommandInteraction, EmbedBuilder, version as discordVersion, InteractionResponse } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { version as sageVersion } from '@root/package.json';
 import { BOT } from '@root/config';
@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = 'Displays info about Sage\'s current status';
 
-	async run(interaction:CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction:ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const fields: Array<EmbedField> = [];
 		const bot = interaction.client;
 

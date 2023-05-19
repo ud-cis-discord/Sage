@@ -1,6 +1,6 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { MAINTAINERS, ROLES } from '@root/config';
-import { ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -17,8 +17,8 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const user = (interaction.options as CommandInteractionOptionResolver).getUser('user');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const user = interaction.options.getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 
 		if (!member) {

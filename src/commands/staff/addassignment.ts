@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, CommandInteraction, EmbedField, EmbedBuilder, ApplicationCommandOptionType,
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, EmbedField, EmbedBuilder, ApplicationCommandOptionType,
 	CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
@@ -27,9 +27,9 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const course = (interaction.options as CommandInteractionOptionResolver).getString('course');
-		const newAssignments = (interaction.options as CommandInteractionOptionResolver).getString('newassignments').split('|').map(assign => assign.trim());
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const course = interaction.options.getString('course');
+		const newAssignments = interaction.options.getString('newassignments').split('|').map(assign => assign.trim());
 		const entry: Course = await interaction.client.mongo.collection(DB.COURSES).findOne({ name: course });
 
 		const added: Array<string> = [];

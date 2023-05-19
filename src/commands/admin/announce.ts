@@ -1,5 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, ModalBuilder, ActionRowBuilder,
+import { TextChannel, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ModalBuilder, ActionRowBuilder,
 	ModalActionRowComponentBuilder, InteractionResponse, CommandInteractionOptionResolver, TextInputBuilder, TextInputStyle, ApplicationCommandOptionType } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -22,10 +22,10 @@ export default class extends Command {
 		required: false
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
-		const channelOption = (interaction.options as CommandInteractionOptionResolver).getChannel('channel');
-		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
+		const channelOption = interaction.options.getChannel('channel');
+		const file = interaction.options.getAttachment('file');
 
 		const channel = (channelOption || announceChannel) as TextChannel;
 

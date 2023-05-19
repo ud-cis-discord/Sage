@@ -2,7 +2,8 @@ import { Collection, Client, CommandInteraction, ApplicationCommand,
 	GuildMember, SelectMenuInteraction,
 	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
 	ButtonInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder,
-	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle } from 'discord.js';
+	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle,
+	ChatInputCommandInteraction } from 'discord.js';
 import { isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -34,7 +35,7 @@ async function register(bot: Client): Promise<void> {
 	});
 
 	bot.on('interactionCreate', async interaction => {
-		if (interaction.isCommand() || interaction.isContextMenuCommand()) runCommand(interaction as CommandInteraction, bot);
+		if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) runCommand(interaction as ChatInputCommandInteraction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
 		if (interaction.isModalSubmit()) handleModalBuilder(interaction, bot);
 		if (interaction.isButton()) handleButton(interaction);
@@ -254,7 +255,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
-async function runCommand(interaction: CommandInteraction, bot: Client): Promise<unknown> {
+async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
 	const command = bot.commands.get(interaction.commandName);
 
 	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {

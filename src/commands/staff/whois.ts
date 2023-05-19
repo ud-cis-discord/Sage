@@ -1,5 +1,5 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
 	InteractionResponse } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
@@ -18,8 +18,8 @@ export default class extends Command {
 	];
 	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const user = (interaction.options as CommandInteractionOptionResolver).getUser('user');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const user = interaction.options.getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 
 		const roles = member.roles.cache.size > 1

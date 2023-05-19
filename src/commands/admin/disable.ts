@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, Formatters,
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, CommandInteractionOptionResolver, Formatters,
 	InteractionResponse } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
@@ -18,8 +18,8 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const commandInput = (interaction.options as CommandInteractionOptionResolver).getString('command');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const commandInput = interaction.options.getString('command');
 		const command = getCommand(interaction.client, commandInput);
 
 		//	check if command exists or is already disabled

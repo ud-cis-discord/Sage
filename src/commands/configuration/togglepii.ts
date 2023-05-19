@@ -1,6 +1,6 @@
 import { DB, MAINTAINERS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
-import { CommandInteraction, InteractionResponse } from 'discord.js';
+import { ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
 import { Command } from '@lib/types/Command';
 
@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = `Toggles whether your email (pii) will be sent to instructors over Discord.`;
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!entry) {

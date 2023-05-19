@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, EmbedBuilder, TextChannel, ThreadChannel, ApplicationCommandOptionType,
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, GuildChannel, EmbedBuilder, TextChannel, ThreadChannel, ApplicationCommandOptionType,
 	CommandInteractionOptionResolver, InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
@@ -26,7 +26,7 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -34,13 +34,13 @@ export default class extends Command {
 		}
 
 		let course: Course;
-		const question = (interaction.options as CommandInteractionOptionResolver).getString('question');
+		const question = interaction.options.getString('question');
 		const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
 
 		if (user.courses.length === 1) {
 			course = courses.find(c => c.name === user.courses[0]);
 		} else {
-			const inputtedCourse = courses.find(c => c.name === (interaction.options as CommandInteractionOptionResolver).getString('course'));
+			const inputtedCourse = courses.find(c => c.name === interaction.options.getString('course'));
 			if (!inputtedCourse) {
 				const desc = 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
 				`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;

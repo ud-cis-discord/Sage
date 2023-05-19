@@ -1,4 +1,4 @@
-import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, CommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType,
+import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType,
 	CommandInteractionOptionResolver, InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
@@ -19,10 +19,10 @@ export default class extends Command {
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		interaction.reply('<a:loading:755121200929439745> working...');
 
-		const course = (interaction.options as CommandInteractionOptionResolver).getString('course');
+		const course = interaction.options.getString('course');
 		//	make sure course does not exist already
 		if (await interaction.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) > 0) {
 			interaction.editReply({ content: `${course} has already been registered as a course.` });

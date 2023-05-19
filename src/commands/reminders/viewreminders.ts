@@ -1,6 +1,6 @@
 import { DB } from '@root/config';
 import { Reminder } from '@lib/types/Reminder';
-import { CommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { reminderTime } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 
@@ -9,7 +9,7 @@ export default class extends Command {
 	description = 'See your upcoming reminders.';
 	extendedHelp = 'Don\'t worry, private reminders will be hidden if you use this command publicly.';
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)
 			.find({ owner: interaction.user.id }).toArray();
 		reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());

@@ -1,4 +1,4 @@
-import { ChannelType, CommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
+import { ChannelType, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -6,7 +6,7 @@ export default class extends Command {
 	description = 'Provides information about the UDCIS discord server.';
 	runInDM = false;
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const membersWithRoles = interaction.guild.members.cache.filter(m => m.roles.cache.size > 1).size;
 		const percentage = Math.floor((interaction.guild.members.cache.filter(m => m.roles.cache.size > 1).size / interaction.guild.memberCount) * 100);
 

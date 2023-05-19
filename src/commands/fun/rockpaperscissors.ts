@@ -1,5 +1,5 @@
 import { BOT } from '@root/config';
-import { ButtonInteraction, CommandInteraction, ActionRowBuilder, ButtonBuilder, EmbedBuilder, InteractionResponse, ButtonStyle } from 'discord.js';
+import { ButtonInteraction, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder, EmbedBuilder, InteractionResponse, ButtonStyle } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { SageInteractionType } from '@lib/types/InteractionType';
 import { buildCustomId, getDataFromCustomId } from '@lib/utils/interactionUtils';
@@ -11,7 +11,7 @@ export default class extends Command {
 
 	description = `The ultimate battle of human vs program. Can you best ${BOT.NAME} in a round of rock paper scissors?`;
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const choiceEmbed = new EmbedBuilder()
 			.setTitle(`Make your choice, ${interaction.user.username}...`)
 			.setColor('Red')
@@ -61,7 +61,7 @@ export default class extends Command {
 		return;
 	}
 
-	timeoutMessage(i: CommandInteraction): void {
+	timeoutMessage(i: ChatInputCommandInteraction): void {
 		const failEmbed = new EmbedBuilder()
 			.setTitle(`${i.user.username} couldn't make up their mind! Command timed out.`)
 			.setColor('Red');

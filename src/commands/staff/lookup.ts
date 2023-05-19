@@ -1,7 +1,7 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { EmbedBuilder, CommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+import { EmbedBuilder, ChatInputCommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver,
 	InteractionResponse } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
@@ -20,8 +20,8 @@ export default class extends Command {
 		}
 	];
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const user = (interaction.options as CommandInteractionOptionResolver).getUser('user');
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const user = interaction.options.getUser('user');
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 		const member = await interaction.guild.members.fetch(user.id);
 

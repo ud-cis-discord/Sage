@@ -1,6 +1,6 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse, 
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, CommandInteractionOptionResolver, InteractionResponse, 
 	PresenceStatusData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
@@ -21,8 +21,8 @@ export default class extends Command {
 		}))
 	}]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const status = (interaction.options as CommandInteractionOptionResolver).getString('status') as PresenceStatusData;
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const status = interaction.options.getString('status') as PresenceStatusData;
 		const bot = interaction.client;
 		await bot.user.setStatus(status);
 

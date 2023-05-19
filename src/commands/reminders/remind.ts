@@ -1,5 +1,5 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
 import { reminderTime } from '@root/src/lib/utils/generalUtils';
@@ -32,11 +32,11 @@ export default class extends Command {
 		}
 	]
 
-	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const content = (interaction.options as CommandInteractionOptionResolver).getString('content');
-		const rawDuration = (interaction.options as CommandInteractionOptionResolver).getString('duration');
+	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		const content = interaction.options.getString('content');
+		const rawDuration = interaction.options.getString('duration');
 		const duration = parse(rawDuration);
-		const repeat = (interaction.options as CommandInteractionOptionResolver).getString('repeat') as 'daily' | 'weekly' || null;
+		const repeat = interaction.options.getString('repeat') as 'daily' | 'weekly' || null;
 
 		if (!duration) {
 			return interaction.reply({

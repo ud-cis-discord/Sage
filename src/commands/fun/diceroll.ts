@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
@@ -37,11 +37,11 @@ export default class extends Command {
 
 	]
 
-	run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		let min = (interaction.options as CommandInteractionOptionResolver).getNumber('minimum');
-		let max = (interaction.options as CommandInteractionOptionResolver).getNumber('maximum');
-		const numRolls = (interaction.options as CommandInteractionOptionResolver).getNumber('numdice') || DEFAULT_ROLLS;
-		const keepHighest = (interaction.options as CommandInteractionOptionResolver).getNumber('keephighest') || numRolls;
+	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		let min = interaction.options.getNumber('minimum');
+		let max = interaction.options.getNumber('maximum');
+		const numRolls = interaction.options.getNumber('numdice') || DEFAULT_ROLLS;
+		const keepHighest = interaction.options.getNumber('keephighest') || numRolls;
 
 		if (!min) {
 			[min, max] = [DEFAULT_RANGE[0], max || DEFAULT_RANGE[1]];

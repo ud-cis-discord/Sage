@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
 import { generateErrorEmbed, generateQuestionId } from '@lib/utils/generalUtils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
@@ -31,22 +31,22 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
+		const file = interaction.options.getAttachment('file');
 
 		if (!user) {
 			return interaction.reply({ embeds: [generateErrorEmbed(`Something went wrong. Please contact ${MAINTAINERS}`)], ephemeral: true });
 		}
 
 		let course: Course;
-		const question = (interaction.options as CommandInteractionOptionResolver).getString('question');
+		const question = interaction.options.getString('question');
 		const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
 
 		if (user.courses.length === 1) {
 			course = courses.find(c => c.name === user.courses[0]);
 		} else {
-			const inputtedCourse = courses.find(c => c.name === (interaction.options as CommandInteractionOptionResolver).getString('course'));
+			const inputtedCourse = courses.find(c => c.name === interaction.options.getString('course'));
 			if (!inputtedCourse) {
 				const desc = 'I wasn\'t able to determine your course based off of your enrollment or your input. Please specify the course at the beginning of your question.' +
 				`\nAvailable courses: \`${courses.map(c => c.name).sort().join('`, `')}\``;

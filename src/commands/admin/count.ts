@@ -1,6 +1,6 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CategoryChannel, CommandInteraction, CommandInteractionOptionResolver, 
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CategoryChannel, ChatInputCommandInteraction, CommandInteractionOptionResolver, 
 	InteractionResponse } from 'discord.js';
 
 export default class extends Command {
@@ -16,9 +16,9 @@ export default class extends Command {
 		required: true
 	}];
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		// grab channel from command parameter
-		const category = (interaction.options as CommandInteractionOptionResolver).getChannel('category') as CategoryChannel;
+		const category = interaction.options.getChannel('category') as CategoryChannel;
 		let channelCount = 0;
 		try {
 			channelCount = category.children.cache.size;

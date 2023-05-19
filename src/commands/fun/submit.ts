@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -20,10 +20,10 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const submissionChannel = await interaction.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
-		const file = (interaction.options as CommandInteractionOptionResolver).getAttachment('file');
-		const description = (interaction.options as CommandInteractionOptionResolver).getString('description');
+		const file = interaction.options.getAttachment('file');
+		const description = interaction.options.getString('description');
 
 		const embed = new EmbedBuilder()
 			.setTitle(`New contest submission from ${interaction.user.tag}`)

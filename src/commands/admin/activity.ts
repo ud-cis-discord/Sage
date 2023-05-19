@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
 import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -29,10 +29,10 @@ export default class extends Command {
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const bot = interaction.client;
-		const content = (interaction.options as CommandInteractionOptionResolver).getString('category');
-		const type = (interaction.options as CommandInteractionOptionResolver).getString('status').toUpperCase();
+		const content = interaction.options.getString('category');
+		const type = interaction.options.getString('status').toUpperCase();
 
 		// setting Sage's activity status in the guild
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
