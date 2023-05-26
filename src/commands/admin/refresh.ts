@@ -30,7 +30,7 @@ export default class extends Command {
 			const command: Command = new commandModule.default;
 
 			command.name = name;
-
+			// Fixed error on this line, it checks to see if the command is undefined, or its length is NOT between 1 and 100 characters
 			if ((command.description === undefined || command.description.length >= 100 || command.description.length <= 0) && (command.type === ApplicationCommandType.ChatInput)) {
 				throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
 			}
