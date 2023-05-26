@@ -46,7 +46,6 @@ export default class extends Command {
 		const customID = interaction.options.getString('custom_id');
 		const buttonStyleInput = interaction.options.getString('style').toUpperCase();
 
-		// TODO: this is dumb
 		let buttonStyle;
 		if (buttonStyleInput === 'PRIMARY') {
 			buttonStyle = ButtonStyle.Primary;
