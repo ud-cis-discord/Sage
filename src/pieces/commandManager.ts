@@ -215,7 +215,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 			name: command.name,
 			description: command.description,
 			options: command?.options || [],
-			type: command.type || 'CHAT_INPUT',
+			type: command.type || ApplicationCommandType.ChatInput,
 			defaultPermission: false
 		} as ApplicationCommandDataResolvable;
 
