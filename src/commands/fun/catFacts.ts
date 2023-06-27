@@ -10,7 +10,11 @@ export default class extends Command { // Made by matt nadar
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const response = await axios.get('https://catfact.ninja/fact');
 		const fact = response.data['fact']
-		return interaction.reply(`${fact}`);
+		const responseEmbed = new EmbedBuilder()
+			.setColor('Blue')
+			.setTitle('A Cat Fact')
+			.setFooter({ text: `${fact}` });
+		return interaction.reply({ embeds: [responseEmbed] });
 	}
 
 }
