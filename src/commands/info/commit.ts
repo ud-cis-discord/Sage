@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { execSync } from 'child_process';
 import { homepage as github } from '@root/package.json';
 import { Command } from '@lib/types/Command';
@@ -7,11 +7,10 @@ export default class extends Command {
 	description = 'Get info about the most recent commit that is currently running.';
 	extendedHelp = 'Merge commits and version bumps are ignored.';
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const [hash, author, message, timestamp, branch] = this.getGitInfo();
 
-		const embed = new MessageEmbed()
-			.setAuthor(author)
+		const embed = new EmbedBuilder()
 			.setTitle(message)
 			.setDescription(`Commit [${hash.slice(0, 8)}](${github}/commit/${hash}) on ${branch}`)
 			.setColor('#fbb848')

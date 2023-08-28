@@ -1,4 +1,4 @@
-import { Message, Role, GuildMember, TextChannel, Collection } from 'discord.js';
+import { Message, Role, GuildMember, TextChannel, Collection, ChannelType } from 'discord.js';
 
 export async function roleParser(msg: Message, input: string): Promise<Role> {
 	input = input.replace(/<@&(\d+)>/, '$1').trim();
@@ -47,7 +47,7 @@ export function channelParser(msg: Message, input: string): TextChannel {
 	input = input.replace(/<#!?(\d+)>/, '$1').trim().toLowerCase();
 
 	const gChannels: Collection<string, TextChannel> = msg.guild.channels.cache
-		.filter(channel => (channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_NEWS')
+		.filter(channel => (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement)
 			&& (channel.id === input || channel.name === input)) as Collection<string, TextChannel>;
 
 	if (!gChannels || gChannels.size < 1) {
