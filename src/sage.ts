@@ -83,7 +83,7 @@ async function main() {
 
 		const activity = status?.name || `${PREFIX}help`;
 
-		// TODO: fix this so supports all types
+		// fix this so supports all types
 		bot.user.setActivity(`${activity} (v${sageVersion})`, { type: ActivityType.Playing });
 		setTimeout(() => bot.user.setActivity(activity, { type: ActivityType.Playing }), 30e3);
 	});

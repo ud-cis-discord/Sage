@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionData, ButtonInteraction, ChatInputCommandInteraction, ActionRowBuilder, EmbedBuilder, ApplicationCommandOptionType,
-	CommandInteractionOptionResolver, InteractionResponse, ButtonBuilder, ButtonStyle } from 'discord.js';
+	InteractionResponse, ButtonBuilder, ButtonStyle } from 'discord.js';
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { Command } from '@lib/types/Command';

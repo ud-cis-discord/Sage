@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionData, ChatInputCommandInteraction, GuildChannel, EmbedBuilder, TextChannel, ThreadChannel, ApplicationCommandOptionType,
-	CommandInteractionOptionResolver, InteractionResponse, ChannelType } from 'discord.js';
+	InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';

@@ -3,8 +3,6 @@ import { ROLES } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { ApplicationCommandPermissions, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 
-const PRUNE_TIMEOUT = 30;
-
 export default class extends Command {
 
 	description = `Prunes all members who don't have the <@&${ROLES.VERIFIED}> role`;

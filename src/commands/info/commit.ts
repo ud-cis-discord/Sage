@@ -8,7 +8,7 @@ export default class extends Command {
 	extendedHelp = 'Merge commits and version bumps are ignored.';
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const [hash, author, message, timestamp, branch] = this.getGitInfo();
+		const [hash, message, timestamp, branch] = this.getGitInfo();
 
 		const embed = new EmbedBuilder()
 			.setTitle(message)

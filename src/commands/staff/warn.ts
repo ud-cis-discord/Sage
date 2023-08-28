@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, Message, EmbedBuilder, TextChannel, ApplicationCommandOptionType,
-	CommandInteractionOptionResolver } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, Message, EmbedBuilder, TextChannel, ApplicationCommandOptionType } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';

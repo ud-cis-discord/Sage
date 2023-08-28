@@ -1,6 +1,5 @@
-import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedBuilder, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
-import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 import axios from 'axios';
 
 export default class extends Command { // Made by matt nadar
@@ -9,7 +8,7 @@ export default class extends Command { // Made by matt nadar
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const response = await axios.get('https://catfact.ninja/fact');
-		const fact = response.data['fact'];
+		const { fact } = response.data;
 		const responseEmbed = new EmbedBuilder()
 			.setColor('Blue')
 			.setTitle('A Cat Fact')

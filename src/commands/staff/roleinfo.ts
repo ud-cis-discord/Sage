@@ -1,5 +1,5 @@
 import { EmbedBuilder, Role, AttachmentBuilder, ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionType,
-	CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+	InteractionResponse } from 'discord.js';
 import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
