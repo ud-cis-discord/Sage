@@ -1,4 +1,4 @@
-import { ActivityType, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 import { BOT, DB } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -8,13 +8,13 @@ const ACTIVITIES = ['Playing', 'Streaming', 'Listening', 'Watching', 'Competing'
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to the given status and content`;
-	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'status',
 			description: 'The activity status.',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true,
 			choices: ACTIVITIES.map((activity) => ({
 				name: activity,
@@ -24,15 +24,15 @@ export default class extends Command {
 		{
 			name: 'content',
 			description: 'The activity itself (ex: /help).',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const bot = interaction.client;
-		const content = interaction.options.getString('content');
-		const type = interaction.options.getString('status').toUpperCase() as ActivityType;
+		const content = interaction.options.getString('category');
+		const type = interaction.options.getString('status').toUpperCase();
 
 		// setting Sage's activity status in the guild
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -1,5 +1,5 @@
 import { BOT, DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 import { Reminder } from '@lib/types/Reminder';
 import parse from 'parse-duration';
 import { reminderTime } from '@root/src/lib/utils/generalUtils';
@@ -14,25 +14,25 @@ export default class extends Command {
 		{
 			name: 'content',
 			description: 'What you\'d like to be reminded of',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'duration',
 			description: 'When you\'d like to be reminded',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'repeat',
 			description: 'How often you want the reminder to repeat',
 			choices: [{ name: 'Daily', value: 'daily' }, { name: 'Weekly', value: 'weekly' }],
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
 
-	run(interaction: CommandInteraction): Promise<unknown> {
+	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const content = interaction.options.getString('content');
 		const rawDuration = interaction.options.getString('duration');
 		const duration = parse(rawDuration);

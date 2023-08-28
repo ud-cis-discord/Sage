@@ -3,24 +3,26 @@ import {
 	GuildChannel,
 	DMChannel,
 	TextChannel,
-	MessageEmbed,
+	EmbedBuilder,
 	EmbedField,
-	Permissions,
+	PermissionsBitField,
 	GuildEmoji,
 	Invite,
 	Message,
 	PartialMessage,
-	MessageAttachment,
+	AttachmentBuilder,
 	Role,
 	Guild,
-	ThreadChannel
+	ThreadChannel,
+	AuditLogEvent,
+	OverwriteType
 } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { GUILDS, CHANNELS } from '@root/config';
 
 async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
-	const logs = (await channel.guild.fetchAuditLogs({ type: 'CHANNEL_CREATE', limit: 1 })).entries;
+	const logs = (await channel.guild.fetchAuditLogs({ type: AuditLogEvent.ChannelCreate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
@@ -34,11 +36,11 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 	}
 
 	channel.permissionOverwrites.cache.forEach(overwrite => {
-		const target = overwrite.type === 'role'
+		const target = overwrite.type === OverwriteType.Role
 			? channel.guild.roles.cache.get(overwrite.id).name
 			: channel.guild.members.cache.get(overwrite.id).user.tag;
 		const allowed = overwrite.allow.bitfield !== BigInt(0)
-			? Permissions.ALL === overwrite.allow.bitfield
+			? PermissionsBitField.All === overwrite.allow.bitfield
 				? '`ALL`'
 				: `\`${overwrite.allow.toArray().join('`, `')}\``
 			: '`NONE`';
@@ -53,20 +55,20 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 		});
 	});
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Created new ${channel.type} channel, #${channel.name}`)
 		.setDescription(`${channel.name} is in the ${channel.parent ? channel.parent.name : 'none'} category.`)
 		.addFields(fields)
 		.setFooter({ text: `Channel ID: ${channel.id}` })
-		.setColor('PURPLE')
+		.setColor('Purple')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
 
 async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog: TextChannel): Promise<void> {
 	if (!('guild' in channel) || channel.guild.id !== GUILDS.MAIN) return;
-	const logs = (await channel.guild.fetchAuditLogs({ type: 'CHANNEL_DELETE', limit: 1 })).entries;
+	const logs = (await channel.guild.fetchAuditLogs({ type: AuditLogEvent.ChannelDelete, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
@@ -79,12 +81,12 @@ async function processChannelDelete(channel: GuildChannel | DMChannel, serverLog
 		});
 	}
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Deleted ${channel.type} channel, #${channel.name}`)
 		.addFields(fields)
 		.setFooter({ text: `Channel ID: ${channel.id}` })
-		.setColor('PURPLE')
+		.setColor('Purple')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -95,14 +97,14 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 	const newTextChannel = newChannel as TextChannel;
 
 	let toSend = false;
-	const logs = (await newChannel.guild.fetchAuditLogs({ type: 'CHANNEL_UPDATE', limit: 1 })).entries;
+	const logs = (await newChannel.guild.fetchAuditLogs({ type: AuditLogEvent.ChannelUpdate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 	if (!logEntry) return;
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setFooter({ text: `Channel ID: ${newChannel.id}` })
-		.setColor('PURPLE')
+		.setColor('Purple')
 		.setTimestamp();
 
 	const fields: Array<EmbedField> = [];
@@ -123,8 +125,8 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 	if (!toSend && oldTextChannel.topic !== newTextChannel.topic) {
 		toSend = true;
 		embed.setTitle(`#${newChannel.name} had a topic change.`)
-			.addField('New topic', newTextChannel.topic ? newTextChannel.topic : 'NONE')
-			.addField('Old topic', oldTextChannel.topic ? oldTextChannel.topic : 'NONE');
+			.addFields({ name: 'New topic', value: newTextChannel.topic ? newTextChannel.topic : 'NONE' })
+			.addFields({ name: 'Old topic', value: oldTextChannel.topic ? oldTextChannel.topic : 'NONE' });
 	}
 
 	if (!toSend && !oldChannel.permissionOverwrites.cache.every((oldOverride, key) => {
@@ -138,13 +140,13 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 		toSend = true;
 		embed.setTitle(`#${newChannel.name} had a permission change`);
 		newChannel.permissionOverwrites.cache.forEach(overwrite => {
-			const target = overwrite.type === 'role'
+			const target = overwrite.type === OverwriteType.Role
 				? newChannel.guild.roles.cache.get(overwrite.id).name.startsWith('@')
 					? newChannel.guild.roles.cache.get(overwrite.id).name
 					: `@${newChannel.guild.roles.cache.get(overwrite.id).name}`
 				: newChannel.guild.members.cache.get(overwrite.id).user.tag;
 			const allowed = overwrite.allow.bitfield !== BigInt(0)
-				? Permissions.ALL === overwrite.allow.bitfield
+				? PermissionsBitField.All === overwrite.allow.bitfield
 					? '`ALL`'
 					: `\`${overwrite.allow.toArray().join('`, `')}\``
 				: '`NONE`';
@@ -168,14 +170,14 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 
 async function processEmojiCreate(emote: GuildEmoji, serverLog: TextChannel): Promise<void> {
 	if (emote.guild.id !== GUILDS.MAIN) return;
-	const logs = (await emote.guild.fetchAuditLogs({ type: 'EMOJI_CREATE', limit: 1 })).entries;
+	const logs = (await emote.guild.fetchAuditLogs({ type: AuditLogEvent.EmojiCreate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`${emote.name} <:${emote.name}:${emote.id}> emote created`)
 		.setImage(emote.url)
-		.setColor('DARK_VIVID_PINK')
+		.setColor('DarkVividPink')
 		.setFooter({ text: `Emote ID: ${emote.id}` })
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -183,14 +185,14 @@ async function processEmojiCreate(emote: GuildEmoji, serverLog: TextChannel): Pr
 
 async function processEmojiDelete(emote: GuildEmoji, serverLog: TextChannel): Promise<void> {
 	if (emote.guild.id !== GUILDS.MAIN) return;
-	const logs = (await emote.guild.fetchAuditLogs({ type: 'EMOJI_DELETE', limit: 1 })).entries;
+	const logs = (await emote.guild.fetchAuditLogs({ type: AuditLogEvent.EmojiDelete, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`${emote.name} emote deleted`)
 		.setImage(emote.url)
-		.setColor('DARK_VIVID_PINK')
+		.setColor('DarkVividPink')
 		.setFooter({ text: `Emote ID: ${emote.id}` })
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -198,13 +200,13 @@ async function processEmojiDelete(emote: GuildEmoji, serverLog: TextChannel): Pr
 
 async function processEmojiUpdate(oldEmote: GuildEmoji, newEmote: GuildEmoji, serverLog: TextChannel): Promise<void> {
 	if (newEmote.guild.id !== GUILDS.MAIN || newEmote.name === oldEmote.name) return;
-	const logs = (await newEmote.guild.fetchAuditLogs({ type: 'EMOJI_UPDATE', limit: 1 })).entries;
+	const logs = (await newEmote.guild.fetchAuditLogs({ type: AuditLogEvent.EmojiUpdate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`<:${newEmote.name}:${newEmote.id}> ${oldEmote.name} is now called ${newEmote.name}`)
-		.setColor('DARK_VIVID_PINK')
+		.setColor('DarkVividPink')
 		.setFooter({ text: `Emote ID: ${newEmote.id}` })
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
@@ -213,7 +215,7 @@ async function processEmojiUpdate(oldEmote: GuildEmoji, newEmote: GuildEmoji, se
 async function processInviteCreate(invite: Invite, serverLog: TextChannel): Promise<void> {
 	if (invite.guild.id !== GUILDS.MAIN) return;
 	// eslint-disable-next-line no-extra-parens
-	const logs = (await (invite.guild as Guild).fetchAuditLogs({ type: 'INVITE_CREATE', limit: 1 })).entries;
+	const logs = (await (invite.guild as Guild).fetchAuditLogs({ type: AuditLogEvent.InviteCreate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	if (logEntry.reason?.startsWith('[no log]')) return;
@@ -253,12 +255,12 @@ async function processInviteCreate(invite: Invite, serverLog: TextChannel): Prom
 		inline: true
 	});
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`New invite created`)
 		.setDescription(invite.temporary ? 'This invite has temporary on.' : '')
 		.addFields(fields)
-		.setColor('GREEN')
+		.setColor('Green')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -266,17 +268,17 @@ async function processInviteCreate(invite: Invite, serverLog: TextChannel): Prom
 async function processInviteDelete(invite: Invite, serverLog: TextChannel): Promise<void> {
 	if (invite.guild.id !== GUILDS.MAIN) return;
 	// eslint-disable-next-line no-extra-parens
-	const logs = (await (invite.guild as Guild).fetchAuditLogs({ type: 'INVITE_DELETE', limit: 1 })).entries;
+	const logs = (await (invite.guild as Guild).fetchAuditLogs({ type: AuditLogEvent.InviteDelete, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 	if (!logEntry) return;
 
 	if (logEntry.reason?.startsWith('[no log]')) return;
 	if (logEntry.changes.find(change => change.key === 'code').old !== invite.code) return;
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Invite to ${invite.channel.name} deleted`)
-		.setColor('GREEN')
+		.setColor('Green')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -286,28 +288,28 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 
 	let embed;
 	if (msg.partial) { // this message is a partial, so author/content information is not available.
-		embed = new MessageEmbed()
+		embed = new EmbedBuilder()
 			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
 				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
-			.setFooter(`Message ID: ${msg.id}`)
-			.setColor('ORANGE')
+			.setFooter({ text: `Message ID: ${msg.id}` })
+			.setColor('Orange')
 			.setTimestamp();
 		serverLog.send({ embeds: [embed] });
 		return;
 	} else {
-		embed = new MessageEmbed()
-			.setAuthor(msg.author.tag, msg.author.avatarURL({ dynamic: true }))
+		embed = new EmbedBuilder()
+			.setAuthor({ name: msg.author.tag, iconURL: msg.author.avatarURL() })
 			.setTitle(`Message deleted in #${msg.channel.name} | Sent ${msg.createdAt.toLocaleString()} ` +
 				`(${prettyMilliseconds(Date.now() - msg.createdTimestamp, { verbose: true })} ago)`)
-			.setFooter(`Message ID: ${msg.id} | Author ID: ${msg.author.id}`)
-			.setColor('ORANGE')
+			.setFooter({ text: `Message ID: ${msg.id} | Author ID: ${msg.author.id}` })
+			.setColor('Orange')
 			.setTimestamp();
 	}
 
-	const attachments: MessageAttachment[] = [];
+	const attachments: AttachmentBuilder[] = [];
 
 	if (msg.attachments.size > 0) {
-		embed.addField('Attachments', `\`${msg.attachments.map(attachment => attachment.name).join('`, `')}\``);
+		embed.addFields('Attachments', `\`${msg.attachments.map(attachment => attachment.name).join('`, `')}\``);
 	}
 
 	if (msg.content.length < 1000) {
@@ -316,7 +318,7 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 		let buffer = 'Last displayed content:\n';
 		buffer += `${msg.content}\n\n`;
 
-		attachments.push(new MessageAttachment(Buffer.from(buffer.trim()), 'Message.txt'));
+		attachments.push(new AttachmentBuilder(Buffer.from(buffer.trim()), { name: 'Message.txt' }));
 
 		embed.setDescription('Too much data to display, sent as a file.');
 	}
@@ -327,7 +329,7 @@ async function processMessageDelete(msg: Message | PartialMessage, serverLog: Te
 async function processBulkDelete(messages: Array<Message | PartialMessage>, serverLog: TextChannel): Promise<void> {
 	if (!('name' in messages[0].channel) || messages[0].guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await serverLog.guild.fetchAuditLogs({ type: 'MESSAGE_BULK_DELETE', limit: 1 })).entries;
+	const logs = (await serverLog.guild.fetchAuditLogs({ type: AuditLogEvent.MessageBulkDelete, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const spacer = '\n\n**************************************************************************\n\n';
@@ -349,24 +351,24 @@ async function processBulkDelete(messages: Array<Message | PartialMessage>, serv
 		}
 	});
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`${messages.length} Message${messages.length === 1 ? '' : 's'} bulk deleted`)
 		.setDescription(logEntry.reason ? `**Reason**\n${logEntry.reason}` : '')
-		.setColor('ORANGE')
+		.setColor('Orange')
 		.setFooter({ text: `Deleter ID: ${logEntry.executor.id}` })
 		.setTimestamp();
 
 	serverLog.send({
 		embeds: [embed],
-		files: [new MessageAttachment(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), 'Messages.txt')]
+		files: [new AttachmentBuilder(Buffer.from(buffer.slice(0, buffer.length - spacer.length).trim()), { name: 'Messages.txt' })]
 	});
 }
 
 async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<void> {
 	if (role.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await role.guild.fetchAuditLogs({ type: 'ROLE_CREATE', limit: 1 })).entries;
+	const logs = (await role.guild.fetchAuditLogs({ type: AuditLogEvent.RoleCreate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
@@ -382,19 +384,19 @@ async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<vo
 	fields.push({
 		name: 'Permissions',
 		value: role.permissions.bitfield !== BigInt(0)
-			? Permissions.ALL === role.permissions.bitfield
+			? PermissionsBitField.All === role.permissions.bitfield
 				? '`ALL`'
 				: `\`${role.permissions.toArray().join('`, `')}\``
 			: '`NONE`',
 		inline: false
 	});
 
-	const embed = new MessageEmbed()
-		.setAuthor(`${logEntry.executor.tag}`, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: `${logEntry.executor.tag}`, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Created new role @${role.name}`)
 		.addFields(fields)
 		.setFooter({ text: `Role ID: ${role.id}` })
-		.setColor('DARK_BLUE')
+		.setColor('DarkBlue')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -402,7 +404,7 @@ async function processRoleCreate(role: Role, serverLog: TextChannel): Promise<vo
 async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<void> {
 	if (role.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await role.guild.fetchAuditLogs({ type: 'ROLE_DELETE', limit: 1 })).entries;
+	const logs = (await role.guild.fetchAuditLogs({ type: AuditLogEvent.RoleDelete, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 
 	const fields: Array<EmbedField> = [];
@@ -415,12 +417,12 @@ async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<vo
 		});
 	}
 
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Deleted role @${role.name}`)
 		.addFields(fields)
 		.setFooter({ text: `Role ID: ${role.id}` })
-		.setColor('DARK_BLUE')
+		.setColor('DarkBlue')
 		.setTimestamp();
 	serverLog.send({ embeds: [embed] });
 }
@@ -428,31 +430,30 @@ async function processRoleDelete(role: Role, serverLog: TextChannel): Promise<vo
 async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextChannel): Promise<void> {
 	if (newRole.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await newRole.guild.fetchAuditLogs({ type: 'ROLE_UPDATE', limit: 1 })).entries;
+	const logs = (await newRole.guild.fetchAuditLogs({ type: AuditLogEvent.RoleUpdate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
 	let toSend = false;
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`@${newRole.name} role updated`)
-		.setColor('DARK_BLUE')
+		.setColor('DarkBlue')
 		.setFooter({ text: `Role ID: ${newRole.id}` })
 		.setTimestamp();
 
 	if (newRole.name !== oldRole.name) {
 		toSend = true;
-		embed.addField('New name', newRole.name, true);
-		embed.addField('Old name', oldRole.name, true);
+		embed.addFields({ name: 'New name', value: newRole.name, inline: false });
+		embed.addFields({ name: 'Old name', value: oldRole.name, inline: false });
 	}
 
 	if (!newRole.permissions.equals(oldRole.permissions)) {
 		toSend = true;
-		embed.addField(
-			'Permissions',
-			newRole.permissions.bitfield !== BigInt(0)
-				? Permissions.ALL === newRole.permissions.bitfield
+		embed.addFields({ name: 'Permissions',
+			value: newRole.permissions.bitfield !== BigInt(0)
+				? PermissionsBitField.All === newRole.permissions.bitfield
 					? '`ALL`'
 					: `\`${newRole.permissions.toArray().join('`, `')}\``
-				: '`NONE`'
+				: '`NONE`' }
 		);
 	}
 
@@ -464,14 +465,14 @@ async function processRoleUpdate(oldRole: Role, newRole: Role, serverLog: TextCh
 async function processThreadCreate(thread: ThreadChannel, serverLog: TextChannel): Promise<void> {
 	if (thread.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await thread.guild.fetchAuditLogs({ type: 'THREAD_CREATE', limit: 1 })).entries;
+	const logs = (await thread.guild.fetchAuditLogs({ type: AuditLogEvent.ThreadCreate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Thread created: "${thread.name}"`)
 		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
 		.setDescription(`<#${thread.id}>`)
-		.setColor('GREYPLE')
+		.setColor('Greyple')
 		.setFooter({ text: `Thread ID: ${thread.id}` })
 		.setTimestamp();
 
@@ -481,13 +482,13 @@ async function processThreadCreate(thread: ThreadChannel, serverLog: TextChannel
 async function processThreadDelete(thread: ThreadChannel, serverLog: TextChannel): Promise<void> {
 	if (thread.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await thread.guild.fetchAuditLogs({ type: 'THREAD_DELETE', limit: 1 })).entries;
+	const logs = (await thread.guild.fetchAuditLogs({ type: AuditLogEvent.ThreadDelete, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Thread deleted: "${thread.name}"`)
 		.setFields([{ name: 'Thread type', inline: true, value: `${thread.type}` }])
-		.setColor('GREYPLE')
+		.setColor('Greyple')
 		.setFooter({ text: `Thread ID: ${thread.id}` })
 		.setTimestamp();
 
@@ -497,26 +498,26 @@ async function processThreadDelete(thread: ThreadChannel, serverLog: TextChannel
 async function processThreadUpdate(oldThread: ThreadChannel, newThread: ThreadChannel, serverLog: TextChannel): Promise<void> {
 	if (newThread.guild.id !== GUILDS.MAIN) return;
 
-	const logs = (await newThread.guild.fetchAuditLogs({ type: 'THREAD_UPDATE', limit: 1 })).entries;
+	const logs = (await newThread.guild.fetchAuditLogs({ type: AuditLogEvent.ThreadUpdate, limit: 1 })).entries;
 	const [logEntry] = [...logs.values()];
-	const embed = new MessageEmbed()
-		.setAuthor(logEntry.executor.tag, logEntry.executor.avatarURL({ dynamic: true }))
+	const embed = new EmbedBuilder()
+		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
 		.setTitle(`Thread updated: "${newThread.name}"`)
 		.setFields([{ name: 'Thread type', inline: false, value: `${newThread.type}` }])
 		.setDescription(`<#${newThread.id}>`)
-		.setColor('GREYPLE')
+		.setColor('Greyple')
 		.setFooter({ text: `Thread ID: ${newThread.id}` })
 		.setTimestamp();
 
 	if (newThread.name !== oldThread.name) {
-		embed.addField('New name', newThread.name, false);
-		embed.addField('Old name', oldThread.name, false);
+		embed.addFields({ name: 'New name', value: newThread.name, inline: false });
+		embed.addFields({ name: 'Old name', value: oldThread.name, inline: false });
 	}
 
 	if (newThread.archived !== oldThread.archived) {
-		embed.addField('Archive status updated', `Changed from ${
+		embed.addFields({ name: 'Archive status updated', value: `Changed from ${
 			oldThread.archived ? 'archived to unarchived' : 'unarchived to archived'
-		}.`);
+		}.` });
 	}
 
 	serverLog.send({ embeds: [embed] });

@@ -1,6 +1,6 @@
 import { Reminder } from '@lib/types/Reminder';
 import { DB } from '@root/config';
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -11,13 +11,13 @@ export default class extends Command {
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'remindernumber',
-			type: 'INTEGER',
+			type: ApplicationCommandOptionType.Integer,
 			required: true,
 			description: 'ID of the reminder to cancel'
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<unknown> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const remindNum = interaction.options.getInteger('remindernumber') - 1;
 
 		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)

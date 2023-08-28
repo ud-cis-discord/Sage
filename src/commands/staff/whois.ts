@@ -1,5 +1,6 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, EmbedBuilder,
+	InteractionResponse } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { Command } from '@lib/types/Command';
 
@@ -11,13 +12,13 @@ export default class extends Command {
 		{
 			name: 'user',
 			description: 'The user to lookup',
-			type: 'USER',
+			type: ApplicationCommandOptionType.User,
 			required: true
 		}
 	];
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user = interaction.options.getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 
@@ -31,8 +32,8 @@ export default class extends Command {
 		const memberSince = `${member.joinedAt.getMonth()}/${member.joinedAt.getDate()}/${member.joinedAt.getFullYear()}
 		(${prettyMilliseconds(Date.now() - member.joinedTimestamp)} ago)`;
 
-		const embed = new MessageEmbed()
-			.setAuthor(`${member.user.username}`, member.user.displayAvatarURL())
+		const embed = new EmbedBuilder()
+			.setAuthor({ name: `${member.user.username}`, iconURL: member.user.displayAvatarURL() })
 			.setColor(member.displayColor)
 			.setTimestamp()
 			.setFooter({ text: `Member ID: ${member.id}` })

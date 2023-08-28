@@ -1,25 +1,25 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
+import { ChatInputCommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Emails you a link to the students blockpy submissions';
 	runInDM = false;
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
-			type: 'USER',
+			type: ApplicationCommandOptionType.User,
 			description: 'The member to look up',
 			required: true
 		}
 	];
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user = interaction.options.getUser('user');
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 		const member = await interaction.guild.members.fetch(user.id);

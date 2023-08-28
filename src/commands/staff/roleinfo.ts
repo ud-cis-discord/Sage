@@ -1,4 +1,5 @@
-import { MessageEmbed, Role, MessageAttachment, ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, Role, AttachmentBuilder, ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionType,
+	InteractionResponse } from 'discord.js';
 import { sendToFile } from '@root/src/lib/utils/generalUtils';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
@@ -11,13 +12,13 @@ export default class extends Command {
 		{
 			name: 'role',
 			description: 'Role to get the info of',
-			type: 'ROLE',
+			type: ApplicationCommandOptionType.Role,
 			required: true
 		}
 	];
-	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const role = interaction.options.getRole('role') as Role;
 
 		const memberList = role.members || (await interaction.guild.roles.fetch(role.id)).members;
@@ -27,18 +28,18 @@ export default class extends Command {
 		const members = memberStrs.join(', ').length > 1000
 			? await sendToFile(memberStrs.join('\n'), 'txt', 'MemberList', true) : memberStrs.join(', ');
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setColor(role.color)
 			.setTitle(`${role.name} | ${memberList.size} members`)
 			.setFooter({ text: `Role ID: ${role.id}` });
 
-		const attachments: MessageAttachment[] = [];
+		const attachments: AttachmentBuilder[] = [];
 
-		if (members instanceof MessageAttachment) {
-			embed.addField('Members', 'Too many to display, see attached file.', true);
+		if (members instanceof AttachmentBuilder) {
+			embed.addFields({ name: 'Members', value: 'Too many to display, see attached file.' });
 			attachments.push(members);
 		} else {
-			embed.addField('Members', memberList.size < 1 ? 'None' : members, true);
+			embed.addFields({ name: 'Members', value: memberList.size < 1 ? 'None' : members, inline: true });
 		}
 		return interaction.reply({ embeds: [embed], files: attachments });
 	}
