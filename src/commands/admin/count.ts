@@ -1,6 +1,6 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CategoryChannel, ChatInputCommandInteraction, CommandInteractionOptionResolver, 
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, CategoryChannel, ChatInputCommandInteraction,
 	InteractionResponse } from 'discord.js';
 
 export default class extends Command {

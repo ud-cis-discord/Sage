@@ -1,5 +1,5 @@
 import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType,
-	CommandInteractionOptionResolver, InteractionResponse, ChannelType } from 'discord.js';
+	InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';

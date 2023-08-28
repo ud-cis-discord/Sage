@@ -2,7 +2,7 @@ import { BOTMASTER_PERMS } from '@lib/permissions';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder,
-	ButtonStyle, TextChannel, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+	ButtonStyle, TextChannel, InteractionResponse } from 'discord.js';
 
 const STYLES = ['primary', 'secondary', 'success', 'danger'];
 
@@ -46,7 +46,7 @@ export default class extends Command {
 		const customID = interaction.options.getString('custom_id');
 		const buttonStyleInput = interaction.options.getString('style').toUpperCase();
 
-		// TODO: this is dumb
+		// this is dumb
 		let buttonStyle;
 		if (buttonStyleInput === 'PRIMARY') {
 			buttonStyle = ButtonStyle.Primary;

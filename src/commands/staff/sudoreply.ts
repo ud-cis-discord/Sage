@@ -2,7 +2,7 @@ import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, GuildChannel, Message, EmbedBuilder, TextChannel, ThreadChannel,
-	ApplicationCommandOptionType, CommandInteractionOptionResolver, ChannelType, InteractionResponse } from 'discord.js';
+	ApplicationCommandOptionType, ChannelType, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 

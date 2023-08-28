@@ -1,6 +1,6 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { TextChannel, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ModalBuilder, ActionRowBuilder,
-	ModalActionRowComponentBuilder, InteractionResponse, CommandInteractionOptionResolver, TextInputBuilder, TextInputStyle, ApplicationCommandOptionType } from 'discord.js';
+	ModalActionRowComponentBuilder, InteractionResponse, TextInputBuilder, TextInputStyle, ApplicationCommandOptionType } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 

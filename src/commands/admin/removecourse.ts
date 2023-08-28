@@ -2,7 +2,7 @@ import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder,
-	ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ButtonStyle } from 'discord.js';
+	ApplicationCommandOptionType, InteractionResponse, ButtonStyle } from 'discord.js';
 import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
 
 const DECISION_TIMEOUT = 30;

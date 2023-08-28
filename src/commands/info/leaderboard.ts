@@ -2,7 +2,7 @@ import { SageUser } from '@lib/types/SageUser';
 import { Leaderboard } from '@lib/enums';
 import { Command } from '@lib/types/Command';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
-import { EmbedBuilder, ApplicationCommandOptionData, ChatInputCommandInteraction, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ImageURLOptions } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandOptionData, ChatInputCommandInteraction, ApplicationCommandOptionType, InteractionResponse, ImageURLOptions } from 'discord.js';
 
 export default class extends Command {
 

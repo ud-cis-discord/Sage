@@ -1,7 +1,7 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Command } from '@lib/types/Command';
 import { BOT } from '@root/config';
-import { EmbedBuilder, ApplicationCommandPermissions, ApplicationCommandOptionData, ChatInputCommandInteraction, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+import { EmbedBuilder, ApplicationCommandPermissions, ApplicationCommandOptionData, ChatInputCommandInteraction, ApplicationCommandOptionType,
 	InteractionResponse } from 'discord.js';
 
 export default class extends Command {

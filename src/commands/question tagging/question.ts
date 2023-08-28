@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, GuildMember, ApplicationCommandOptionType, CommandInteractionOptionResolver,
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, GuildMember, ApplicationCommandOptionType,
 	InteractionResponse } from 'discord.js';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { BOT, PREFIX } from '@root/config';

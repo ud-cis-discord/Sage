@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, AttachmentBuilder, ChatInputCommandInteraction, CommandInteractionOptionResolver, EmbedBuilder,
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder,
 	InteractionResponse, Message } from 'discord.js';
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';

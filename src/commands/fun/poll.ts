@@ -1,6 +1,6 @@
 import { BOT, DB } from '@root/config';
 import { ApplicationCommandOptionData, ButtonInteraction, Client,
-	ChatInputCommandInteraction, ActionRowBuilder, EmbedBuilder, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse, ButtonBuilder, ButtonStyle } from 'discord.js';
+	ChatInputCommandInteraction, ActionRowBuilder, EmbedBuilder, ApplicationCommandOptionType, InteractionResponse, ButtonBuilder, ButtonStyle } from 'discord.js';
 import parse from 'parse-duration';
 import { Command } from '@lib/types/Command';
 import { dateToTimestamp, generateErrorEmbed } from '@root/src/lib/utils/generalUtils';

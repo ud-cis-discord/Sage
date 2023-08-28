@@ -1,4 +1,4 @@
-import { EmbedBuilder, TextChannel, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, CommandInteractionOptionResolver, InteractionResponse } from 'discord.js';
+import { EmbedBuilder, TextChannel, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
 import { BOT, CHANNELS, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
