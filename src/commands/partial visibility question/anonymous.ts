@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
 import { generateErrorEmbed, generateQuestionId } from '@lib/utils/generalUtils';
 import { Course } from '@lib/types/Course';
 import { SageUser } from '@lib/types/SageUser';
@@ -14,24 +14,24 @@ export default class extends Command {
 		{
 			name: 'question',
 			description: 'What would you like to ask?',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'course',
 			description: 'What course chat would you like to ask your question in?',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		},
 		{
 			name: 'file',
 			description: 'A file to be posted with the question',
-			type: 'ATTACHMENT',
+			type: ApplicationCommandOptionType.Attachment,
 			required: false
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 		const file = interaction.options.getAttachment('file');
 
@@ -61,8 +61,8 @@ export default class extends Command {
 
 		const questionId = await generateQuestionId(interaction);
 
-		const studentEmbed = new MessageEmbed()
-			.setAuthor(`Anonymous asked Question ${questionId}`, interaction.client.user.avatarURL())
+		const studentEmbed = new EmbedBuilder()
+			.setAuthor({ name: `Anonymous asked Question ${questionId}`, iconURL: interaction.client.user.avatarURL() })
 			.setDescription(question);
 
 		if (file) studentEmbed.setImage(file.url);
@@ -71,8 +71,8 @@ export default class extends Command {
 		const questionMessage = await generalChannel.send({ embeds: [studentEmbed] });
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
-		const staffEmbed = new MessageEmbed()
-			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
+		const staffEmbed = new EmbedBuilder()
+			.setAuthor({ name: `${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(`[Click to jump](${messageLink})
 	It is recommended you reply in public, but sudoreply can be used **in a staff channel** to reply in private if necessary.`);
 

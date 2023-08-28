@@ -1,4 +1,4 @@
-import { EmbedField, CommandInteraction, MessageEmbed, version as discordVersion } from 'discord.js';
+import { EmbedField, ChatInputCommandInteraction, EmbedBuilder, version as discordVersion, InteractionResponse } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { version as sageVersion } from '@root/package.json';
 import { BOT } from '@root/config';
@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = 'Displays info about Sage\'s current status';
 
-	async run(interaction:CommandInteraction): Promise<void> {
+	async run(interaction:ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const fields: Array<EmbedField> = [];
 		const bot = interaction.client;
 
@@ -48,9 +48,9 @@ export default class extends Command {
 			inline: true
 		});
 
-		const embed = new MessageEmbed()
-			.setColor('DARK_GREEN')
-			.setAuthor(`${BOT.NAME} Stats`, bot.user.displayAvatarURL())
+		const embed = new EmbedBuilder()
+			.setColor('DarkGreen')
+			.setAuthor({ name: `${BOT.NAME} Stats`, iconURL: bot.user.displayAvatarURL() })
 			.setThumbnail(bot.user.displayAvatarURL())
 			.setTimestamp(Date.now())
 			.addFields(fields);

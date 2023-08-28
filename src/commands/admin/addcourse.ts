@@ -1,30 +1,31 @@
-import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { OverwriteResolvable, Guild, TextChannel, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType,
+	InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
+import { updateDropdowns } from '@lib/utils/generalUtils';
 
 export default class extends Command {
 
 	description = 'Creates a courses category and adds all necessary channels/roles.';
 	runInDM = false;
-	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
 		description: 'The three-digit course ID of the course to be added (ex: 108).',
-		type: 'STRING',
+		type: ApplicationCommandOptionType.String,
 		required: true
 	}]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		interaction.reply('<a:loading:755121200929439745> working...');
 
 		const course = interaction.options.getString('course');
 		//	make sure course does not exist already
 		if (await interaction.client.mongo.collection(DB.COURSES).countDocuments({ name: course }) > 0) {
-			interaction.reply({ content: `${course} has already been registered as a course.`, ephemeral: true });
+			interaction.editReply({ content: `${course} has already been registered as a course.` });
 		}
 		const reason = `Creating new course \`${course}\` as requested 
 		by \`${interaction.user.username}\` \`(${interaction.user.id})\`.`;
@@ -47,25 +48,26 @@ export default class extends Command {
 		//	set permissions for the course
 		const standardPerms: Array<OverwriteResolvable> = [{
 			id: ROLES.ADMIN,
-			allow: 'VIEW_CHANNEL'
+			allow: 'ViewChannel'
 		}, {
 			id: staffRole.id,
-			allow: 'VIEW_CHANNEL'
+			allow: 'ViewChannel'
 		}, {
 			id: GUILDS.MAIN,
-			deny: 'VIEW_CHANNEL'
+			deny: 'ViewChannel'
 		}, {
 			id: studentRole.id,
-			allow: 'VIEW_CHANNEL'
+			allow: 'ViewChannel'
 		}, {
 			id: ROLES.MUTED,
-			deny: 'SEND_MESSAGES'
+			deny: 'SendMessages'
 		}];
 		const staffPerms = [standardPerms[0], standardPerms[1], standardPerms[2]];
 
 		//	create course category
-		const categoryChannel = await interaction.guild.channels.create(`CISC ${course}`, {
-			type: 'GUILD_CATEGORY',
+		const categoryChannel = await interaction.guild.channels.create({
+			name: `CISC ${course}`,
+			type: ChannelType.GuildCategory,
 			permissionOverwrites: standardPerms,
 			reason
 		});
@@ -75,22 +77,22 @@ export default class extends Command {
 		await this.createTextChannel(interaction.guild, `${course}_homework`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(interaction.guild, `${course}_labs`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(interaction.guild, `${course}_projects`, standardPerms, categoryChannel.id, reason);
-		const staffChannel = await interaction.guild.channels.create(`${course}_staff`, {
-			type: 'GUILD_TEXT',
+		const staffChannel = await interaction.guild.channels.create({
+			name: `${course}_staff`,
+			type: ChannelType.GuildText,
 			parent: categoryChannel.id,
 			topic: '[no message count]',
 			permissionOverwrites: staffPerms,
 			reason
 		});
-		const privateQuestionChannel = await interaction.guild.channels.create(`${course}_private_qs`, {
-			type: 'GUILD_TEXT',
+		const privateQuestionChannel = await interaction.guild.channels.create({
+			name: `${course}_private_qs`,
+			type: ChannelType.GuildText,
 			parent: categoryChannel.id,
 			topic: '[no message count]',
 			permissionOverwrites: staffPerms,
 			reason
 		});
-
-		if (!await modifyRoleDD(interaction, studentRole, true, 'ADD')) return;
 
 		//	adding the course to the database
 		const newCourse: Course = {
@@ -109,12 +111,15 @@ export default class extends Command {
 		};
 		await interaction.client.mongo.collection(DB.COURSES).insertOne(newCourse);
 
+		await updateDropdowns(interaction);
+
 		interaction.editReply(`Successfully added course with ID ${course}`);
 	}
 
 	async createTextChannel(guild: Guild, name: string, permissionOverwrites: Array<OverwriteResolvable>, parent: string, reason: string): Promise<TextChannel> {
-		return guild.channels.create(name, {
-			type: 'GUILD_TEXT',
+		return guild.channels.create({
+			name,
+			type: ChannelType.GuildText,
 			parent,
 			permissionOverwrites,
 			reason
