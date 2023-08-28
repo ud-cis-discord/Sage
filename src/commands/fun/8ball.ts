@@ -40,15 +40,16 @@ export default class extends Command {
 
 	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const question = interaction.options.getString('question');
-		const response = question.length !== 0 && question[question.length - 1].endsWith('?')
+		const response = question.length !== 0 && (question[question.length - 1].endsWith('?') || question.endsWith('?!'))
 			?	MAGIC8BALL_RESPONSES[Math.floor(Math.random() * MAGIC8BALL_RESPONSES.length)]
 			:	'The 8-ball only responds to questions smh';
 		const responseEmbed = new EmbedBuilder()
 			.setColor('#000000')
 			.setTitle('The magic 8-ball says...')
 			.setDescription(response)
+			.setImage(`https://i.imgur.com/UFPWxHV.png`)
 			.setFooter({ text: `${interaction.user.username} asked: ${question}` });
-		return interaction.reply({ embeds: [responseEmbed], files: [{ attachment: `${__dirname}../../../../../assets/images/8-ball.png`, name: '8-ball.png' }] });
+		return interaction.reply({ embeds: [responseEmbed] });
 	}
 
 }
