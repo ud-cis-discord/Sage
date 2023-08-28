@@ -4,7 +4,7 @@ import { Course } from '@lib/types/Course';
 import { ADMIN_PERMS } from '@lib/permissions';
 import { DB, GUILDS, ROLES } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
+import { updateDropdowns } from '@lib/utils/generalUtils';
 
 export default class extends Command {
 

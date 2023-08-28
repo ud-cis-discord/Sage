@@ -203,7 +203,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 		command.name = name;
 
-		if ((!command.description || command.description.length >= 100 || command.description.length) <= 0 && (command.type === ApplicationCommandType.ChatInput)) {
+		if ((!command.description || command.description.length >= 100 || command.description.length <= 0) && (command.type === ApplicationCommandType.ChatInput)) {
 			throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
 		}
 
@@ -288,12 +288,14 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 
 		try {
 			bot.commands.get(interaction.commandName).run(interaction)
-				?.catch(async (error: Error) => {
+				?.catch(async (error: Error) => { // Idk if this is needed now, but keeping in case removing it breaks stuff...
 					bot.emit('error', new CommandError(error, interaction));
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 				});
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
+			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
+			console.log(error.errors);
 		}
 	}
 }

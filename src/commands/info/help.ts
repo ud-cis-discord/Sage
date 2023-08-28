@@ -112,8 +112,7 @@ export default class extends Command {
 				}
 			});
 
-			const splitStr = helpStr.split('\n');
-			console.log(splitStr);
+			const splitStr = helpStr.split(/\n\s*\n/).map(line => line === '' ? '\n' : line); // split string on blank lines, effectively one message for each category
 
 			let notified = false;
 			splitStr.forEach((helpMsg) => {

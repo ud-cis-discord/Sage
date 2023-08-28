@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { DB, CHANNELS, ROLE_DROPDOWNS, BOT } from '@root/config';
 import moment from 'moment';
 import { Reminder } from '@lib/types/Reminder';
-import { Course } from '../types/Course';
+import { Course } from '@lib/types/Course';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -103,10 +103,12 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 	// initialize dropdowns
 	const coursesDropdown = new StringSelectMenuBuilder()
 		.setCustomId('roleselect')
-		.setMaxValues(courses.length);
+		.setMaxValues(courses.length)
+		.setMinValues(0);
 	const assignablesDropdown = new StringSelectMenuBuilder()
 		.setCustomId('roleselect')
-		.setMaxValues(assignables.length);
+		.setMaxValues(assignables.length)
+		.setMinValues(0);
 
 	// add options to dropdowns
 	coursesDropdown.addOptions(courses.map(c => ({ label: `CISC ${c.name}`, value: c.roles.student })));
