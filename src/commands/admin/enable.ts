@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, Formatters,
-	InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Formatters } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { DB } from '@root/config';
@@ -10,16 +9,16 @@ export default class extends Command {
 
 	description = 'Enable a command.';
 	usage = '<command>';
-	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'command',
 		description: 'The name of the command to be enabled.',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true
 	}]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const commandInput = interaction.options.getString('command');
 		const command = getCommand(interaction.client, commandInput);
 

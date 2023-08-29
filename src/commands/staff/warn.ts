@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, Message, EmbedBuilder, TextChannel, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { Course } from '@lib/types/Course';
@@ -16,19 +16,19 @@ export default class extends Command {
 		{
 			name: 'msglink',
 			description: 'Link to the offending message',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		},
 		{
 			name: 'reason',
 			description: 'Reason for warning the user',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: false
 		}
 	]
-	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: ChatInputCommandInteraction): Promise<Message> {
+	async run(interaction: CommandInteraction): Promise<Message> {
 		const target = await interaction.channel.messages.fetch(getMsgIdFromLink(interaction.options.getString('msglink')));
 		const reason = interaction.options.getString('reason') || 'Breaking server rules';
 		if ('parentId' in interaction.channel) {
@@ -37,7 +37,7 @@ export default class extends Command {
 
 			if (course) {
 				const staffChannel = interaction.guild.channels.cache.get(course.channels.staff) as TextChannel;
-				const embed = new EmbedBuilder()
+				const embed = new MessageEmbed()
 					.setTitle(`${interaction.user.tag} Warned ${target.author.tag}`)
 					.setFooter({ text: `${target.author.tag}'s ID: ${target.author.id} | ${interaction.user.tag}'s ID: ${interaction.user.id}` })
 					.addFields([{

@@ -1,67 +1,64 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { TextChannel, ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ModalBuilder, ActionRowBuilder,
-	ModalActionRowComponentBuilder, InteractionResponse, TextInputBuilder, TextInputStyle, ApplicationCommandOptionType } from 'discord.js';
+import { TextChannel, ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData, Modal, TextInputComponent, MessageActionRow, ModalActionRowComponent } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Sends an announcement from Sage to a specified channel or announcements if no channel is given.';
-	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'channel',
 		description: 'The channel to send the announcement in',
-		type: ApplicationCommandOptionType.Channel,
+		type: 'CHANNEL',
 		required: true
 	},
 	{
 		name: 'file',
 		description: 'A file to be posted with the announcement',
-		type: ApplicationCommandOptionType.Attachment,
+		type: 'ATTACHMENT',
 		required: false
 	}]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const announceChannel = interaction.guild.channels.cache.get(CHANNELS.ANNOUNCEMENTS);
 		const channelOption = interaction.options.getChannel('channel');
 		const file = interaction.options.getAttachment('file');
 
 		const channel = (channelOption || announceChannel) as TextChannel;
 
-		const modal = new ModalBuilder()
+		const modal = new Modal()
 			.setTitle('Announce')
 			.setCustomId('announce');
 
-		const contentsComponent = new TextInputBuilder()
+		const contentsComponent = new TextInputComponent()
 			.setCustomId('content')
 			.setLabel('Content to send with this announcement')
-			.setStyle(TextInputStyle.Paragraph)
+			.setStyle('PARAGRAPH')
 			.setRequired(true);
 
-		const channelComponent = new TextInputBuilder()
+		const channelComponent = new TextInputComponent()
 			.setCustomId('channel')
 			.setLabel('ID of receiving channel (auto-filled)')
-			.setStyle(TextInputStyle.Short)
+			.setStyle('SHORT')
 			.setRequired(true)
 			.setValue(channel.id);
 
-		const fileComponent = new TextInputBuilder()
+		const fileComponent = new TextInputComponent()
 			.setCustomId('file')
 			.setLabel('URL to attached file (auto-filled)')
-			.setStyle(TextInputStyle.Short)
+			.setStyle('SHORT')
 			.setRequired(false)
 			.setValue(file ? file.url : '');
 
-		const modalRows: ActionRowBuilder<ModalActionRowComponentBuilder>[] = [
-			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(contentsComponent),
-			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(channelComponent),
-			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(fileComponent)
+		const modalRows: MessageActionRow<ModalActionRowComponent>[] = [
+			new MessageActionRow<ModalActionRowComponent>().addComponents(contentsComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(channelComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(fileComponent)
 		];
 		modal.addComponents(...modalRows);
 
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore - apparently doesn't exist, but if i ignore it it works!
 		await interaction.showModal(modal);
 	}
 

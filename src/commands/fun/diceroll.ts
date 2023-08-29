@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedBuilder, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedFieldData, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { generateErrorEmbed } from '@root/src/lib/utils/generalUtils';
 
@@ -13,31 +13,31 @@ export default class extends Command {
 		{
 			name: 'minimum',
 			description: `Minimum of the roll range (defaults to ${DEFAULT_RANGE[0]})`,
-			type: ApplicationCommandOptionType.Number,
+			type: 'NUMBER',
 			required: false
 		},
 		{
 			name: 'maximum',
 			description: `Maximum of the roll range (defaults to ${DEFAULT_RANGE[1]})`,
-			type: ApplicationCommandOptionType.Number,
+			type: 'NUMBER',
 			required: false
 		},
 		{
 			name: 'numdice',
 			description: `Number of dice to roll (1-10) (defaults to ${DEFAULT_ROLLS})`,
-			type: ApplicationCommandOptionType.Number,
+			type: 'NUMBER',
 			required: false
 		},
 		{
 			name: 'keephighest',
 			description: `How many dice to keep/total (defaults to the number of dice you're rolling)`,
-			type: ApplicationCommandOptionType.Number,
+			type: 'NUMBER',
 			required: false
 		}
 
 	]
 
-	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		let min = interaction.options.getNumber('minimum');
 		let max = interaction.options.getNumber('maximum');
 		const numRolls = interaction.options.getNumber('numdice') || DEFAULT_ROLLS;
@@ -72,7 +72,7 @@ export default class extends Command {
 			: `The total of the ${keepHighest} highest dice is **${total}**`;
 
 		const nums = results.join(', ');
-		const embedFields = [
+		const embedFields: EmbedFieldData[] = [
 			{
 				name: `Roll${results.length === 1 ? '' : 's'}`,
 				value: `Your random number${results.length === 1 ? ' is' : 's are'} ${nums}.`,
@@ -84,7 +84,7 @@ export default class extends Command {
 			}
 		];
 
-		const responseEmbed = new EmbedBuilder()
+		const responseEmbed = new MessageEmbed()
 			.setColor(Math.floor(Math.random() * 16777215))
 			.setTitle('Random Integer Generator')
 			.setFields(embedFields)

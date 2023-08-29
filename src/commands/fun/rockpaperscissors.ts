@@ -1,5 +1,5 @@
 import { BOT } from '@root/config';
-import { ButtonInteraction, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder, EmbedBuilder, InteractionResponse, ButtonStyle } from 'discord.js';
+import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { SageInteractionType } from '@lib/types/InteractionType';
 import { buildCustomId, getDataFromCustomId } from '@lib/utils/interactionUtils';
@@ -11,60 +11,58 @@ export default class extends Command {
 
 	description = `The ultimate battle of human vs program. Can you best ${BOT.NAME} in a round of rock paper scissors?`;
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		const choiceEmbed = new EmbedBuilder()
+	async run(interaction: CommandInteraction): Promise<void> {
+		const choiceEmbed = new MessageEmbed()
 			.setTitle(`Make your choice, ${interaction.user.username}...`)
-			.setColor('Red')
-			.setFooter({ text: `You have ${DECISION_TIMEOUT} seconds to make up your mind.` });
+			.setColor('RED')
+			.setFooter(`You have ${DECISION_TIMEOUT} seconds to make up your mind.`);
 
 		const timer = setInterval(this.timeoutMessage, DECISION_TIMEOUT * 1000, interaction);
 		const confirmBtns = [
-			new ButtonBuilder({
+			new MessageButton({
 				label: 'Rock',
 				customId: buildCustomId({
 					type: SageInteractionType.RPS,
 					commandOwner: interaction.user.id,
 					additionalData: ['rock', `${timer[Symbol.toPrimitive]()}`]
 				}),
-				style: ButtonStyle.Primary,
+				style: 'PRIMARY',
 				emoji: '👊'
 			}),
-			new ButtonBuilder({
+			new MessageButton({
 				label: 'Paper',
 				customId: buildCustomId({
 					type: SageInteractionType.RPS,
 					commandOwner: interaction.user.id,
 					additionalData: ['paper', `${timer[Symbol.toPrimitive]()}`]
 				}),
-				style: ButtonStyle.Primary,
+				style: 'PRIMARY',
 				emoji: '✋'
 			}),
-			new ButtonBuilder({
+			new MessageButton({
 				label: 'Scissors',
 				customId: buildCustomId({
 					type: SageInteractionType.RPS,
 					commandOwner: interaction.user.id,
 					additionalData: ['scissors', `${timer[Symbol.toPrimitive]()}`]
 				}),
-				style: ButtonStyle.Primary,
+				style: 'PRIMARY',
 				emoji: '✌'
 			})
 		];
 
 		await interaction.reply({
 			embeds: [choiceEmbed],
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore: you are literally the right type shut up
-			components: [new ActionRowBuilder().addComponents(confirmBtns)]
+			components: [new MessageActionRow({ components: confirmBtns })]
 		});
 
 		return;
 	}
 
-	timeoutMessage(i: ChatInputCommandInteraction): void {
-		const failEmbed = new EmbedBuilder()
+	timeoutMessage(i: CommandInteraction): void {
+		const failEmbed = new MessageEmbed()
 			.setTitle(`${i.user.username} couldn't make up their mind! Command timed out.`)
-			.setColor('Red');
+			.setColor('RED');
 
 		i.editReply({
 			components: [],
@@ -102,20 +100,20 @@ export async function handleRpsOptionSelect(i: ButtonInteraction): Promise<void>
 	const botMove = CHOICES[Math.floor(Math.random() * CHOICES.length)];
 	const winner = checkWinner(CHOICES.indexOf(choice), CHOICES.indexOf(botMove));
 
-	let winEmbed: EmbedBuilder;
+	let winEmbed: MessageEmbed;
 
 	if (winner === BOT.NAME) {
-		winEmbed = new EmbedBuilder()
+		winEmbed = new MessageEmbed()
 			.setTitle(`${i.user.username} threw ${choice} and ${BOT.NAME} threw ${botMove}. ${winner} won - the machine triumphs!`)
-			.setColor('Red');
+			.setColor('RED');
 	} else if (winner === 'Nobody') {
-		winEmbed = new EmbedBuilder()
+		winEmbed = new MessageEmbed()
 			.setTitle(`Both ${i.user.username} and ${BOT.NAME} threw ${choice}. It's a draw!`)
-			.setColor('Blue');
+			.setColor('BLUE');
 	} else {
-		winEmbed = new EmbedBuilder()
+		winEmbed = new MessageEmbed()
 			.setTitle(`${i.user.username} threw ${choice} and ${BOT.NAME} threw ${botMove}. ${i.user.username} won - humanity triumphs!`)
-			.setColor('Green');
+			.setColor('GREEN');
 	}
 	await msg.edit({
 		components: [],

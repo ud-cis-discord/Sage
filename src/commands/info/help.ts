@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, GuildMember, ApplicationCommandOptionType,
-	InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed, Util, GuildMember } from 'discord.js';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { BOT, PREFIX } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -13,12 +12,12 @@ export default class extends Command {
 		{
 			name: 'cmd',
 			description: 'command you would like to know more about',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: false
 		}
 	]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const cmd = interaction.options.getString('cmd');
 		const { commands } = interaction.client;
 		const website = 'https://ud-cis-discord.github.io/pages/commands';
@@ -71,13 +70,13 @@ export default class extends Command {
 				inline: false
 			});
 
-			const embed = new EmbedBuilder()
+			const embed = new MessageEmbed()
 				.setTitle(command.name)
 				.setDescription(command.description ? command.description : '')
 				.addFields(fields)
 				.setThumbnail(interaction.client.user.avatarURL())
 				.setTimestamp(Date.now())
-				.setColor('Random');
+				.setColor('RANDOM');
 
 			return interaction.reply({ embeds: [embed] });
 		} else {
@@ -112,14 +111,14 @@ export default class extends Command {
 				}
 			});
 
-			const splitStr = helpStr.split(/\n\s*\n/).map(line => line === '' ? '\n' : line); // split string on blank lines, effectively one message for each category
+			const splitStr = Util.splitMessage(helpStr, { char: '\n' });
 
 			let notified = false;
 			splitStr.forEach((helpMsg) => {
-				const embed = new EmbedBuilder()
+				const embed = new MessageEmbed()
 					.setTitle(`-- Commands --`)
 					.setDescription(helpMsg)
-					.setColor('Random');
+					.setColor('RANDOM');
 				interaction.user.send({ embeds: [embed] })
 					.then(() => {
 						if (!notified) {

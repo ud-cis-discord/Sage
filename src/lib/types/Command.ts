@@ -1,7 +1,5 @@
 import { ROLES } from '@root/config';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ApplicationCommandPermissionType, ApplicationCommandType, CommandInteraction, InteractionResponse,
-	Message,
-	MessageContextMenuCommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ApplicationCommandType, CommandInteraction, MessageContextMenuInteraction } from 'discord.js';
 
 
 export abstract class Command {
@@ -18,17 +16,14 @@ export abstract class Command {
 	runInGuild?: boolean = true;
 	options?: ApplicationCommandOptionData[];
 	type?: ApplicationCommandType;
-	permissions?: ApplicationCommandPermissions[] = [{
+	permissions?: ApplicationCommandPermissionData[] = [{
 		id: ROLES.VERIFIED,
-		type: ApplicationCommandPermissionType.Role,
+		type: 'ROLE',
 		permission: true
 	}];
 
 	// functions
-	abstract run(interaction: CommandInteraction | MessageContextMenuCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>>;
-	// void: Does not return anything (i.e. no interaction; rarely used)
-	// InteractionResponse<boolean>: usually means 'return interaction.reply('Text');
-	// Message<boolean>: usually means 'return interaction.followUp('text');
+	abstract run(interaction: CommandInteraction | MessageContextMenuInteraction): Promise<unknown>;
 
 }
 

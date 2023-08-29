@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 import { BOT, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -6,7 +6,7 @@ export default class extends Command {
 
 	description = `Provides information about ${BOT.NAME}.`;
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const info
 		= `Welcome to ${BOT.NAME}, a wonderful, magical bot that has been custom-coded to assist you while you use this Discord server!
 			

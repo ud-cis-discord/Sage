@@ -1,16 +1,16 @@
 import { BOT } from '@root/config';
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ActivityType, ApplicationCommandPermissions, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = `Sets ${BOT.NAME}'s activity to 'Playing Restart...' and ends the process.`;
-	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const bot = interaction.client;
-		bot.user.setActivity(`Restarting...`, { type: ActivityType.Playing });
+		bot.user.setActivity(`Restarting...`, { type: 'PLAYING' });
 		interaction.reply(`Restarting ${BOT.NAME}`)
 			.then(() => {
 				bot.destroy();

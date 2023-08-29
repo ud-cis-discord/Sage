@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder,
-	InteractionResponse, Message } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, MessageAttachment } from 'discord.js';
 import fetch from 'node-fetch';
 import { createCanvas, loadImage } from 'canvas';
 import { Command } from '@lib/types/Command';
@@ -19,12 +18,12 @@ export default class extends Command {
 		{
 			name: 'input',
 			description: 'The LaTeX expression to render',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		}
 	]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>> {
+	async run(interaction: CommandInteraction): Promise<unknown> {
 		// Might take a few seconds to respond in rare cases
 		await interaction.deferReply();
 
@@ -85,8 +84,8 @@ export default class extends Command {
 			return interaction.followUp({ embeds: [generateErrorEmbed(errorResponse)] });
 		}
 
-		const file = new AttachmentBuilder(canvas.toBuffer(), { name: 'tex.png' });
-		const embed = new EmbedBuilder().setImage('attachment://tex.png');
+		const file = new MessageAttachment(canvas.toBuffer(), 'tex.png');
+		const embed = new MessageEmbed().setImage('attachment://tex.png');
 
 		interaction.editReply({ embeds: [embed], files: [file] });
 	}

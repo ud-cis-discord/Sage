@@ -1,38 +1,37 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder,
-	ButtonStyle, TextChannel, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageActionRow, MessageButton, MessageButtonStyle, TextChannel } from 'discord.js';
 
 const STYLES = ['primary', 'secondary', 'success', 'danger'];
 
 export default class extends Command {
 
 	description = `Edits a message sent by ${BOT.NAME} to include a button.`;
-	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'msg_link',
 		description: 'A message link',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true
 	},
 	{
 		name: 'label',
 		description: 'The button text',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true
 	},
 	{
 		name: 'custom_id',
 		description: 'The button/s custom ID',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true
 	},
 	{
 		name: 'style',
 		description: 'The button\'s style type',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true,
 		choices: STYLES.map((status) => ({
 			name: status,
@@ -40,23 +39,11 @@ export default class extends Command {
 		}))
 	}]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const msg = interaction.options.getString('msg_link');
 		const buttonLabel = interaction.options.getString('label');
 		const customID = interaction.options.getString('custom_id');
-		const buttonStyleInput = interaction.options.getString('style').toUpperCase();
-
-		// this is dumb
-		let buttonStyle;
-		if (buttonStyleInput === 'PRIMARY') {
-			buttonStyle = ButtonStyle.Primary;
-		} else if (buttonStyleInput === 'SECONDARY') {
-			buttonStyle = ButtonStyle.Secondary;
-		} else if (buttonStyleInput === 'SUCCESS') {
-			buttonStyle = ButtonStyle.Success;
-		} else if (buttonStyleInput === 'DANGER') {
-			buttonStyle = ButtonStyle.Danger;
-		}
+		const buttonStyle = interaction.options.getString('style').toUpperCase() as MessageButtonStyle;
 
 		//	for discord canary users, links are different
 		const newLink = msg.replace('canary.', '');
@@ -76,14 +63,12 @@ export default class extends Command {
 					ephemeral: true });
 		}
 
-		const btn = new ButtonBuilder()
+		const btn = new MessageButton()
 			.setLabel(buttonLabel)
 			.setCustomId(customID)
 			.setStyle(buttonStyle);
 
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: you are literally the right type shut up
-		await message.edit({ content: message.content, components: [new ActionRowBuilder({ components: [btn] })] });
+		await message.edit({ content: message.content, components: [new MessageActionRow({ components: [btn] })] });
 		interaction.reply({ content: 'Your message has been given a button', ephemeral: true });
 	}
 

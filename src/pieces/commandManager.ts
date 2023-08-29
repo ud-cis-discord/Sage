@@ -1,9 +1,8 @@
 import { Collection, Client, CommandInteraction, ApplicationCommand,
-	GuildMember, SelectMenuInteraction,
+	GuildMember, MessageSelectMenu, SelectMenuInteraction,
 	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
-	ButtonInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder,
-	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle,
-	ChatInputCommandInteraction } from 'discord.js';
+	ButtonInteraction, Modal, TextInputComponent, MessageActionRow,
+	ModalActionRowComponent } from 'discord.js';
 import { isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -35,9 +34,9 @@ async function register(bot: Client): Promise<void> {
 	});
 
 	bot.on('interactionCreate', async interaction => {
-		if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) runCommand(interaction as ChatInputCommandInteraction, bot);
+		if (interaction.isCommand() || interaction.isContextMenu()) runCommand(interaction as CommandInteraction, bot);
 		if (interaction.isSelectMenu()) handleDropdown(interaction);
-		if (interaction.isModalSubmit()) handleModalBuilder(interaction, bot);
+		if (interaction.isModalSubmit()) handleModal(interaction, bot);
 		if (interaction.isButton()) handleButton(interaction);
 	});
 
@@ -56,7 +55,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 	const { customId, values, member } = interaction;
 	let responseContent = `Your roles have been updated.`;
 	if (customId === 'roleselect' && member instanceof GuildMember) {
-		const { component } = interaction;
+		const component = interaction.component as MessageSelectMenu;
 		const removed = component.options.filter((option) => !values.includes(option.value));
 		const addedRoleNames = [];
 		const removedRoleNames = [];
@@ -103,7 +102,7 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 	}
 }
 
-async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Client) {
+async function handleModal(interaction: ModalSubmitInteraction, bot: Client) {
 	const { customId, fields } = interaction;
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
 	guild.members.fetch();
@@ -153,22 +152,19 @@ export async function handleButton(interaction: ButtonInteraction): Promise<void
 
 	switch (customId) {
 		case 'verify': {
-			const verifyModal = new ModalBuilder()
+			const verifyModal = new Modal()
 				.setTitle('User Verification')
 				.setCustomId('verify');
-			const verifyPrompt = new TextInputBuilder()
+			const verifyPrompt = new TextInputComponent()
 				.setCustomId('verifyPrompt')
 				.setLabel('Please enter your unigue hash code here: ')
-				.setStyle(TextInputStyle.Short)
+				.setStyle('SHORT')
 				.setMinLength(44)
 				.setMaxLength(44)
 				.setRequired(true);
-			const verifyActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(verifyPrompt);
+			const verifyActionRow = new MessageActionRow<ModalActionRowComponent>().addComponents(verifyPrompt);
 
 			verifyModal.addComponents(verifyActionRow);
-
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore - apparently doesn't exist, but if i ignore it it works!
 			await interaction.showModal(verifyModal);
 		}
 	}
@@ -203,7 +199,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 		command.name = name;
 
-		if ((!command.description || command.description.length >= 100 || command.description.length <= 0) && (command.type === ApplicationCommandType.ChatInput)) {
+		if ((!command.description || command.description.length >= 100 || command.description.length <= 0) && (command.type === 'CHAT_INPUT')) {
 			throw `Command ${command.name}'s description must be between 1 and 100 characters.`;
 		}
 
@@ -215,9 +211,9 @@ export async function loadCommands(bot: Client): Promise<void> {
 			name: command.name,
 			description: command.description,
 			options: command?.options || [],
-			type: command.type || ApplicationCommandType.ChatInput,
+			type: command.type || 'CHAT_INPUT',
 			defaultPermission: false
-		} as ApplicationCommandDataResolvable;
+		};
 
 		if (!guildCmd) {
 			awaitedCmds.push(commands.create(cmdData));
@@ -255,10 +251,10 @@ export async function loadCommands(bot: Client): Promise<void> {
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
-async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
+async function runCommand(interaction: CommandInteraction, bot: Client): Promise<unknown> {
 	const command = bot.commands.get(interaction.commandName);
 
-	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {
+	if (interaction.channel.type === 'GUILD_TEXT' && command.runInGuild === false) {
 		return interaction.reply({
 			content: 'This command must be run in DMs, not public channels',
 			ephemeral: true
@@ -268,11 +264,11 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 	if (bot.commands.get(interaction.commandName).run !== undefined) {
 		let success = false;
 		for (const user of command.permissions) {
-			if (user.id === interaction.user.id && user.type === ApplicationCommandPermissionType.User) { // the user is able to use this command (most likely admin-only)
+			if (user.id === interaction.user.id && user.type === 'USER') { // the user is able to use this command (most likely admin-only)
 				success = true;
 				break;
 			}
-			if (user.type === ApplicationCommandPermissionType.Role) {
+			if (user.type === 'ROLE') {
 				// says these parens are unneeded, but removing them breaks this line, so
 				// eslint-disable-next-line no-extra-parens
 				if ((interaction.member.roles as GuildMemberRoleManager).cache.find(role => role.id === user.id)) {
@@ -288,14 +284,12 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 
 		try {
 			bot.commands.get(interaction.commandName).run(interaction)
-				?.catch(async (error: Error) => { // Idk if this is needed now, but keeping in case removing it breaks stuff...
-					bot.emit('error', new CommandError(error, interaction));
+				?.catch(async (error: Error) => {
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
+					bot.emit('error', new CommandError(error, interaction));
 				});
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
-			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
-			console.log(error.errors);
 		}
 	}
 }

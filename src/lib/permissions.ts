@@ -1,5 +1,5 @@
 import { ROLES } from '@root/config';
-import { ApplicationCommandPermissions, ApplicationCommandPermissionType, CommandInteraction, Message, Team } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, Message, Team } from 'discord.js';
 
 export function staffPerms(msg: Message): boolean {
 	return msg.member ? msg.member.roles.cache.has(ROLES.STAFF) : false;
@@ -21,20 +21,20 @@ export async function tempBotMasterPerms(interaction: CommandInteraction): Promi
 	return team.members.has(interaction.user.id) ? interaction.user.id : 'ID not found';
 }
 
-export const STAFF_PERMS: ApplicationCommandPermissions = {
+export const STAFF_PERMS: ApplicationCommandPermissionData = {
 	id: ROLES.STAFF,
 	permission: true,
-	type: ApplicationCommandPermissionType.Role
+	type: 'ROLE'
 };
 
-export const ADMIN_PERMS: ApplicationCommandPermissions = {
+export const ADMIN_PERMS: ApplicationCommandPermissionData = {
 	id: ROLES.ADMIN,
 	permission: true,
-	type: ApplicationCommandPermissionType.Role
+	type: 'ROLE'
 };
 
-export let BOTMASTER_PERMS: ApplicationCommandPermissions[];
+export let BOTMASTER_PERMS: ApplicationCommandPermissionData[];
 
-export function setBotmasterPerms(data: ApplicationCommandPermissions[]): void {
+export function setBotmasterPerms(data: ApplicationCommandPermissionData[]): void {
 	BOTMASTER_PERMS = data;
 }

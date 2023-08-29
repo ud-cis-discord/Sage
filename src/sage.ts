@@ -1,7 +1,7 @@
 import 'module-alias/register';
 import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
-import { ApplicationCommandPermissions, Client, IntentsBitField, Partials, Team, ActivityType, ApplicationCommandPermissionType } from 'discord.js';
+import { ApplicationCommandPermissionData, Client, ExcludeEnum, Intents, PartialTypes, Team } from 'discord.js';
 import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
 import { Octokit } from '@octokit/rest';
@@ -9,22 +9,23 @@ import { version as sageVersion } from '@root/package.json';
 import { registerFont } from 'canvas';
 import { SageData } from '@lib/types/SageData';
 import { setBotmasterPerms } from './lib/permissions';
+import { ActivityTypes } from 'discord.js/typings/enums';
 
 const BOT_INTENTS = [
-	IntentsBitField.Flags.DirectMessages,
-	IntentsBitField.Flags.Guilds,
-	IntentsBitField.Flags.GuildModeration,
-	IntentsBitField.Flags.GuildEmojisAndStickers,
-	IntentsBitField.Flags.GuildIntegrations,
-	IntentsBitField.Flags.GuildMembers,
-	IntentsBitField.Flags.GuildMessages,
-	IntentsBitField.Flags.GuildMessageReactions
+	Intents.FLAGS.DIRECT_MESSAGES,
+	Intents.FLAGS.GUILDS,
+	Intents.FLAGS.GUILD_BANS,
+	Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+	Intents.FLAGS.GUILD_INVITES,
+	Intents.FLAGS.GUILD_MEMBERS,
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.GUILD_MESSAGE_REACTIONS
 ];
 
-const BOT_PARTIALS = [
-	Partials.Channel,
-	Partials.Message,
-	Partials.GuildMember
+const BOT_PARTIALS: PartialTypes[] = [
+	'CHANNEL',
+	'MESSAGE',
+	'GUILD_MEMBER'
 ];
 
 consoleStamp(console, {
@@ -55,10 +56,10 @@ async function main() {
 		// I'm mad about this - Josh </3
 		const team = (await bot.application.fetch()).owner as Team;
 		setBotmasterPerms(team.members.map(value => {
-			const permData: ApplicationCommandPermissions = {
+			const permData: ApplicationCommandPermissionData = {
 				id: value.id,
 				permission: true,
-				type: ApplicationCommandPermissionType.User
+				type: 'USER'
 			};
 			return permData;
 		}));
@@ -83,9 +84,11 @@ async function main() {
 
 		const activity = status?.name || `${PREFIX}help`;
 
-		// fix this so supports all types
-		bot.user.setActivity(`${activity} (v${sageVersion})`, { type: ActivityType.Playing });
-		setTimeout(() => bot.user.setActivity(activity, { type: ActivityType.Playing }), 30e3);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: type's typing not properly inferred
+		const type: ExcludeEnum<typeof ActivityTypes, 'CUSTOM'> = status?.type || 'PLAYING';
+		bot.user.setActivity(`${activity} (v${sageVersion})`, { type });
+		setTimeout(() => bot.user.setActivity(activity, { type }), 30e3);
 	});
 }
 

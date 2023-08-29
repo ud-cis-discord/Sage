@@ -1,8 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB, MAINTAINERS } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, GuildChannel, Message, EmbedBuilder, TextChannel, ThreadChannel,
-	ApplicationCommandOptionType, ChannelType, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, GuildChannel, Message, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 
@@ -15,19 +14,19 @@ export default class extends Command {
 		{
 			name: 'questionid',
 			description: 'ID of question you are replying to',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		},
 		{
 			name: 'response',
 			description: 'Response to the question',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		}
 	]
-	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>> {
+	async run(interaction: CommandInteraction): Promise<Message | void> {
 		const idArg = interaction.options.getString('questionid');
 		if (isNaN(Number.parseInt(idArg))) return interaction.reply({ content: `**${idArg}** is not a valid question ID`, ephemeral: true });
 
@@ -39,7 +38,7 @@ export default class extends Command {
 		const bot = interaction.client;
 		const asker = await interaction.guild.members.fetch(question.owner);
 
-		if (interaction.channel.type !== ChannelType.GuildText) {
+		if (interaction.channel.type !== 'GUILD_TEXT') {
 			return interaction.reply({
 				content: `You must use this command in a regular text channel. If you think there is a problem, please contact ${MAINTAINERS} for help.`,
 				ephemeral: true
@@ -61,7 +60,7 @@ export default class extends Command {
 
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
-		if (courseGeneral.type === ChannelType.GuildText) {
+		if (courseGeneral.isText()) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			privThread = await courseGeneral.threads.create({
@@ -80,7 +79,7 @@ export default class extends Command {
 		privThread.members.add(interaction.user.id);
 		privThread.members.add(question.owner);
 
-		const embed = new EmbedBuilder()
+		const embed = new MessageEmbed()
 			.setDescription(`I've sent your response to this thread: <#${privThread.id}>\n\n Please have any further conversation there.`);
 
 		await interaction.reply({
@@ -94,8 +93,8 @@ export default class extends Command {
 			embeds: [embed]
 		});
 
-		const threadEmbed = new EmbedBuilder()
-			.setAuthor({ name: `${interaction.user.tag}`, iconURL: interaction.user.avatarURL() })
+		const threadEmbed = new MessageEmbed()
+			.setAuthor(`${interaction.user.tag}`, interaction.user.avatarURL())
 			.setDescription(response)
 			.setFooter({ text: `Please have any further conversation in this thread!` });
 

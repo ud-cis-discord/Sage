@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, TextChannel } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { DB } from '@root/config';
@@ -12,19 +12,19 @@ export default class extends Command {
 		{
 			name: 'message',
 			description: 'The link of the message you want to tag',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		},
 		{
 			name: 'assignmentid',
 			description: 'The assignment name tag to add to this message',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		}
 	]
 
 	// never assume that students are not dumb
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const msgLink = interaction.options.getString('message');
 		const assignmentId = interaction.options.getString('assignmentid');
 

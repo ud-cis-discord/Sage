@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, Formatters,
-	InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, Formatters } from 'discord.js';
 import { BOTMASTER_PERMS } from '@lib/permissions';
 import { getCommand } from '@root/src/lib/utils/generalUtils';
 import { SageData } from '@lib/types/SageData';
@@ -9,16 +8,16 @@ import { Command } from '@lib/types/Command';
 export default class extends Command {
 
 	description = 'Disable a command';
-	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'command',
 		description: 'The name of the command to be disabled.',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true
 	}]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const commandInput = interaction.options.getString('command');
 		const command = getCommand(interaction.client, commandInput);
 

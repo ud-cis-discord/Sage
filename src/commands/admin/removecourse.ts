@@ -1,9 +1,8 @@
 import { ADMIN_PERMS } from '@lib/permissions';
 import { CHANNELS, DB, SEMESTER_ID } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ButtonInteraction, CategoryChannel, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder,
-	ApplicationCommandOptionType, InteractionResponse, ButtonStyle } from 'discord.js';
-import { updateDropdowns } from '@root/src/lib/utils/generalUtils';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, ButtonInteraction, CategoryChannel, CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
+import { modifyRoleDD } from '@root/src/lib/utils/generalUtils';
 
 const DECISION_TIMEOUT = 30;
 
@@ -11,24 +10,23 @@ export default class extends Command {
 
 	description = 'Remove a course';
 	runInDM = false;
-	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [ADMIN_PERMS];
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'course',
 		description: 'The course ID of the course to be removed (ex: 108).',
-		type: ApplicationCommandOptionType.Channel,
+		type: 'CHANNEL',
 		required: true
 	}]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		let timeout = DECISION_TIMEOUT;
 		const course = interaction.options.getChannel('course') as CategoryChannel;
-		console.log(course.id);
 
 		//	 grabbing course data
 		let channelCount;
 		try {
-			channelCount = course.children.cache.size;
+			channelCount = course.children.size;
 		} catch (error) {
 			return interaction.reply('You have to tag a valid course category.');
 		}
@@ -38,16 +36,14 @@ export default class extends Command {
 		`${interaction.user.tag}\` \`(${interaction.user.id})\``;
 
 		const confirmBtns = [
-			new ButtonBuilder({ label: 'Yes', customId: 'y', style: ButtonStyle.Secondary }),
-			new ButtonBuilder({ label: 'No', customId: 'n', style: ButtonStyle.Danger })
+			new MessageButton({ label: 'Yes', customId: 'y', style: 'SECONDARY' }),
+			new MessageButton({ label: 'No', customId: 'n', style: 'DANGER' })
 		];
 
 		//	a warning gets issued for this command
 		const baseText = `Are you sure you want to delete ${course}? ` +
 		`This action will archive ${channelCount} channels and unenroll ${userCount} users. `;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: you are literally the right type shut up
-		await interaction.reply({ content: `${baseText} Press 'yes' in the next 30 seconds to confirm.`, components: [new ActionRowBuilder({ components: confirmBtns })] });
+		await interaction.reply({ content: `${baseText} Press 'yes' in the next 30 seconds to confirm.`, components: [new MessageActionRow({ components: confirmBtns })] });
 
 		let replyId;
 		interaction.fetchReply().then(reply => { replyId = reply.id; });
@@ -80,8 +76,9 @@ export default class extends Command {
 					const profRole = await interaction.guild.roles.cache.find(role => role.name === 'Prof');
 					const TARole = await interaction.guild.roles.cache.find(role => role.name === 'TA');
 					const LARole = await interaction.guild.roles.cache.find(role => role.name === 'LA');
+
 					//	archving the course channels
-					for (const channel of [...course.children.cache.values()]) {
+					for (const channel of [...course.children.values()]) {
 						await channel.setParent(CHANNELS.ARCHIVE, { reason });
 						await channel.lockPermissions();
 						await channel.setName(`${SEMESTER_ID}_${channel.name}`, reason);
@@ -108,18 +105,17 @@ export default class extends Command {
 						if (member.roles.cache.has(studentRole.id)) await member.roles.remove(studentRole.id, reason);
 					}
 
-					// update and remove from database
-					await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
-					await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
-
-					await updateDropdowns(interaction);
+					if (!await modifyRoleDD(interaction, studentRole, true, 'REMOVE')) return;
 
 					staffRole.delete(reason);
 					studentRole.delete(reason);
 
+					// update and remove from database
+					await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: courseId } });
+					await interaction.client.mongo.collection(DB.COURSES).findOneAndDelete({ name: courseId });
+
 					await interaction.editReply(`${channelCount} channels archived and ${userCount} users unenrolled from CISC ${courseId}`);
 				} catch (error) {
-					interaction.client.emit('error', error);
 					interaction.channel.send(`An error occured: ${error.message}`);
 				}
 			} else {
@@ -151,14 +147,12 @@ export default class extends Command {
 		return;
 	}
 
-	countdown(interaction: ChatInputCommandInteraction, timeout: number, btns: ButtonBuilder[], baseText: string): void {
+	countdown(interaction: CommandInteraction, timeout: number, btns: MessageButton[], baseText: string): void {
 		const extraText = timeout > 1
 			? `Press 'yes' in the next ${timeout} seconds to confirm.`
 			: `Press 'yes' in the next ${timeout} seconds to confirm.`;
 		interaction.editReply({ content: baseText +
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: you are literally the right type shut up
-		extraText, components: [new ActionRowBuilder({ components: btns })] });
+		extraText, components: [new MessageActionRow({ components: btns })] });
 	}
 
 

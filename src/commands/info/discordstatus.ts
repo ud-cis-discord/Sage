@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { EmbedBuilder, EmbedField, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
+import { MessageEmbed, EmbedField, CommandInteraction } from 'discord.js';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import { Command } from '@lib/types/Command';
@@ -8,7 +8,7 @@ export default class extends Command {
 
 	description = 'Check Discord\'s current status.';
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		await interaction.deferReply();
 		const url = 'https://srhpyqt94yxb.statuspage.io/api/v2/summary.json';
 		const currentStatus = await fetch(url, { method: 'Get' }).then(r => r.json()) as DiscordStatus;
@@ -41,7 +41,7 @@ export default class extends Command {
 			});
 		}
 
-		const embed = new EmbedBuilder()
+		const embed = new MessageEmbed()
 			.setTitle(currentStatus.status.description)
 			.setDescription(`[Discord Status](${currentStatus.page.url})\n\n${currentStatus.incidents[0]
 				? `Current incidents:\n${currentStatus.incidents.map(i => i.name).join('\n')}`
@@ -50,7 +50,7 @@ export default class extends Command {
 			.setThumbnail('https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png')
 			.setTimestamp()
 			.setFooter({ text: `Last changed ${moment(currentStatus.page.updated_at).format('YYYY MMM Do')}` })
-			.setColor('Blurple');
+			.setColor('BLURPLE');
 
 		interaction.editReply({ embeds: [embed] });
 	}

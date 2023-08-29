@@ -1,4 +1,4 @@
-import { EmbedBuilder, ChatInputCommandInteraction, ApplicationCommandOptionData, InteractionResponse, ApplicationCommandOptionType } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
@@ -10,12 +10,12 @@ export default class extends Command {
 		{
 			name: 'hide',
 			description: 'determines if you want stats public or private',
-			type: ApplicationCommandOptionType.Boolean,
+			type: 'BOOLEAN',
 			required: false
 		}
 	]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user: SageUser = await interaction.user.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -23,12 +23,12 @@ export default class extends Command {
 			return;
 		}
 
-		const embed = new EmbedBuilder()
+		const embed = new MessageEmbed()
 			.setTitle(`${interaction.user.username}'s Progress`)
 			.setThumbnail(interaction.user.avatarURL())
-			.addFields({ name: 'Message Count', value: `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, inline: true })
-			.addFields({ name: 'Level Progress', value: `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
-			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, inline: false });
+			.addField('Message Count', `You have sent **${user.count}** message${user.count === 1 ? '' : 's'} this week in academic course channels.`, true)
+			.addField('Level Progress', `You're **${user.curExp}** message${user.curExp === 1 ? '' : 's'} away from **Level ${user.level + 1}**
+			${this.progressBar(user.levelExp - user.curExp, user.levelExp, 18)}`, false);
 		if (interaction.options.getBoolean('hide') === true) {
 			interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {

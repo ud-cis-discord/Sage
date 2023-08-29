@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction } from 'discord.js';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
@@ -11,23 +11,23 @@ export default class extends Command {
 	extendedHelp = `Using with no value will reset to 0. A positive integer will
 	set their message count and a negative will subtract that from their total`;
 	runInDM = false;
-	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
 			description: 'The user whose message count will be edited',
-			type: ApplicationCommandOptionType.User,
+			type: 'USER',
 			required: true
 		},
 		{
 			name: 'value',
 			description: 'value to use (positive to set, negative to subtract, none to set to 0)',
-			type: ApplicationCommandOptionType.Integer,
+			type: 'INTEGER',
 			required: false
 		}
 	];
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user = interaction.options.getUser('user');
 		const amount = interaction.options.getInteger('value') || 0;
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });

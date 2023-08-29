@@ -1,26 +1,25 @@
 import { DB, EMAIL } from '@root/config';
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { SageUser } from '@lib/types/SageUser';
-import { EmbedBuilder, ChatInputCommandInteraction, ApplicationCommandPermissions, ApplicationCommandOptionData, ApplicationCommandOptionType,
-	InteractionResponse } from 'discord.js';
+import { MessageEmbed, CommandInteraction, ApplicationCommandPermissionData, ApplicationCommandOptionData } from 'discord.js';
 import nodemailer from 'nodemailer';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
-	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	description = 'Looks up information about a given user';
 	runInDM = false;
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
-			type: ApplicationCommandOptionType.User,
+			type: 'USER',
 			description: 'The member to look up',
 			required: true
 		}
 	];
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user = interaction.options.getUser('user');
 		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: user.id });
 		const member = await interaction.guild.members.fetch(user.id);
@@ -29,10 +28,10 @@ export default class extends Command {
 			return interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
 		}
 
-		const embed = new EmbedBuilder()
+		const embed = new MessageEmbed()
 			.setTitle(`Looking Up:	${member.displayName}`)
 			.setThumbnail(user.avatarURL())
-			.setColor('Green')
+			.setColor('GREEN')
 			.setFooter({ text: `Member ID: ${user.id}` })
 			.setTimestamp()
 			.addFields([

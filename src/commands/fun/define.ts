@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -8,12 +8,12 @@ export default class extends Command {
 		{
 			name: 'word',
 			description: 'The word to define',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: true
 		}
 	]
 
-	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		const input = interaction.options.getString('word');
 
 		// Get the first word in the sentence and make it URL-friendly

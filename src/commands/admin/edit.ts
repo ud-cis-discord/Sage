@@ -1,6 +1,5 @@
 import { BOTMASTER_PERMS } from '@lib/permissions';
-import { ApplicationCommandOptionData, ApplicationCommandPermissions, ChatInputCommandInteraction, ActionRowBuilder, ModalActionRowComponentBuilder, TextChannel,
-	TextInputBuilder, ApplicationCommandOptionType, InteractionResponse, ModalBuilder, TextInputStyle } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandPermissionData, CommandInteraction, MessageActionRow, Modal, ModalActionRowComponent, TextChannel, TextInputComponent } from 'discord.js';
 import { BOT } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -8,16 +7,16 @@ export default class extends Command {
 
 	description = `Edits a message sent by ${BOT.NAME}.`;
 	usage = '<messageLink>|<content>';
-	permissions: ApplicationCommandPermissions[] = BOTMASTER_PERMS;
+	permissions: ApplicationCommandPermissionData[] = BOTMASTER_PERMS;
 
 	options: ApplicationCommandOptionData[] = [{
 		name: 'msg_link',
 		description: 'A message link',
-		type: ApplicationCommandOptionType.String,
+		type: 'STRING',
 		required: true
 	}]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const link = interaction.options.getString('msg_link');
 
 		//	for discord canary users, links are different
@@ -38,39 +37,37 @@ export default class extends Command {
 					ephemeral: true });
 		}
 
-		const modal = new ModalBuilder()
+		const modal = new Modal()
 			.setTitle('Edit')
 			.setCustomId('edit');
 
-		const contentsComponent = new TextInputBuilder()
+		const contentsComponent = new TextInputComponent()
 			.setCustomId('content')
 			.setLabel('New message content')
-			.setStyle(TextInputStyle.Paragraph)
+			.setStyle('PARAGRAPH')
 			.setRequired(true);
 
-		const messageComponent = new TextInputBuilder()
+		const messageComponent = new TextInputComponent()
 			.setCustomId('message')
 			.setLabel('ID of message to be edited (auto-filled)')
-			.setStyle(TextInputStyle.Short)
+			.setStyle('SHORT')
 			.setRequired(true)
 			.setValue(message.id);
 
-		const channelComponent = new TextInputBuilder()
+		const channelComponent = new TextInputComponent()
 			.setCustomId('channel')
 			.setLabel('The channel this message is in (auto-filled)')
-			.setStyle(TextInputStyle.Short)
+			.setStyle('SHORT')
 			.setRequired(true)
 			.setValue(message.channelId);
 
-		const modalRows: ActionRowBuilder<ModalActionRowComponentBuilder>[] = [
-			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(contentsComponent),
-			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(messageComponent),
-			new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(channelComponent)
+		const modalRows: MessageActionRow<ModalActionRowComponent>[] = [
+			new MessageActionRow<ModalActionRowComponent>().addComponents(contentsComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(messageComponent),
+			new MessageActionRow<ModalActionRowComponent>().addComponents(channelComponent)
 		];
 		modal.addComponents(...modalRows);
 
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore - apparently doesn't exist, but if i ignore it it works!
 		await interaction.showModal(modal);
 	}
 

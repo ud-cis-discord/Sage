@@ -12,7 +12,7 @@ const NORMALIZE: [RegExp, string][] = [
 	[/Ғ|ғ|₣|🅵|🅕|\uD83C\uDDEB/g, 'F'],
 	[/₲|Ꮆ|Ᏻ|Ᏽ|🅶|🅖|\uD83C\uDDEC/g, 'G'],
 	[/Η|Н|н|Ӊ|ӊ|Ң|ң|Ӈ|ӈ|Ҥ|ҥ|Ꮋ|🅷|🅗|\uD83C\uDDED/g, 'H'],
-	[/Ι|І|Ӏ|ӏ|Ⅰ|Ꮖ|Ꮠ|🅸|🅘|\uD83C\uDDEE/g, 'I'],
+	[/Ι|І|Ӏ|ӏ|Ⅰ|Ꮖ|Ꮠ|🅸|🅘|!|\uD83C\uDDEE/g, 'I'],
 	[/Ј|Ꭻ|🅹|🅙|\uD83C\uDDEF/g, 'J'],
 	[/Κ|κ|К|к|Қ|қ|Ҟ|ҟ|Ҡ|ҡ|Ӄ|ӄ|Ҝ|ҝ|₭|Ꮶ|🅺|🅚|\uD83C\uDDF0/g, 'K'],
 	[/Ⅼ|£|Ł|Ꮮ|🅻|🅛|\uD83C\uDDF1/g, 'L'],
@@ -24,7 +24,7 @@ const NORMALIZE: [RegExp, string][] = [
 	[/Я|я|Ꭱ|Ꮢ|🆁|🅡|\uD83C\uDDF7/g, 'R'],
 	[/Ѕ|\$|Ꭶ|Ꮥ|Ꮪ|🆂|🅢|\uD83C\uDDF8/g, 'S'],
 	[/Τ|Т|т|Ҭ|ҭ|₮|₸|Ꭲ|🆃|🅣|\uD83C\uDDF9/g, 'T'],
-	[/🆄|🅤|\uD83C\uDDFA/g, 'U'],
+	[/🆄|🅤|\*|\uD83C\uDDFA/g, 'U'],
 	[/Ⅴ|Ꮴ|Ꮙ|Ꮩ|🆅|🅥|\uD83C\uDDFB/g, 'V'],
 	[/₩|Ꮃ|Ꮤ|🆆|🅦|\uD83C\uDDFC/g, 'W'],
 	[/Χ|χ|Х|Ҳ|🆇|🅧|\uD83C\uDDFD/g, 'X'],
@@ -37,7 +37,7 @@ const NORMALIZE: [RegExp, string][] = [
 	[/ε|е|Ҽ|ҽ|Ҿ|ҿ|Є|є|€/g, 'e'],
 	[/ƒ/g, 'f'],
 	[/Ћ|ћ|Һ|һ|Ꮒ|Ꮵ/g, 'h'],
-	[/ι|і|ⅰ|Ꭵ|¡/g, 'i'],
+	[/ι|і|ⅰ|Ꭵ|!|¡/g, 'i'],
 	[/ј/g, 'j'],
 	[/ⅼ|£|₤/g, 'l'],
 	[/ⅿ|₥/g, 'm'],
@@ -84,7 +84,7 @@ async function register(bot: Client): Promise<void> {
 		filterMessages(msg).catch(async error => bot.emit('error', error));
 	});
 	bot.on('messageUpdate', async (_, msg) => {
-		// Handel partials
+		// Handle partials
 		if (msg.partial) {
 			msg = await msg.fetch();
 		}
@@ -110,15 +110,18 @@ async function filterMessages(msg: Message): Promise<Message | void> {
 	const cleanLowercaseMessage = cleanMessage.toLowerCase();
 	const cleanNormalizedLowercaseMessage = cleanNormalizedMessage.toLowerCase();
 
+	// strip of any special characters and spaces
+	const finalMessage = cleanNormalizedLowercaseMessage.replace(/[^a-zA-Z0-9 ]/g, '');
+	const finalMessagenoSpaces = finalMessage.replace(/\s/g, '');
+
 	for (const word of BLACKLIST) {
 		const simpleContains = lowercaseMessage.includes(word);
-		if (simpleContains || cleanLowercaseMessage.includes(word) || cleanNormalizedLowercaseMessage.includes(word)) {
+		if (simpleContains || cleanLowercaseMessage.includes(word) || cleanNormalizedLowercaseMessage.includes(word)
+		|| finalMessage.includes(word) || finalMessagenoSpaces.includes(word)) {
 			msg.delete();
 
 			return msg.author.send(`You used a restricted word. Please refrain from doing so again.`)
-				.catch(() => {
-					msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`);
-				});
+				.catch(() => msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`));
 		}
 	}
 }

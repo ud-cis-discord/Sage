@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, TextChannel } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
 import { CHANNELS } from '@root/config';
 import { Command } from '@lib/types/Command';
 
@@ -9,27 +9,28 @@ export default class extends Command {
 		{
 			name: 'file',
 			description: 'A file to be submitted',
-			type: ApplicationCommandOptionType.Attachment,
+			type: 'ATTACHMENT',
 			required: true
 		},
 		{
 			name: 'description',
 			description: 'Description of your submission',
-			type: ApplicationCommandOptionType.String,
+			type: 'STRING',
 			required: false
 		}
 	]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const submissionChannel = await interaction.client.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 		const file = interaction.options.getAttachment('file');
 		const description = interaction.options.getString('description');
 
-		const embed = new EmbedBuilder()
-			.setTitle(`New contest submission from ${interaction.user.tag}`)
-			.addFields({ name: 'URL', value: file.url })
+		const embed = new MessageEmbed()
+			.setAuthor(interaction.user.tag, interaction.user.avatarURL({ dynamic: true }))
+			.setTitle('New contest submission')
+			.addField('URL', file.url)
 			.setImage(file.url)
-			.setColor('Blue')
+			.setColor('BLUE')
 			.setTimestamp();
 
 		if (description) embed.setDescription(description);

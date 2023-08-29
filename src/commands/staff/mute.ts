@@ -1,23 +1,23 @@
 import { ADMIN_PERMS, STAFF_PERMS } from '@lib/permissions';
 import { MAINTAINERS, ROLES } from '@root/config';
-import { ApplicationCommandPermissions, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
+import { ApplicationCommandPermissionData, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
 
 	description = 'Gives the muted role to the given user.';
 	runInDM = false;
-	permissions: ApplicationCommandPermissions[] = [STAFF_PERMS, ADMIN_PERMS];
+	permissions: ApplicationCommandPermissionData[] = [STAFF_PERMS, ADMIN_PERMS];
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'user',
 			description: 'The user to mute',
-			type: ApplicationCommandOptionType.User,
+			type: 'USER',
 			required: true
 		}
 	]
 
-	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	async run(interaction: CommandInteraction): Promise<void> {
 		const user = interaction.options.getUser('user');
 		const member = await interaction.guild.members.fetch(user.id);
 

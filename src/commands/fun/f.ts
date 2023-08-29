@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandOptionType, ChatInputCommandInteraction, GuildMember, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction, GuildMember } from 'discord.js';
 import { Command } from '@lib/types/Command';
 
 export default class extends Command {
@@ -8,12 +8,12 @@ export default class extends Command {
 		{
 			name: 'target',
 			description: 'The user to pay respects to',
-			type: ApplicationCommandOptionType.User,
+			type: 'USER',
 			required: false
 		}
 	]
 
-	run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+	run(interaction: CommandInteraction): Promise<void> {
 		const target = interaction.options.getMember('target') as GuildMember;
 		const replyContent = `${interaction.user.username} paid their respects ${target ? `to ${target.user.username}` : ``}`;
 		return interaction.reply({ files: [{

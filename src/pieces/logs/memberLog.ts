@@ -1,16 +1,16 @@
-import { Client, GuildMember, TextChannel, EmbedBuilder, PartialGuildMember, EmbedField, User, PartialUser, AuditLogEvent } from 'discord.js';
+import { Client, GuildMember, TextChannel, MessageEmbed, PartialGuildMember, EmbedField, User, PartialUser } from 'discord.js';
 import prettyMilliseconds from 'pretty-ms';
 import { GUILDS, CHANNELS } from '@root/config';
 
 async function processMemberAdd(member: GuildMember, channel: TextChannel): Promise<void> {
 	if (member.guild.id !== GUILDS.MAIN) return;
 
-	const embed = new EmbedBuilder()
+	const embed = new MessageEmbed()
 		.setTitle(`${member.user.tag} just joined.`)
-		.setThumbnail(member.user.avatarURL())
-		.addFields({ name: 'Account created', value: `${member.user.createdAt.toLocaleString()}, ` +
-			`${prettyMilliseconds(Date.now() - member.user.createdTimestamp, { verbose: true })} ago` })
-		.setColor('Aqua')
+		.setThumbnail(member.user.avatarURL({ dynamic: true }))
+		.addField('Account created', `${member.user.createdAt.toLocaleString()}, ` +
+			`${prettyMilliseconds(Date.now() - member.user.createdTimestamp, { verbose: true })} ago`)
+		.setColor('AQUA')
 		.setFooter({ text: `Discord ID: ${member.id}` })
 		.setTimestamp();
 	channel.send({ embeds: [embed] });
@@ -65,11 +65,11 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 		});
 	}
 
-	const embed = new EmbedBuilder()
+	const embed = new MessageEmbed()
 		.setTitle(`${member.user.tag} just left.`)
-		.setThumbnail(member.user.avatarURL())
+		.setThumbnail(member.user.avatarURL({ dynamic: true }))
 		.addFields(fields)
-		.setColor('DarkOrange')
+		.setColor('DARK_ORANGE')
 		.setFooter({ text: `Discord ID: ${member.id}` })
 		.setTimestamp();
 	channel.send({ embeds: [embed] });
@@ -77,14 +77,14 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 
 async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember, channel: TextChannel): Promise<void> {
 	if (newMember.guild.id !== GUILDS.MAIN) return;
-	const embed = new EmbedBuilder()
+	const embed = new MessageEmbed()
 		.setFooter({ text: `Discord ID: ${newMember.id}` })
 		.setTimestamp();
 	let toSend = false;
 
 	if (!toSend && oldMember.displayName !== newMember.displayName) {
 		toSend = true;
-		embed.setAuthor({ name: `${newMember.user.tag} changed their nickname.`, iconURL: newMember.user.avatarURL() })
+		embed.setAuthor(`${newMember.user.tag} changed their nickname.`, newMember.user.avatarURL({ dynamic: true }))
 			.addFields([
 				{
 					name: 'New nickname',
@@ -96,7 +96,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 					inline: true
 				}
 			])
-			.setColor('DarkPurple');
+			.setColor('DARK_PURPLE');
 	}
 
 	if (!toSend && !oldMember.roles.cache.equals(newMember.roles.cache)) {
@@ -111,7 +111,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 			updatedRole = oldMember.roles.cache.find(role => !newMember.roles.cache.has(role.id));
 		}
 
-		const logEntries = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 15 });
+		const logEntries = await newMember.guild.fetchAuditLogs({ type: 'MEMBER_ROLE_UPDATE', limit: 15 });
 		const logEntry = logEntries.entries.find(entry => {
 			if (!('id' in entry.target)) return false;
 			if (entry.changes[0].new[0].id !== updatedRole.id) return false;
@@ -135,9 +135,9 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 			});
 		}
 
-		embed.setAuthor({ name: `${newMember.user.tag} was ${updateType} the ${updatedRole.name} role`, iconURL: newMember.user.avatarURL() })
+		embed.setAuthor(`${newMember.user.tag} was ${updateType} the ${updatedRole.name} role`, newMember.user.avatarURL({ dynamic: true }))
 			.addFields(fields)
-			.setColor('Navy');
+			.setColor('NAVY');
 	}
 
 	if (toSend) {
@@ -147,9 +147,9 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 
 async function processUserUpdate(oldUser: User | PartialUser, newUser: User, channel: TextChannel): Promise<void> {
 	let toSend = false;
-	const embed = new EmbedBuilder()
-		.setAuthor({ name: newUser.tag, iconURL: newUser.avatarURL() })
-		.setColor('DarkGold')
+	const embed = new MessageEmbed()
+		.setAuthor(newUser.tag, newUser.avatarURL({ dynamic: true }))
+		.setColor('DARK_GOLD')
 		.setFooter({ text: `Discord ID: ${newUser.id}` })
 		.setTimestamp();
 
@@ -162,8 +162,8 @@ async function processUserUpdate(oldUser: User | PartialUser, newUser: User, cha
 		toSend = true;
 		embed.setTitle(`${newUser.tag} changed their pfp`)
 			.setDescription('↓ New pfp ↓ | Old pfp →')
-			.setImage(newUser.avatarURL())
-			.setThumbnail(oldUser.avatarURL());
+			.setImage(newUser.avatarURL({ dynamic: true }))
+			.setThumbnail(oldUser.avatarURL({ dynamic: true }));
 	}
 
 	if (toSend) {
