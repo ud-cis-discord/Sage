@@ -80,7 +80,7 @@ export default class extends Command {
 			cursor.x += 75;
 
 			ctx.fillStyle = Leaderboard.textColor;
-			ctx.fillText(discUser.displayName, cursor.x, cursor.y, 325);
+			ctx.fillText(discUser.nickname ?? discUser.displayName ?? discUser.user.username, cursor.x, cursor.y, 325);
 			cursor.x = 450;
 
 			ctx.fillStyle = discUser.displayHexColor !== '#000000' ? discUser.displayHexColor : Leaderboard.textColor;
