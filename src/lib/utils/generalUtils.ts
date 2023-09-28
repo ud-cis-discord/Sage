@@ -1,7 +1,7 @@
 import {
 	ApplicationCommandOptionData, Client, CommandInteraction, AttachmentBuilder,
 	EmbedBuilder, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
-	StringSelectMenuBuilder
+	StringSelectMenuBuilder,
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
@@ -109,6 +109,10 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 		.setCustomId('roleselect')
 		.setMaxValues(assignables.length)
 		.setMinValues(0);
+	// these have to be here otherwise it won't add the dropdown components
+	// typings reference - https://discord-api-types.dev/api/discord-api-types-v10/enum/ComponentType
+	coursesDropdown.data.type = 3;
+	assignablesDropdown.data.type = 3;
 
 	// add options to dropdowns
 	coursesDropdown.addOptions(courses.map(c => ({ label: `CISC ${c.name}`, value: c.roles.student })));
