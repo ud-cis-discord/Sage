@@ -1,7 +1,7 @@
 import {
 	ApplicationCommandOptionData, Client, CommandInteraction, AttachmentBuilder,
 	EmbedBuilder, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
-	StringSelectMenuBuilder,
+	StringSelectMenuBuilder
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
