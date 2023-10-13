@@ -45,8 +45,6 @@ export default class extends Command {
 		//	a warning gets issued for this command
 		const baseText = `Are you sure you want to delete ${course}? ` +
 		`This action will archive ${channelCount} channels and unenroll ${userCount} users. `;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: you are literally the right type shut up
 		await interaction.reply({ content: `${baseText} Press 'yes' in the next 30 seconds to confirm.`, components: [new ActionRowBuilder({ components: confirmBtns })] });
 
 		let replyId;
@@ -156,8 +154,6 @@ export default class extends Command {
 			? `Press 'yes' in the next ${timeout} seconds to confirm.`
 			: `Press 'yes' in the next ${timeout} seconds to confirm.`;
 		interaction.editReply({ content: baseText +
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore: you are literally the right type shut up
 		extraText, components: [new ActionRowBuilder({ components: btns })] });
 	}
 
