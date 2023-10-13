@@ -121,12 +121,8 @@ export default class extends Command {
 		});
 
 		if (choiceBtns2.length === 0) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore: you are literally the right type shut up
 			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder({ components: choiceBtns })] });
 		} else {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore: you are literally the right type shut up
 			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder().addComponents(choiceBtns), new ActionRowBuilder().addComponents(choiceBtns2)] });
 		}
 
@@ -207,8 +203,6 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 	const msgComponents = [new ActionRowBuilder({ components: choiceBtns.slice(0, 5) })];
 	if (choiceBtns.length > 5) msgComponents.push(new ActionRowBuilder({ components: choiceBtns.slice(5) }));
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore: you are literally the right type shut up
 	await pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });
 	if (prevAnswers.length === 0 || !prevAnswers.includes(newChoice)) {
 		await i.reply({ ephemeral: true, content: `Vote for ***${newChoice}*** recorded. To remove it, click the same option again.` });

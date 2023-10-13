@@ -62,7 +62,7 @@ export default class extends Command {
 		let privThread: ThreadChannel;
 		if (courseGeneral.type === ChannelType.GuildText) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+			// @ts-ignore: yet another case of if I ignore it, it works *shrug*
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
