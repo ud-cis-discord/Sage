@@ -25,6 +25,8 @@ const MESSAGE = `<!DOCTYPE html>
 	<p>Once you're on the server, follow the instructions given to you in the channel called "getting-verified". Make sure you have your hash code (given below) ready!
 	</p>
 
+	<p>Further, usage of this Discord server means that you agree to <a href="https://docs.google.com/document/d/1ReVBzepnWvrt6bf4aRfaeHIDo4fFfEuNpOsjmGzvRdM/edit?usp=sharing">these rules</a>. Please take a moment to review them.</p>
+
 	<p>Your hash code is: <span style="color:blueviolet">$hash</span></p>
 	<p><br>We hope to see you on the server soon!<br>- The <span style="color:#738ADB">Discord</span> Admin Team</p>
 
