@@ -120,7 +120,7 @@ async function filterMessages(msg: Message): Promise<Message | void> {
 		|| finalMessage.includes(word) || finalMessagenoSpaces.includes(word)) {
 			msg.delete();
 
-			return msg.author.send(`You used the restricted word "${word}". Please refrain from doing so again.`)
+			return msg.author.send(`Your message contains the restricted word "${word}". Please refrain from using restricted words again.\n\nOriginal message:\n${msg.content}`)
 				.catch(() => msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`));
 		}
 	}
