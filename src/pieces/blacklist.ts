@@ -96,10 +96,8 @@ async function register(bot: Client): Promise<void> {
 
 async function filterMessages(msg: Message): Promise<Message | void> {
 	let normalizedMessage = msg.content.normalize('NFKD');
-	let attemptedBypass = false;
 	for (const [re, rep] of NORMALIZE) {
 		const cleanerString = normalizedMessage.replace(re, rep);
-		attemptedBypass = attemptedBypass || normalizedMessage !== cleanerString;
 		normalizedMessage = cleanerString;
 	}
 
