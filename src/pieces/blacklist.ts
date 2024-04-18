@@ -96,29 +96,32 @@ async function register(bot: Client): Promise<void> {
 
 async function filterMessages(msg: Message): Promise<Message | void> {
 	let normalizedMessage = msg.content.normalize('NFKD');
+	let selfNormalizedMessage = normalizedMessage; // Thanks, Rowan :D
 	for (const [re, rep] of NORMALIZE) {
-		const cleanerString = normalizedMessage.replace(re, rep);
-		normalizedMessage = cleanerString;
+		selfNormalizedMessage = selfNormalizedMessage.replace(re, rep);
 	}
 
-	const cleanNormalizedMessage = normalizedMessage.replace(CLEANER, '');
+	const cleanSelfNormalizedMessage = selfNormalizedMessage.replace(CLEANER, '');
 	const cleanMessage = msg.content.replace(CLEANER, '');
 
 	const lowercaseMessage = msg.content.toLowerCase();
 	const cleanLowercaseMessage = cleanMessage.toLowerCase();
-	const cleanNormalizedLowercaseMessage = cleanNormalizedMessage.toLowerCase();
+	const cleanSelfNormalizedLowercaseMessage = cleanSelfNormalizedMessage.toLowerCase();
 
 	// strip of any special characters and spaces
-	const finalMessage = cleanNormalizedLowercaseMessage.replace(/[^a-zA-Z0-9 ]/g, '');
+	const finalMessage = cleanSelfNormalizedLowercaseMessage.replace(/[^a-zA-Z0-9 ]/g, '');
 	const finalMessagenoSpaces = finalMessage.replace(/\s/g, '');
 
 	for (const word of BLACKLIST) {
 		const simpleContains = lowercaseMessage.includes(word);
-		if (simpleContains || cleanLowercaseMessage.includes(word) || cleanNormalizedLowercaseMessage.includes(word)
+		if (simpleContains || cleanLowercaseMessage.includes(word) || cleanSelfNormalizedLowercaseMessage.includes(word)
 		|| finalMessage.includes(word) || finalMessagenoSpaces.includes(word)) {
 			msg.delete();
 
-			return msg.author.send(`Your message contains the restricted word "${word}". Please refrain from using restricted words again.\n\nOriginal message:\n${msg.content}`)
+			return msg.author.send(`Your message contains the restricted word "${word}". Please refrain from using restricted words again.
+
+Original message:
+${normalizedMessage}`)
 				.catch(() => msg.channel.send(`${msg.member}, you used a restricted word. Please refrain from doing so again.`));
 		}
 	}
