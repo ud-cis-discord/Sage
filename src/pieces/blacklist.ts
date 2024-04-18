@@ -97,6 +97,9 @@ async function register(bot: Client): Promise<void> {
 async function filterMessages(msg: Message): Promise<Message | void> {
 	let normalizedMessage = msg.content.normalize('NFKD');
 	let selfNormalizedMessage = normalizedMessage; // Thanks, Rowan :D
+	// Distinguish between NFKD normalisation and self-normalisation to allow the original message to be
+	// normalized and sent to the offending user, without removing the spaces.
+
 	for (const [re, rep] of NORMALIZE) {
 		selfNormalizedMessage = selfNormalizedMessage.replace(re, rep);
 	}
