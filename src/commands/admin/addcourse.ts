@@ -75,6 +75,13 @@ export default class extends Command {
 		await this.createTextChannel(interaction.guild, `${course}_homework`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(interaction.guild, `${course}_labs`, standardPerms, categoryChannel.id, reason);
 		await this.createTextChannel(interaction.guild, `${course}_projects`, standardPerms, categoryChannel.id, reason);
+		await interaction.guild.channels.create(`${course}_help`, {
+			type: 'GUILD_FORUM',
+			parent: categoryChannel.id,
+			topic: '',
+			permissionOverwrites: standardPerms,
+			reason: reason
+		});
 		const staffChannel = await interaction.guild.channels.create(`${course}_staff`, {
 			type: 'GUILD_TEXT',
 			parent: categoryChannel.id,
