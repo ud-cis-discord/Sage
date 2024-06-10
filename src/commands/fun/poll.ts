@@ -121,9 +121,9 @@ export default class extends Command {
 		});
 
 		if (choiceBtns2.length === 0) {
-			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder({ components: choiceBtns })] });
+			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder<ButtonBuilder>({ components: choiceBtns })] });
 		} else {
-			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder().addComponents(choiceBtns), new ActionRowBuilder().addComponents(choiceBtns2)] });
+			interaction.reply({ embeds: [pollEmbed], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(choiceBtns), new ActionRowBuilder<ButtonBuilder>().addComponents(choiceBtns2)] });
 		}
 
 		let replyId: string;
@@ -200,7 +200,7 @@ export async function handlePollOptionSelect(bot: Client, i: ButtonInteraction):
 		.setFooter({ text: pollFooter })
 		.setColor('Random');
 
-	const msgComponents = [new ActionRowBuilder({ components: choiceBtns.slice(0, 5) })];
+	const msgComponents = [new ActionRowBuilder<ButtonBuilder>({ components: choiceBtns.slice(0, 5) })];
 	if (choiceBtns.length > 5) msgComponents.push(new ActionRowBuilder({ components: choiceBtns.slice(5) }));
 
 	await pollMsg.edit({ embeds: [pollEmbed], components: msgComponents });

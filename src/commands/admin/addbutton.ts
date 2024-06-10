@@ -81,7 +81,7 @@ export default class extends Command {
 			.setCustomId(customID)
 			.setStyle(buttonStyle);
 
-		await message.edit({ content: message.content, components: [new ActionRowBuilder({ components: [btn] })] });
+		await message.edit({ content: message.content, components: [new ActionRowBuilder<ButtonBuilder>({ components: [btn] })] });
 		interaction.reply({ content: 'Your message has been given a button', ephemeral: true });
 	}
 
