@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionData, CommandInteraction, GuildChannel, MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, GuildChannel, EmbedBuilder, TextChannel, ThreadChannel, ApplicationCommandOptionType,
+	InteractionResponse, ChannelType } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { SageUser } from '@lib/types/SageUser';
@@ -14,18 +15,18 @@ export default class extends Command {
 		{
 			name: 'question',
 			description: 'What you would like to ask',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'course',
 			description: 'What course chat would you like to ask your question in?',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -59,16 +60,14 @@ export default class extends Command {
 
 		const courseGeneral = (await bot.channels.fetch(course.channels.general)) as GuildChannel;
 		let privThread: ThreadChannel;
-		if (courseGeneral.isText()) {
+		if (courseGeneral.type === ChannelType.GuildText) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+			// @ts-ignore: yet another case of if I ignore it, it works *shrug*
 			privThread = await courseGeneral.threads.create({
 				name: `${interaction.user.username}‘s private question (${questionId})`,
 				autoArchiveDuration: 4320,
 				reason: `${interaction.user.username} asked a private question`,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore: typescript throws a fit for some reason now, claims type is of type 'never'. Problem since djs v13.6
-				type: 'GUILD_PRIVATE_THREAD'
+				type: ChannelType.PrivateThread
 			});
 		} else {
 			throw `Something went wrong creating ${interaction.user.username}'s private thread. Please contact ${MAINTAINERS} for assistance!'`;
@@ -81,8 +80,8 @@ export default class extends Command {
 		});
 		privThread.members.add(interaction.user.id);
 
-		const embed = new MessageEmbed()
-			.setAuthor(`${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, interaction.user.avatarURL())
+		const embed = new EmbedBuilder()
+			.setAuthor({ name: `${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
 
 		const privateChannel = await interaction.client.channels.fetch(course.channels.private) as TextChannel;

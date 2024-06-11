@@ -1,7 +1,7 @@
 import { PVQuestion } from '@lib/types/PVQuestion';
 import { BOT, DB } from '@root/config';
 import { Command } from '@lib/types/Command';
-import { MessageEmbed, TextChannel, CommandInteraction, ApplicationCommandOptionData } from 'discord.js';
+import { EmbedBuilder, TextChannel, ChatInputCommandInteraction, ApplicationCommandOptionData, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
 import { generateErrorEmbed } from '@lib/utils/generalUtils';
 
 
@@ -12,24 +12,24 @@ export default class extends Command {
 		{
 			name: 'questionid',
 			description: 'The ID of the question you would like to reply to',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'response',
 			description: 'What you would like to reply with',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'file',
 			description: 'A file to be posted with the reply',
-			type: 'ATTACHMENT',
+			type: ApplicationCommandOptionType.Attachment,
 			required: false
 		}
 	]
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const id = interaction.options.getString('questionid');
 		const file = interaction.options.getAttachment('file');
 		const question: PVQuestion = await interaction.client.mongo.collection(DB.PVQ).findOne({ questionId: id });
@@ -44,8 +44,8 @@ export default class extends Command {
 		const [, channelId] = question.messageLink.match(/\d\/(\d+)\//);
 		const channel = await interaction.client.channels.fetch(channelId) as TextChannel;
 
-		const embed = new MessageEmbed()
-			.setAuthor(`Anonymous responded to ${question.questionId}`, interaction.client.user.avatarURL())
+		const embed = new EmbedBuilder()
+			.setAuthor({ name: `Anonymous responded to ${question.questionId}`, iconURL: interaction.client.user.avatarURL() })
 			.setDescription(`${interaction.options.getString('response')}\n\n[Jump to question](${question.messageLink})`);
 
 		if (file) embed.setImage(file.url);

@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { setTimeout } from 'timers';
 
@@ -9,7 +9,7 @@ export default class extends Command {
 
 	description = 'Have Sage flip a coin for you!';
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		await interaction.reply('Flipping...');
 		const result = COIN_FLIP[Math.floor(Math.random() * COIN_FLIP.length)];
 

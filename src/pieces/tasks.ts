@@ -1,5 +1,5 @@
 import { CHANNELS, DB } from '@root/config';
-import { Client, MessageEmbed, TextChannel } from 'discord.js';
+import { ChannelType, Client, EmbedBuilder, TextChannel } from 'discord.js';
 import { schedule } from 'node-cron';
 import { Reminder } from '@lib/types/Reminder';
 import { Poll, PollResult } from '@lib/types/Poll';
@@ -61,25 +61,25 @@ async function checkPolls(bot: Client): Promise<void> {
 		});
 
 		const pollChannel = await bot.channels.fetch(poll.channel);
-		if (!pollChannel.isText()) throw 'something went wrong fetching the poll\'s channel';
+		if (pollChannel.type !== ChannelType.GuildText) throw 'something went wrong fetching the poll\'s channel';
 		const pollMsg = await pollChannel.messages.fetch(poll.message);
 		const owner = await pollMsg.guild.members.fetch(poll.owner);
-		const pollEmbed = new MessageEmbed()
+		const pollEmbed = new EmbedBuilder()
 			.setTitle(poll.question)
 			.setDescription(`This poll was created by ${owner.displayName} and ended **${mdTimestamp}**`)
-			.addField(`Winner${winners.length === 1 ? '' : 's'}`, winMessage)
-			.addField('Choices', choiceText)
-			.setColor('RANDOM');
+			.addFields({ name: `Winner${winners.length === 1 ? '' : 's'}`, value: winMessage })
+			.addFields({ name: 'Choices', value: choiceText })
+			.setColor('Random');
 
 		pollMsg.edit({ embeds: [pollEmbed], components: [] });
 
 
-		pollMsg.channel.send({ embeds: [new MessageEmbed()
+		pollMsg.channel.send({ embeds: [new EmbedBuilder()
 			.setTitle(poll.question)
 			.setDescription(`${owner}'s poll has ended!`)
-			.addField(`Winner${winners.length === 1 ? '' : 's'}`, winMessage)
-			.addField('Original poll', `Click [here](${pollMsg.url}) to see the original poll.`)
-			.setColor('RANDOM')
+			.addFields({ name: `Winner${winners.length === 1 ? '' : 's'}`, value: winMessage })
+			.addFields({ name: 'Original poll', value: `Click [here](${pollMsg.url}) to see the original poll.` })
+			.setColor('Random')
 		] });
 
 		await bot.mongo.collection<Poll>(DB.POLLS).findOneAndDelete(poll);

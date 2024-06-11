@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction, EmbedField, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOptionData, ChatInputCommandInteraction, EmbedField, EmbedBuilder, ApplicationCommandOptionType, InteractionResponse } from 'discord.js';
 import { Course } from '@lib/types/Course';
 import { QuestionTag } from '@lib/types/QuestionTag';
 import { SageUser } from '@lib/types/SageUser';
@@ -14,20 +14,20 @@ export default class extends Command {
 		{
 			name: 'assignment',
 			description: 'The ID of the assignment to filter questions from',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: true
 		},
 		{
 			name: 'course',
 			description: 'What course would you like to filter questions from?',
-			type: 'STRING',
+			type: ApplicationCommandOptionType.String,
 			required: false
 		}
 	]
 
 	// never assume that students are not dumb
 
-	async run(interaction: CommandInteraction): Promise<void> {
+	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 
 		if (!user) {
@@ -66,15 +66,15 @@ export default class extends Command {
 		entries.forEach(doc => {
 			fields.push({ name: doc.header.replace(/\n/g, ' '), value: `[Click to view](${doc.link})`, inline: false });
 		});
-		const embeds: Array<MessageEmbed> = [new MessageEmbed()
+		const embeds: Array<EmbedBuilder> = [new EmbedBuilder()
 			.setTitle(`Questions for ${course} ${assignment}`)
 			.addFields(fields.splice(0, 25))
-			.setColor('DARK_AQUA')];
+			.setColor('DarkAqua')];
 
 		while (fields.length > 0) {
-			embeds.push(new MessageEmbed()
+			embeds.push(new EmbedBuilder()
 				.addFields(fields.splice(0, 25))
-				.setColor('DARK_AQUA'));
+				.setColor('DarkAqua'));
 		}
 
 		return interaction.reply({ embeds: embeds, ephemeral: true });

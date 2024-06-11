@@ -1,4 +1,4 @@
-import { Client, TextChannel, Role, Message, MessageEmbed, PartialMessage, ThreadChannel } from 'discord.js';
+import { Client, TextChannel, Role, Message, EmbedBuilder, PartialMessage, ThreadChannel, ChannelType } from 'discord.js';
 import { DatabaseError } from '@lib/types/errors';
 import { CHANNELS, DB, ROLES, GUILDS } from '@root/config';
 import { SageUser } from '@lib/types/SageUser';
@@ -9,9 +9,9 @@ const greenIncrement = 8;
 const maxGreen:[number, number, number] = [0, 255, 0];
 const maxLevel = 20;
 const countedChannelTypes = [
-	'GUILD_TEXT',
-	'GUILD_PUBLIC_THREAD',
-	'GUILD_PRIVATE_THREAD'
+	ChannelType.GuildText,
+	ChannelType.PublicThread,
+	ChannelType.PrivateThread
 ];
 
 async function register(bot: Client): Promise<void> {
@@ -141,11 +141,11 @@ async function sendLevelPing(msg: Message, user: SageUser): Promise<Message> {
 	} else {
 		embedText = `Congratulations ${msg.author.username}, you have advanced to level ${user.level}!\n Keep up the great work!`;
 	}
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setThumbnail(msg.author.avatarURL())
 		.setTitle('<:steve_peace:883541149032267816> Level up!')
 		.setDescription(embedText)
-		.addField('XP to next level:', user.levelExp.toString(), true)
+		.addFields({ name: 'XP to next level:', value: user.levelExp.toString(), inline: true })
 		.setColor(createLevelRgb(user.level))
 		.setFooter({ text: 'You can turn the messages off by using the `/togglelevelpings` command' })
 		.setTimestamp();
