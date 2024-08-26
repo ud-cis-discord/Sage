@@ -11,10 +11,7 @@ const PADDING = 4;
 
 export default class extends Command {
 
-	// Made by Brendan Lewis (@craftablescience)
-
 	description = `Accepts a LaTeX expression and posts it as a rendered image.`;
-
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'input',
