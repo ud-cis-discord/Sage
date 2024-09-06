@@ -1,7 +1,7 @@
 import 'module-alias/register';
 import consoleStamp from 'console-stamp';
 import { MongoClient } from 'mongodb';
-import { ApplicationCommandPermissions, Client, IntentsBitField, Partials, Team, ActivityType, ApplicationCommandPermissionType } from 'discord.js';
+import { ApplicationCommandPermissions, Client, IntentsBitField, Partials, Team, ActivityType, ApplicationCommandPermissionType, GatewayIntentBits } from 'discord.js';
 import { readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { DB, BOT, PREFIX, GITHUB_TOKEN } from '@root/config';
 import { Octokit } from '@octokit/rest';
@@ -18,7 +18,9 @@ const BOT_INTENTS = [
 	IntentsBitField.Flags.GuildIntegrations,
 	IntentsBitField.Flags.GuildMembers,
 	IntentsBitField.Flags.GuildMessages,
-	IntentsBitField.Flags.GuildMessageReactions
+	IntentsBitField.Flags.GuildMessageReactions,
+	// eslint-disable-next-line no-warning-comments
+	GatewayIntentBits.MessageContent // TODO: convert all of these to GatewayIntentBits
 ];
 
 const BOT_PARTIALS = [
