@@ -27,7 +27,7 @@ export default class extends Command {
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
 		const embed = new EmbedBuilder()
-			.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.avatarURL() })
+			.setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() })
 			.setTitle('New Feedback')
 			.setDescription(feedback)
 			.setColor('DarkGreen')

@@ -38,7 +38,7 @@ async function processChannelCreate(channel: GuildChannel | DMChannel, serverLog
 	channel.permissionOverwrites.cache.forEach(overwrite => {
 		const target = overwrite.type === OverwriteType.Role
 			? channel.guild.roles.cache.get(overwrite.id).name
-			: channel.guild.members.cache.get(overwrite.id).user.tag;
+			: channel.guild.members.cache.get(overwrite.id).user.username;
 		const allowed = overwrite.allow.bitfield !== BigInt(0)
 			? PermissionsBitField.All === overwrite.allow.bitfield
 				? '`ALL`'
@@ -144,7 +144,7 @@ async function processChannelUpdate(oldChannel: GuildChannel | DMChannel, newCha
 				? newChannel.guild.roles.cache.get(overwrite.id).name.startsWith('@')
 					? newChannel.guild.roles.cache.get(overwrite.id).name
 					: `@${newChannel.guild.roles.cache.get(overwrite.id).name}`
-				: newChannel.guild.members.cache.get(overwrite.id).user.tag;
+				: newChannel.guild.members.cache.get(overwrite.id).user.username;
 			const allowed = overwrite.allow.bitfield !== BigInt(0)
 				? PermissionsBitField.All === overwrite.allow.bitfield
 					? '`ALL`'

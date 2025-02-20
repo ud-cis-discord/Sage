@@ -26,7 +26,7 @@ export default class extends Command {
 		const description = interaction.options.getString('description');
 
 		const embed = new EmbedBuilder()
-			.setTitle(`New contest submission from ${interaction.user.tag}`)
+			.setTitle(`New contest submission from ${interaction.user.username}`)
 			.addFields({ name: 'URL', value: file.url })
 			.setImage(file.url)
 			.setColor('Blue')

@@ -88,14 +88,14 @@ export default class extends Command {
 		});
 
 		embed.setDescription(`${question.messageLink}`);
-		embed.setTitle(`${asker.user.tag}'s Question`);
+		embed.setTitle(`${asker.user.username}'s Question`);
 		embed.setFooter({ text: `When you're done with this question, you can send \`/archive\` to close it` });
 		await privThread.send({
 			embeds: [embed]
 		});
 
 		const threadEmbed = new EmbedBuilder()
-			.setAuthor({ name: `${interaction.user.tag}`, iconURL: interaction.user.avatarURL() })
+			.setAuthor({ name: `${interaction.user.username}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(response)
 			.setFooter({ text: `Please have any further conversation in this thread!` });
 

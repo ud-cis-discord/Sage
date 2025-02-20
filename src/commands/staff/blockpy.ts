@@ -25,13 +25,13 @@ export default class extends Command {
 		const member = await interaction.guild.members.fetch(user.id);
 
 		if (!entry) {
-			return interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
+			return interaction.reply({ content: `User ${user.username} has not verified.`, ephemeral: true });
 		}
 
 		const sender: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-		this.sendEmail(sender.email, member.displayName, user.tag, entry);
+		this.sendEmail(sender.email, member.displayName, user.username, entry);
 		return interaction.reply(
-			{ content: `An email has been sent to you containing the requested data about \`${user.tag}\`.`,
+			{ content: `An email has been sent to you containing the requested data about \`${user.username}\`.`,
 				ephemeral: true });
 	}
 

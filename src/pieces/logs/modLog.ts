@@ -20,7 +20,7 @@ async function processBanAdd(ban: GuildBan, modLog: TextChannel): Promise<void> 
 
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
-		.setTitle(`${user.tag} was banned.`)
+		.setTitle(`${user.username} was banned.`)
 		.addFields(fields)
 		.setColor('Greyple')
 		.setFooter({ text: `Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}` })
@@ -47,7 +47,7 @@ async function processBanRemove(ban: GuildBan, modLog: TextChannel): Promise<voi
 
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: logEntry.executor.tag, iconURL: logEntry.executor.avatarURL() })
-		.setTitle(`${user.tag} was unbanned.`)
+		.setTitle(`${user.username} was unbanned.`)
 		.addFields(fields)
 		.setColor('Greyple')
 		.setFooter({ text: `Mod ID: ${logEntry.executor.id} | Target ID: ${user.id}` })
@@ -76,7 +76,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 
 	if (muted !== null) {
 		const embed = new EmbedBuilder()
-			.setTitle(`${member.user.tag} ${muted} by ${logEntry.executor.tag}`)
+			.setTitle(`${member.user.username} ${muted} by ${logEntry.executor.tag}`)
 			.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 			.setColor('DarkRed')
 			.setFooter({ text: `TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}` })
@@ -97,7 +97,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, mod
 		|| (Date.now() - logEntry.createdTimestamp) > 10e3) return;
 
 	const embed = new EmbedBuilder()
-		.setTitle(`${member.user.tag} kicked by ${logEntry.executor.tag}`)
+		.setTitle(`${member.user.username} kicked by ${logEntry.executor.tag}`)
 		.setDescription(logEntry.reason ? `With reason: \n${logEntry.reason}` : '')
 		.setColor('Yellow')
 		.setFooter({ text: `TargetID: ${member.id} | Mod ID: ${logEntry.executor.id}` })

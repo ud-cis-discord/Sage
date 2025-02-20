@@ -35,7 +35,7 @@ export default class extends Command {
 		const courseId = course.name.substring(5);
 		const userCount = await interaction.client.mongo.collection(DB.USERS).countDocuments({ courses: courseId });
 		const reason = `Removing course \`${course}\` as requested by ` +
-		`${interaction.user.tag}\` \`(${interaction.user.id})\``;
+		`${interaction.user.username}\` \`(${interaction.user.id})\``;
 
 		const confirmBtns = [
 			new ButtonBuilder({ label: 'Yes', customId: 'y', style: ButtonStyle.Secondary }),
