@@ -26,7 +26,7 @@ export default class extends Command {
 		const member = await interaction.guild.members.fetch(user.id);
 
 		if (!entry) {
-			return interaction.reply({ content: `User ${user.tag} has not verified.`, ephemeral: true });
+			return interaction.reply({ content: `User ${user.username} has not verified.`, ephemeral: true });
 		}
 
 		const embed = new EmbedBuilder()
@@ -37,16 +37,16 @@ export default class extends Command {
 			.setTimestamp()
 			.addFields([
 				{ name: 'Display Name', value: `<@${member.id}>`, inline: true },
-				{ name: 'Username', value: `${user.tag}`, inline: false },
+				{ name: 'Username', value: `${user.username}`, inline: false },
 				{ name: 'UD Email:', value: entry.email, inline: false },
 				{ name: 'Message count: ', value: `This week: ${entry.count.toString()}`, inline: false }
 			]);
 
 		if (!entry.pii) {
 			const sender: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-			this.sendEmail(sender.email, member.displayName, user.tag, entry);
+			this.sendEmail(sender.email, member.displayName, user.username, entry);
 			return interaction.reply(
-				{ content: `\`${user.tag}\` has not opted to have their information shared over Discord.\nInstead, an email has been sent to you containing the requested data.`,
+				{ content: `\`${user.username}\` has not opted to have their information shared over Discord.\nInstead, an email has been sent to you containing the requested data.`,
 					ephemeral: true });
 		}
 

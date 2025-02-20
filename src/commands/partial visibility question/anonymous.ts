@@ -72,7 +72,7 @@ export default class extends Command {
 		const messageLink = `https://discord.com/channels/${questionMessage.guild.id}/${questionMessage.channel.id}/${questionMessage.id}`;
 
 		const staffEmbed = new EmbedBuilder()
-			.setAuthor({ name: `${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
+			.setAuthor({ name: `${interaction.user.username} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(`[Click to jump](${messageLink})
 	It is recommended you reply in public, but sudoreply can be used **in a staff channel** to reply in private if necessary.`);
 

@@ -30,16 +30,16 @@ export default class extends Command {
 		}
 
 		if (member.roles.cache.has(ROLES.MUTED)) {
-			const reason = `${member.user.username} was un-muted by ${interaction.user.tag} (${interaction.user.id})`;
+			const reason = `${member.user.username} was un-muted by ${interaction.user.username} (${interaction.user.id})`;
 			await member.roles.remove(ROLES.MUTED, reason);
 			return interaction.reply({ content: `${member.user.username} has been un-muted.`, ephemeral: true });
 		}
-		const reason = `${member.user.username} was muted by ${interaction.user.tag} (${interaction.user.id})`;
+		const reason = `${member.user.username} was muted by ${interaction.user.username} (${interaction.user.id})`;
 		await member.roles.add(ROLES.MUTED, reason);
 
 		let muteMsg = `${member.user.username} has been muted.`;
 
-		await member.send(`You have been muted on the UD CIS Discord Server by ${interaction.user.tag}.
+		await member.send(`You have been muted on the UD CIS Discord Server by ${interaction.user.username}.
 If you believe this to be a problem, please reach out to them directly.`).catch(() => {
 			muteMsg += '\n\nThis user has DMs disabled, please make sure to let them know why this happened.';
 			return;

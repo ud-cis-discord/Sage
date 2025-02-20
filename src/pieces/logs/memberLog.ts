@@ -6,7 +6,7 @@ async function processMemberAdd(member: GuildMember, channel: TextChannel): Prom
 	if (member.guild.id !== GUILDS.MAIN) return;
 
 	const embed = new EmbedBuilder()
-		.setTitle(`${member.user.tag} just joined.`)
+		.setTitle(`${member.user.username} just joined.`)
 		.setThumbnail(member.user.avatarURL())
 		.addFields({ name: 'Account created', value: `${member.user.createdAt.toLocaleString()}, ` +
 			`${prettyMilliseconds(Date.now() - member.user.createdTimestamp, { verbose: true })} ago` })
@@ -66,7 +66,7 @@ async function processMemberRemove(member: GuildMember | PartialGuildMember, cha
 	}
 
 	const embed = new EmbedBuilder()
-		.setTitle(`${member.user.tag} just left.`)
+		.setTitle(`${member.user.username} just left.`)
 		.setThumbnail(member.user.avatarURL())
 		.addFields(fields)
 		.setColor('DarkOrange')
@@ -84,7 +84,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 
 	if (!toSend && oldMember.displayName !== newMember.displayName) {
 		toSend = true;
-		embed.setAuthor({ name: `${newMember.user.tag} changed their nickname.`, iconURL: newMember.user.avatarURL() })
+		embed.setAuthor({ name: `${newMember.user.username} changed their nickname.`, iconURL: newMember.user.avatarURL() })
 			.addFields([
 				{
 					name: 'New nickname',
@@ -135,7 +135,7 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 			});
 		}
 
-		embed.setAuthor({ name: `${newMember.user.tag} was ${updateType} the ${updatedRole.name} role`, iconURL: newMember.user.avatarURL() })
+		embed.setAuthor({ name: `${newMember.user.username} was ${updateType} the ${updatedRole.name} role`, iconURL: newMember.user.avatarURL() })
 			.addFields(fields)
 			.setColor('Navy');
 	}
@@ -148,19 +148,19 @@ async function processMemberUpdate(oldMember: GuildMember | PartialGuildMember, 
 async function processUserUpdate(oldUser: User | PartialUser, newUser: User, channel: TextChannel): Promise<void> {
 	let toSend = false;
 	const embed = new EmbedBuilder()
-		.setAuthor({ name: newUser.tag, iconURL: newUser.avatarURL() })
+		.setAuthor({ name: newUser.username, iconURL: newUser.avatarURL() })
 		.setColor('DarkGold')
 		.setFooter({ text: `Discord ID: ${newUser.id}` })
 		.setTimestamp();
 
-	if (!toSend && oldUser.tag !== newUser.tag) {
+	if (!toSend && oldUser.username !== newUser.username) {
 		toSend = true;
-		embed.setTitle(`${oldUser.tag} changed their tag to ${newUser.tag}`);
+		embed.setTitle(`${oldUser.username} changed their tag to ${newUser.username}`);
 	}
 
 	if (!toSend && oldUser.avatar !== newUser.avatar) {
 		toSend = true;
-		embed.setTitle(`${newUser.tag} changed their pfp`)
+		embed.setTitle(`${newUser.username} changed their pfp`)
 			.setDescription('↓ New pfp ↓ | Old pfp →')
 			.setImage(newUser.avatarURL())
 			.setThumbnail(oldUser.avatarURL());

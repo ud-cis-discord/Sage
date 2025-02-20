@@ -81,7 +81,7 @@ export default class extends Command {
 		privThread.members.add(interaction.user.id);
 
 		const embed = new EmbedBuilder()
-			.setAuthor({ name: `${interaction.user.tag} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
+			.setAuthor({ name: `${interaction.user.username} (${interaction.user.id}) asked Question ${questionId}`, iconURL: interaction.user.avatarURL() })
 			.setDescription(`${question}\n\n To respond to this question, reply in this thread: <#${privThread.id}>`);
 
 		const privateChannel = await interaction.client.channels.fetch(course.channels.private) as TextChannel;
