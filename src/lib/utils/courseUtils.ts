@@ -6,16 +6,72 @@ import { updateDropdowns } from '@lib/utils/generalUtils';
 // serializes course creation within the bot process so two concurrent commands can't create the same course twice
 const coursesInCreation = new Set<string>();
 
-export async function createCourse(interaction: ChatInputCommandInteraction, course: string): Promise<Course> {
+export const DEFAULT_ASSIGNMENTS = ['hw1', 'hw2', 'hw3', 'hw4', 'hw5', 'lab1', 'lab2', 'lab3', 'lab4', 'lab5'];
+
+//	any command that creates or adopts a course runs its writes through here, so /addcourse and /registercourse
+//	can't work on the same course at the same time
+export async function withCourseLock<T>(course: string, work: () => Promise<T>): Promise<T> {
 	if (coursesInCreation.has(course)) {
 		throw `Course ${course} is already being created by another command run.`;
 	}
 	coursesInCreation.add(course);
 	try {
-		return await buildCourse(interaction, course);
+		return await work();
 	} finally {
 		coursesInCreation.delete(course);
 	}
+}
+
+//	the access every course channel grants: staffPerms leaves students out, standardPerms lets them in
+export function getCoursePerms(staffRoleId: string, studentRoleId: string): { standardPerms: OverwriteResolvable[], staffPerms: OverwriteResolvable[] } {
+	const standardPerms: Array<OverwriteResolvable> = [{
+		id: ROLES.ADMIN,
+		allow: 'ViewChannel'
+	}, {
+		id: staffRoleId,
+		allow: 'ViewChannel'
+	}, {
+		id: GUILDS.MAIN,
+		deny: 'ViewChannel'
+	}, {
+		id: studentRoleId,
+		allow: 'ViewChannel'
+	}, {
+		id: ROLES.MUTED,
+		deny: 'SendMessages'
+	}];
+	return { standardPerms, staffPerms: [standardPerms[0], standardPerms[1], standardPerms[2]] };
+}
+
+//	A record whose category is gone is dead: nobody is really enrolled and its roles grant access to nothing.
+//	Roles the caller is about to reuse are named in keepRoleIds. Returns the names of the roles it deleted.
+export async function clearStaleCourse(interaction: ChatInputCommandInteraction, stale: Course,
+	keepRoleIds: Set<string> = new Set()): Promise<string[]> {
+	const courses = interaction.client.mongo.collection(DB.COURSES);
+	await courses.deleteOne({ name: stale.name });
+	await interaction.client.mongo.collection(DB.USERS).updateMany({}, { $pull: { courses: stale.name } });
+
+	const deleted: string[] = [];
+	for (const roleId of [stale.roles?.staff, stale.roles?.student]) {
+		//	going by the IDs on the record, never by name, so a role belonging to some other course is never caught
+		//	up in this
+		if (!roleId || keepRoleIds.has(roleId)) continue;
+		const role = interaction.guild.roles.cache.get(roleId);
+		if (!role) continue;
+		if (await courses.countDocuments({ $or: [{ 'roles.staff': roleId }, { 'roles.student': roleId }] }) > 0) continue;
+		try {
+			await role.delete(`Clearing the leftover record for course ${stale.name}.`);
+			deleted.push(role.name);
+		} catch (error) {
+			//	a role too high in the list to delete shouldn't stop the course being rebuilt
+			interaction.client.emit('error', error);
+		}
+	}
+	return deleted;
+}
+
+export async function createCourse(interaction: ChatInputCommandInteraction, course: string): Promise<Course> {
+	return withCourseLock(course, () => buildCourse(interaction, course));
 }
 
 async function buildCourse(interaction: ChatInputCommandInteraction, course: string): Promise<Course> {
@@ -38,23 +94,7 @@ async function buildCourse(interaction: ChatInputCommandInteraction, course: str
 	});
 
 	//	set permissions for the course
-	const standardPerms: Array<OverwriteResolvable> = [{
-		id: ROLES.ADMIN,
-		allow: 'ViewChannel'
-	}, {
-		id: staffRole.id,
-		allow: 'ViewChannel'
-	}, {
-		id: GUILDS.MAIN,
-		deny: 'ViewChannel'
-	}, {
-		id: studentRole.id,
-		allow: 'ViewChannel'
-	}, {
-		id: ROLES.MUTED,
-		deny: 'SendMessages'
-	}];
-	const staffPerms = [standardPerms[0], standardPerms[1], standardPerms[2]];
+	const { standardPerms, staffPerms } = getCoursePerms(staffRole.id, studentRole.id);
 
 	//	create course category
 	const categoryChannel = await interaction.guild.channels.create({
@@ -99,7 +139,7 @@ async function buildCourse(interaction: ChatInputCommandInteraction, course: str
 			staff: staffRole.id,
 			student: studentRole.id
 		},
-		assignments: ['hw1', 'hw2', 'hw3', 'hw4', 'hw5', 'lab1', 'lab2', 'lab3', 'lab4', 'lab5']
+		assignments: [...DEFAULT_ASSIGNMENTS]
 	};
 	await interaction.client.mongo.collection(DB.COURSES).insertOne(newCourse);
 
