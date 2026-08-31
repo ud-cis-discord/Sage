@@ -1,5 +1,5 @@
 import { Collection, Client, CommandInteraction, ApplicationCommand,
-	GuildMember, SelectMenuInteraction,
+	GuildMember, Role, SelectMenuInteraction,
 	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
 	ButtonInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder,
 	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle,
@@ -36,9 +36,9 @@ async function register(bot: Client): Promise<void> {
 
 	bot.on('interactionCreate', async interaction => {
 		if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) runCommand(interaction as ChatInputCommandInteraction, bot);
-		if (interaction.isSelectMenu()) handleDropdown(interaction);
-		if (interaction.isModalSubmit()) handleModalBuilder(interaction, bot);
-		if (interaction.isButton()) handleButton(interaction);
+		if (interaction.isSelectMenu()) handleDropdown(interaction).catch(error => bot.emit('error', error));
+		if (interaction.isModalSubmit()) handleModalBuilder(interaction, bot).catch(error => bot.emit('error', error));
+		if (interaction.isButton()) handleButton(interaction).catch(error => bot.emit('error', error));
 	});
 
 	bot.on('messageCreate', async msg => {
@@ -51,56 +51,92 @@ async function register(bot: Client): Promise<void> {
 	});
 }
 
-async function handleDropdown(interaction: SelectMenuInteraction) {
-	const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
+async function handleDropdown(interaction: SelectMenuInteraction): Promise<void> {
 	const { customId, values, member } = interaction;
+	if (customId !== 'roleselect' || !(member instanceof GuildMember)) return;
+
+	// Discord only gives us 3 seconds to acknowledge; defer before doing any DB or role API work
+	await interaction.deferReply({ ephemeral: true });
+
+	const courses: Array<Course> = await interaction.client.mongo.collection(DB.COURSES).find().toArray();
+	const { component } = interaction;
+	const removed = component.options.filter((option) => !values.includes(option.value));
 	let responseContent = `Your roles have been updated.`;
-	if (customId === 'roleselect' && member instanceof GuildMember) {
-		const { component } = interaction;
-		const removed = component.options.filter((option) => !values.includes(option.value));
-		const addedRoleNames = [];
-		const removedRoleNames = [];
-		for (const id of removed) {
-			const role = interaction.guild.roles.cache.find(r => r.id === id.value);
-			if (!role.name.includes('CISC') && member.roles.cache.some(r => r.id === id.value)) {
-				member.roles.remove(id.value);
-				removedRoleNames.push(role.name);
-				responseContent = `Your enrollments have been updated.`;
-			}
-			if (role.name.includes('CISC') && member.roles.cache.some(r => r.id === id.value)) { // does user have this role?
-				const course = courses.find(c => c.name === role.name.substring(5));
-				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-				user.courses = user.courses.filter(c => c !== course.name);
-				member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`);
-				member.roles.remove(id.value);
-				removedRoleNames.push(role.name);
-				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-				responseContent = `Your enrollments have been updated.`;
-			}
+	const addedRoleNames = [];
+	const removedRoleNames = [];
+	const staleOptions = [];
+	const failedRoleNames = [];
+	for (const option of removed) {
+		const role = interaction.guild.roles.cache.get(option.value);
+		if (!role) {
+			// a role deleted from the server can linger as an option on a stale dropdown; skip it rather than fail the whole interaction
+			staleOptions.push(option.label);
+			continue;
 		}
-		for (const id of values) {
-			const role = interaction.guild.roles.cache.find(r => r.id === id);
-			if (!role.name.includes('CISC') && !member.roles.cache.some(r => r.id === id)) {
-				member.roles.add(id);
-				addedRoleNames.push(role.name);
-			}
-			if (role.name.includes('CISC') && !member.roles.cache.some(r => r.id === id)) { // does user not have this role?
-				const course = courses.find(c => c.name === role.name.substring(5));
-				const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
-				user.courses.push(course.name);
-				member.roles.add(course.roles.student, `Enrolled in ${course.name}.`);
-				member.roles.add(id);
-				addedRoleNames.push(role.name);
-				interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } });
-				responseContent = `Your enrollments have been updated.`;
-			}
+		if (!member.roles.cache.has(option.value)) continue; // does user have this role?
+		const result = await toggleDropdownRole(interaction, member, courses, role, false);
+		if (result === 'failed') {
+			failedRoleNames.push(role.name);
+			continue;
 		}
-		interaction.reply({
-			content: `${responseContent} The following changes have been applied to your roles:
-			${addedRoleNames.length !== 0 ? `**Added: **${addedRoleNames.join(', ')}\n\t\t\t` : ''}${removedRoleNames.length !== 0 ? `**Removed: **${removedRoleNames.join(', ')}` : ''}`,
-			ephemeral: true
-		});
+		removedRoleNames.push(role.name);
+		responseContent = `Your enrollments have been updated.`;
 	}
+	for (const id of values) {
+		const role = interaction.guild.roles.cache.get(id);
+		if (!role) {
+			staleOptions.push(component.options.find(option => option.value === id)?.label || id);
+			continue;
+		}
+		if (member.roles.cache.has(id)) continue; // does user not have this role?
+		const result = await toggleDropdownRole(interaction, member, courses, role, true);
+		if (result === 'failed') {
+			failedRoleNames.push(role.name);
+			continue;
+		}
+		if (result === 'enrollment') responseContent = `Your enrollments have been updated.`;
+		addedRoleNames.push(role.name);
+	}
+	if (staleOptions.length !== 0) {
+		interaction.client.emit('error', new Error(`roleselect: dropdown has stale option(s) pointing at deleted roles: ${staleOptions.join(', ')}`));
+	}
+	await interaction.editReply({
+		content: `${responseContent} The following changes have been applied to your roles:
+		${addedRoleNames.length !== 0 ? `**Added: **${addedRoleNames.join(', ')}\n\t\t\t` : ''}${removedRoleNames.length !== 0 ? `**Removed: **${removedRoleNames.join(', ')}` : ''}${
+	staleOptions.length !== 0 ? `\n\t\t\tThe following options couldn't be processed because their roles no longer exist: ${staleOptions.join(', ')}. ${MAINTAINERS} have been notified.` : ''}${
+	failedRoleNames.length !== 0 ? `\n\t\t\tThe following role changes couldn't be applied: ${failedRoleNames.join(', ')}. ${MAINTAINERS} have been notified.` : ''}`
+	});
+}
+
+// Adds or removes one dropdown role (and, for course roles, the DB enrollment bookkeeping) for a member.
+// 'enrollment' = a course change was applied, 'role' = a plain role change was applied, 'failed' = the Discord role change didn't go through.
+async function toggleDropdownRole(interaction: SelectMenuInteraction, member: GuildMember, courses: Array<Course>, role: Role, adding: boolean): Promise<'enrollment' | 'role' | 'failed'> {
+	// a CISC role can outlive its course document (e.g. archived courses); fall back to a plain role toggle then
+	const course = role.name.includes('CISC') ? courses.find(c => c.name === role.name.substring(5)) : null;
+	let roleOpFailed = false;
+	const onRoleOpError = (error: Error) => {
+		roleOpFailed = true;
+		interaction.client.emit('error', error);
+	};
+	// change the Discord roles first so the DB and the reply only ever record changes that actually happened
+	if (course) {
+		if (adding) await member.roles.add(course.roles.student, `Enrolled in ${course.name}.`).catch(onRoleOpError);
+		else await member.roles.remove(course.roles.student, `Unenrolled from ${course.name}.`).catch(onRoleOpError);
+	}
+	if (adding) await member.roles.add(role.id).catch(onRoleOpError);
+	else await member.roles.remove(role.id).catch(onRoleOpError);
+	if (roleOpFailed) return 'failed';
+	if (!course) return 'role';
+
+	const user: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: member.id });
+	if (user) {
+		user.courses = adding ? [...user.courses, course.name] : user.courses.filter(c => c !== course.name);
+		await interaction.client.mongo.collection(DB.USERS).updateOne({ discordId: member.id }, { $set: { ...user } })
+			.catch(error => interaction.client.emit('error', error));
+	} else {
+		interaction.client.emit('error', new Error(`roleselect: no SageUser found for ${member.id} while ${adding ? 'enrolling in' : 'unenrolling from'} CISC ${course.name}`));
+	}
+	return 'enrollment';
 }
 
 async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Client) {
