@@ -121,8 +121,9 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 	// create component rows, add to messages
 	const coursesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(coursesDropdown);
 	const assignablesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(assignablesDropdown);
-	coursesMsg.edit({ components: [coursesRow] });
-	assignablesMsg.edit({ components: [assignablesRow] });
+	// awaited so a failed edit rejects updateDropdowns instead of becoming an unhandled rejection after callers report success
+	await coursesMsg.edit({ components: [coursesRow] });
+	await assignablesMsg.edit({ components: [assignablesRow] });
 
 	return;
 }
