@@ -1,11 +1,11 @@
 import {
 	ApplicationCommandOptionData, Client, CommandInteraction, AttachmentBuilder,
 	EmbedBuilder, TextChannel, ActionRowBuilder, ApplicationCommandPermissions,
-	StringSelectMenuBuilder
+	StringSelectMenuBuilder, Message
 } from 'discord.js';
 import { Command, CompCommand } from '@lib/types/Command';
 import * as fs from 'fs';
-import { DB, CHANNELS, ROLE_DROPDOWNS, BOT } from '@root/config';
+import { DB, CHANNELS, ROLE_DROPDOWNS, BOT, MAINTAINERS } from '@root/config';
 import moment from 'moment';
 import { Reminder } from '@lib/types/Reminder';
 import { Course } from '@lib/types/Course';
@@ -60,12 +60,27 @@ export function getMsgIdFromLink(link: string): string {
 }
 
 export async function updateDropdowns(interaction: CommandInteraction): Promise<void> {
+	// refreshing the dropdowns is best-effort: whatever command called us has already done its real work,
+	// so a problem here is reported rather than thrown back at the caller
+	try {
+		await refreshDropdowns(interaction);
+	} catch (error) {
+		interaction.client.emit('error', error);
+		await reportDropdownProblem(interaction, 'Error', `The role dropdowns couldn't be updated. ${MAINTAINERS} have been notified.`);
+	}
+}
+
+async function refreshDropdowns(interaction: CommandInteraction): Promise<void> {
 	/*
 	Here in this function lies the genius ideas of Ben Segal, the OG admin
 	Thank you Ben for making v14 refactoring so much easier, now I'll just find some more hair having pulled all of mine out
 	- S
 	*/
 	const channel = await interaction.guild.channels.fetch(CHANNELS.ROLE_SELECT) as TextChannel;
+	if (!channel) {
+		await reportDropdownProblem(interaction, 'Argument error', `Unknown channel, make sure the role select channel ID in the config is correct.`);
+		return;
+	}
 	let coursesMsg, assignablesMsg;
 
 	// find both dropdown messages, based on what's in the config
@@ -73,18 +88,13 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 		coursesMsg = await channel.messages.fetch(ROLE_DROPDOWNS.COURSE_ROLES);
 		assignablesMsg = await channel.messages.fetch(ROLE_DROPDOWNS.ASSIGN_ROLES);
 	} catch (error) {
-		const responseEmbed = new EmbedBuilder()
-			.setColor('#ff0000')
-			.setTitle('Argument error')
-			.setDescription(`Unknown message(s), make sure your channel and message ID are correct.`);
-		interaction.channel.send({ embeds: [responseEmbed] });
+		// the dropdowns can't be updated without both messages, so stop here instead of using them anyway
+		await reportDropdownProblem(interaction, 'Argument error', `Unknown message(s), make sure your channel and message ID are correct.`);
+		return;
 	}
 	if (coursesMsg.author.id !== BOT.CLIENT_ID || assignablesMsg.author.id !== BOT.CLIENT_ID) {
-		const responseEmbed = new EmbedBuilder()
-			.setColor('#ff0000')
-			.setTitle('Argument error')
-			.setDescription(`You must tag a message that was sent by ${BOT.NAME} (me!).`);
-		interaction.channel.send({ embeds: [responseEmbed] });
+		await reportDropdownProblem(interaction, 'Argument error', `You must tag a message that was sent by ${BOT.NAME} (me!).`);
+		return;
 	}
 
 	// get roles from DB
@@ -92,41 +102,61 @@ export async function updateDropdowns(interaction: CommandInteraction): Promise<
 	const assignableRoles = await interaction.client.mongo.collection(DB.ASSIGNABLE).find().toArray();
 	let assignables = [];
 	for (const role of assignableRoles) {
-		const { name } = await interaction.guild.roles.fetch(role.id);
-		assignables.push({ name, id: role.id });
+		// a role that's been deleted from the server but not the database shouldn't take the whole dropdown down
+		const guildRole = await interaction.guild.roles.fetch(role.id).catch(() => null);
+		if (!guildRole) continue;
+		assignables.push({ name: guildRole.name, id: role.id });
 	}
 
 	// sort alphabetically
 	courses = courses.sort((a, b) => a.name > b.name ? 1 : -1);
 	assignables = assignables.sort((a, b) => a.name > b.name ? 1 : -1);
 
-	// initialize dropdowns
-	const coursesDropdown = new StringSelectMenuBuilder()
-		.setCustomId('roleselect')
-		.setMaxValues(courses.length)
-		.setMinValues(0);
-	const assignablesDropdown = new StringSelectMenuBuilder()
-		.setCustomId('roleselect')
-		.setMaxValues(assignables.length)
-		.setMinValues(0);
-	// these have to be here otherwise it won't add the dropdown components
-	// typings reference - https://discord-api-types.dev/api/discord-api-types-v10/enum/ComponentType
-	coursesDropdown.data.type = 3;
-	assignablesDropdown.data.type = 3;
-
-	// add options to dropdowns
-	coursesDropdown.addOptions(courses.map(c => ({ label: `CISC ${c.name}`, value: c.roles.student })));
-	assignablesDropdown.addOptions(assignables.map(a => ({ label: a.name, value: a.id })));
-
-	// create component rows, add to messages
-	const coursesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(coursesDropdown);
-	const assignablesRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(assignablesDropdown);
-	await Promise.all([
-		coursesMsg.edit({ components: [coursesRow] }),
-		assignablesMsg.edit({ components: [assignablesRow] })
-	]);
+	// each dropdown is updated on its own so a problem with one doesn't leave the other stale
+	await editDropdown(interaction, coursesMsg, 'course', courses.map(c => ({ label: `CISC ${c.name}`, value: c.roles.student })));
+	await editDropdown(interaction, assignablesMsg, 'assignable role', assignables.map(a => ({ label: a.name, value: a.id })));
 
 	return;
+}
+
+// Discord only allows this many options in a single string select menu
+const MAX_DROPDOWN_OPTIONS = 25;
+
+async function editDropdown(interaction: CommandInteraction, message: Message, label: string,
+	options: Array<{ label: string, value: string }>): Promise<void> {
+	// building a menu with too few/too many options throws, which would abort whatever command called us
+	if (options.length < 1 || options.length > MAX_DROPDOWN_OPTIONS) {
+		await reportDropdownProblem(interaction, 'Error',
+			`The ${label} dropdown couldn't be updated: Discord allows 1-${MAX_DROPDOWN_OPTIONS} options per dropdown, but there are ${options.length} ${label}s.`);
+		return;
+	}
+
+	const dropdown = new StringSelectMenuBuilder()
+		.setCustomId('roleselect')
+		.setMaxValues(options.length)
+		.setMinValues(0);
+	// this has to be here otherwise it won't add the dropdown components
+	// typings reference - https://discord-api-types.dev/api/discord-api-types-v10/enum/ComponentType
+	dropdown.data.type = 3;
+	dropdown.addOptions(options);
+
+	const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(dropdown);
+	try {
+		await message.edit({ components: [row] });
+	} catch (error) {
+		// a stale dropdown shouldn't abort the command that triggered this update
+		interaction.client.emit('error', error);
+		await reportDropdownProblem(interaction, 'Error', `The ${label} dropdown couldn't be updated. ${MAINTAINERS} have been notified.`);
+	}
+}
+
+async function reportDropdownProblem(interaction: CommandInteraction, title: string, description: string): Promise<void> {
+	const responseEmbed = new EmbedBuilder()
+		.setColor('#ff0000')
+		.setTitle(title)
+		.setDescription(description);
+	// this is also called from updateDropdowns' own catch, so it must never throw
+	await interaction.channel?.send({ embeds: [responseEmbed] }).catch(error => interaction.client.emit('error', error));
 }
 
 export type TimestampType = 't' | 'T' | 'd' | 'D' | 'f' | 'F' | 'R';
