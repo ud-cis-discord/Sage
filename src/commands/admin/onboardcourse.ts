@@ -6,7 +6,7 @@ import { DB, MAINTAINERS } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { Course } from '@lib/types/Course';
 import { createCourse } from '@lib/utils/courseUtils';
-import { onboardUser, sendOnboardEmail, sleep } from '@lib/utils/onboardUtils';
+import { needsInvite, onboardUser, sendOnboardEmail, sleep } from '@lib/utils/onboardUtils';
 import { generateErrorEmbed, sendToFile } from '@lib/utils/generalUtils';
 
 const MAX_FILE_SIZE = 1000000;
@@ -28,6 +28,7 @@ interface RosterParse {
 interface OnboardTally {
 	created: Array<string>;
 	skipped: Array<string>;
+	resent: Array<string>;
 	restaffed: Array<string>;
 	verifiedStaff: Array<string>;
 	emailFailed: Array<string>;
@@ -40,7 +41,8 @@ export default class extends Command {
 
 	description = 'Onboards a course roster: creates the course if needed, adds users, and emails invites.';
 	extendedHelp = 'The roster is a .csv or .txt file with one udel.edu email per line. A legacy STUDENT/STAFF,course header line is' +
-		' allowed but must match the command options. Re-uploading a roster is safe: already-onboarded users are skipped.';
+		' allowed but must match the command options. Re-uploading a roster is safe: verified users are skipped and unverified users' +
+		' get their invite re-sent (the hash code never changes).';
 	runInDM = false;
 	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];
 
@@ -138,7 +140,7 @@ export default class extends Command {
 			courseCreated = true;
 		}
 
-		//	onboard every email, emailing invites to new users
+		//	onboard every email, emailing invites to new and still-unverified users
 		const tally = await this.onboardAll(interaction, emails, isStaff, course, courseId);
 
 		await this.report(interaction, tally, invalid, courseId, roleType, isStaff, courseCreated);
@@ -150,7 +152,7 @@ export default class extends Command {
 			port: 25
 		});
 		const users = interaction.client.mongo.collection(DB.USERS);
-		const tally: OnboardTally = { created: [], skipped: [], restaffed: [], verifiedStaff: [], emailFailed: [] };
+		const tally: OnboardTally = { created: [], skipped: [], resent: [], restaffed: [], verifiedStaff: [], emailFailed: [] };
 
 		let processed = 0;
 		for (const email of emails) {
@@ -158,12 +160,6 @@ export default class extends Command {
 			switch (result) {
 				case 'created':
 					tally.created.push(email);
-					try {
-						await sendOnboardEmail(mailer, email, hash);
-					} catch (error) {
-						tally.emailFailed.push(email);
-					}
-					await sleep(EMAIL_DELAY);
 					break;
 				case 'restaffed':
 					tally.restaffed.push(email);
@@ -172,8 +168,16 @@ export default class extends Command {
 					tally.verifiedStaff.push(`${email} (Discord ID ${entry.discordId})`);
 					break;
 				case 'skipped':
-					tally.skipped.push(email);
+					(needsInvite(result, entry) ? tally.resent : tally.skipped).push(email);
 					break;
+			}
+			if (needsInvite(result, entry)) {
+				try {
+					await sendOnboardEmail(mailer, email, hash);
+				} catch (error) {
+					tally.emailFailed.push(email);
+				}
+				await sleep(EMAIL_DELAY);
 			}
 			processed++;
 			if (processed % PROGRESS_INTERVAL === 0 && processed < emails.length) {
@@ -227,21 +231,22 @@ export default class extends Command {
 			`**Course:** ${courseId}${courseCreated ? ' (newly created)' : ''}`,
 			`**Role type:** ${roleType}`,
 			`**New users created:** ${tally.created.length}`,
-			`**Invites emailed:** ${tally.created.length - tally.emailFailed.length}`,
-			`**Already onboarded (skipped):** ${tally.skipped.length}`
+			`**Invites re-sent to unverified users:** ${tally.resent.length}`,
+			`**Invites emailed:** ${tally.created.length + tally.resent.length + tally.restaffed.length - tally.emailFailed.length}`,
+			`**Already verified (skipped):** ${tally.skipped.length}`
 		];
 		if (isStaff) {
 			summary.push(`**Unverified users updated to staff:** ${tally.restaffed.length}`);
 			summary.push(`**Verified users flagged as staff (add Discord roles manually):** ${tally.verifiedStaff.length}`);
 		}
 		if (invalid.length > 0) summary.push(`**Invalid lines ignored:** ${invalid.length}`);
-		if (tally.emailFailed.length > 0) summary.push(`**Users created but email failed:** ${tally.emailFailed.length}`);
+		if (tally.emailFailed.length > 0) summary.push(`**Users onboarded but email failed:** ${tally.emailFailed.length}`);
 
 		await interaction.editReply({ content: summary.join('\n'), embeds: [] });
 
 		const details: Array<string> = [];
 		if (tally.verifiedStaff.length > 0) details.push(`Verified users flagged as staff (add Discord roles manually):\n${tally.verifiedStaff.join('\n')}`);
-		if (tally.emailFailed.length > 0) details.push(`Users created but email failed (re-running won't re-email them; use the nudge script):\n${tally.emailFailed.join('\n')}`);
+		if (tally.emailFailed.length > 0) details.push(`Users onboarded but email failed (re-run this command to retry them; the hash code does not change):\n${tally.emailFailed.join('\n')}`);
 		if (invalid.length > 0) details.push(`Invalid lines ignored:\n${invalid.join('\n')}`);
 		if (details.length > 0) {
 			await interaction.followUp({

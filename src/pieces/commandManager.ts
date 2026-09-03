@@ -4,14 +4,15 @@ import { Collection, Client, CommandInteraction, ApplicationCommand,
 	ButtonInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder,
 	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle,
 	ChatInputCommandInteraction } from 'discord.js';
-import { isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
+import { generateErrorEmbed, isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
+import { HASH_LENGTH } from '@lib/utils/onboardUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
 import { DB, GUILDS, MAINTAINERS, CHANNELS } from '@root/config';
 import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
 import { CommandError } from '../lib/types/errors';
-import { verify } from '../pieces/verification';
+import { verify, VerifyResult } from '../pieces/verification';
 
 const DELETE_DELAY = 10000;
 
@@ -141,8 +142,6 @@ async function toggleDropdownRole(interaction: SelectMenuInteraction, member: Gu
 
 async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Client) {
 	const { customId, fields } = interaction;
-	const guild = await bot.guilds.fetch(GUILDS.MAIN);
-	guild.members.fetch();
 
 	switch (customId) {
 		case 'announce': {
@@ -166,21 +165,60 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			break;
 		}
 		case 'verify': {
-			const givenHash = fields.getTextInputValue('verifyPrompt');
-			const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ hash: givenHash });
-
-			if (!entry) {
-				interaction.user.send(`I could not find that hash in the database. Please try again or contact ${MAINTAINERS}.`);
-				break;
-			}
-			await verify(interaction, bot, guild, entry, givenHash);
-			const enrollStr = entry.courses.length > 0
-				? `You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or to unenroll from your current course,` +
-			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
-				: '';
-			interaction.reply({ content: `Thank you for verifying! You can now access the rest of the server. ${enrollStr}`, ephemeral: true });
+			await handleVerifyModal(interaction, bot);
 			break;
 		}
+	}
+}
+
+async function handleVerifyModal(interaction: ModalSubmitInteraction, bot: Client): Promise<void> {
+	// Discord only gives us 3 seconds to acknowledge; defer before doing any DB or role API work
+	await interaction.deferReply({ ephemeral: true });
+	try {
+		// hashes copied out of the email often pick up stray spaces/newlines; the code itself never contains whitespace
+		const givenHash = interaction.fields.getTextInputValue('verifyPrompt').replace(/\s+/g, '');
+		if (givenHash.length !== HASH_LENGTH) {
+			await interaction.editReply({ embeds: [generateErrorEmbed(`That doesn't look like a hash code. Please paste only the ${HASH_LENGTH}-character code from your verification email,` +
+				' exactly as shown (it is case-sensitive).')] });
+			return;
+		}
+
+		const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ hash: givenHash });
+		if (!entry) {
+			await interaction.editReply({ embeds: [generateErrorEmbed('I could not find that hash code in the database. Please copy and paste the code from your verification email' +
+				` exactly as shown — it is case-sensitive, and it is the same code in every email you have received from us. If it still doesn't work, contact ${MAINTAINERS}.`)] });
+			return;
+		}
+
+		const guild = await bot.guilds.fetch(GUILDS.MAIN);
+		const result: VerifyResult = await verify(interaction, bot, guild, entry, givenHash);
+		const enrollStr = entry.courses.length > 0
+			? ` You have been automatically enrolled in CISC ${entry.courses[0]}. To enroll in more courses or to unenroll from your current course,` +
+			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
+			: '';
+		switch (result) {
+			case 'verified':
+				await interaction.editReply({ content: `Thank you for verifying! You can now access the rest of the server.${enrollStr}` });
+				break;
+			case 'reverified':
+				await interaction.editReply({ content: 'You were already verified with this account, so I\'ve re-applied your roles.' +
+					` You should be able to access the rest of the server.${enrollStr}` });
+				break;
+			case 'claimedByOther':
+				await interaction.editReply({ embeds: [generateErrorEmbed('That hash code has already been used to verify a different Discord account.' +
+					` If that account is yours, please log in with it instead; otherwise contact ${MAINTAINERS}.`)] });
+				break;
+			case 'notInGuild':
+				await interaction.editReply({ embeds: [generateErrorEmbed('I couldn\'t find you in the main server. Please join it using the link in your verification email, then press Verify again.')] });
+				break;
+			case 'roleAddFailed':
+				await interaction.editReply({ embeds: [generateErrorEmbed('You\'re verified in our records, but I couldn\'t assign your roles.' +
+					` ${MAINTAINERS} have been notified — please press Verify again in a minute.`)] });
+				break;
+		}
+	} catch (error) {
+		bot.emit('error', error);
+		await interaction.editReply({ embeds: [generateErrorEmbed(`Something went wrong while verifying you. ${MAINTAINERS} have been notified; please try again in a minute.`)] }).catch(() => undefined);
 	}
 }
 
@@ -194,10 +232,10 @@ export async function handleButton(interaction: ButtonInteraction): Promise<void
 				.setCustomId('verify');
 			const verifyPrompt = new TextInputBuilder()
 				.setCustomId('verifyPrompt')
-				.setLabel('Please enter your unigue hash code here: ')
+				.setLabel('Please enter your unique hash code here:')
 				.setStyle(TextInputStyle.Short)
-				.setMinLength(44)
-				.setMaxLength(44)
+				// wider than the hash itself so a pasted code with stray whitespace can still be submitted and trimmed server-side
+				.setMaxLength(HASH_LENGTH * 2)
 				.setRequired(true);
 			const verifyActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(verifyPrompt);
 
