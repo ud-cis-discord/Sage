@@ -46,7 +46,9 @@ export async function verify(interaction: ModalSubmitInteraction, bot: Client, g
 
 async function register(bot: Client): Promise<void> {
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
-	guild.members.fetch();
+	//	warm the member cache; a timeout here is not fatal, so report it instead of crashing on an unhandled rejection
+	guild.members.fetch()
+		.catch(error => bot.emit('error', error));
 }
 
 export default register;

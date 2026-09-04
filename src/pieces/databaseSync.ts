@@ -4,7 +4,9 @@ import { SageUser } from '../lib/types/SageUser';
 import { schedule } from 'node-cron';
 
 async function register(bot: Client): Promise<void> {
-	handleCron(bot);
+	//	a failed member fetch (e.g. GuildMembersTimeout) must not become an unhandled rejection that kills the bot
+	handleCron(bot)
+		.catch(async error => bot.emit('error', error));
 	schedule('0 3 * * *', () => { // run every day at 3:00am (time chosen because of low activity)
 		handleCron(bot)
 			.catch(async error => bot.emit('error', error));

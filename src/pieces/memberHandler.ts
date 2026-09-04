@@ -20,6 +20,9 @@ async function memberAdd(member: GuildMember): Promise<void> {
 	// 		throw new Error(`User ${member.user.tag} (${member.id}) is not verified.`);
 	// 	}
 
+	// a brand-new (not yet verified) member has no record bound to their Discord ID; there are no roles to restore yet
+	if (!entry) return;
+
 	entry.roles.forEach(role => {
 		// This might happen if a course was removed between when they left and when they re-joined.
 		if (!member.guild.roles.cache.has(role)) return;
